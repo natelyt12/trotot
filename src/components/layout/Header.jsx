@@ -28,7 +28,7 @@ export default function Header({ currentPage, navigate }) {
                 top: isScrolled ? '0' : '0.75rem',
                 left: isScrolled ? '0' : '1rem',
                 right: isScrolled ? '0' : '1rem',
-                zIndex: 100,
+                zIndex: 10,
                 transition: 'all 0.3s ease',
             }}
         >

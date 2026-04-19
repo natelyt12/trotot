@@ -17,57 +17,88 @@ import RegisterPage from './pages/RegisterPage.jsx';
 const PAGES_WITHOUT_LAYOUT = ['login', 'register'];
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home');
-  const [pageData, setPageData] = useState(null); // e.g. selected room
+    const [currentPage, setCurrentPage] = useState('home');
+    const [pageData, setPageData] = useState(null); // e.g. selected room
+    const [isClosing, setIsClosing] = useState(false);
 
-  const navigate = (page, data = null) => {
-    setCurrentPage(page);
-    setPageData(data);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    const navigate = (page, data = null) => {
+        // Exit animation logic for modal
+        if (currentPage === 'room-detail' && page === 'home') {
+            setIsClosing(true);
+            setTimeout(() => {
+                setIsClosing(false);
+                setCurrentPage('home');
+                setPageData(null);
+            }, 400); // Match animation duration
+            return;
+        }
 
-  const showLayout = !PAGES_WITHOUT_LAYOUT.includes(currentPage);
+        // Only scroll to top for "major" page changes (login, register, home)
+        // but NOT when we are just opening/closing the Room Detail modal overlay.
+        if (page !== 'room-detail' && currentPage !== 'room-detail') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <HomePage navigate={navigate} />;
-      case 'room-detail':
-        return <RoomDetailPage room={pageData} navigate={navigate} />;
-      case 'login':
-        return <LoginPage navigate={navigate} />;
-      case 'register':
-        return <RegisterPage navigate={navigate} />;
-      default:
-        // Fallback: 404-style back to home
-        return (
-          <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', paddingTop: '80px' }}>
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 8v4M12 16h.01" />
-            </svg>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700, color: '#1c1917' }}>
-              Trang không tồn tại
-            </h2>
-            <button className="btn-primary" onClick={() => navigate('home')}>
-              Về trang chủ
-            </button>
-          </div>
-        );
-    }
-  };
+        setCurrentPage(page);
+        setPageData(data);
+    };
 
-  return (
-    <>
-      {showLayout && (
-        <Header currentPage={currentPage} navigate={navigate} />
-      )}
+    const showLayout = !PAGES_WITHOUT_LAYOUT.includes(currentPage);
 
-      <main>
-        {renderPage()}
-      </main>
+    // Determine if modal should be in the DOM
+    const shouldShowModal = currentPage === 'room-detail' || isClosing;
 
-      {showLayout && <Footer navigate={navigate} />}
-    </>
-  );
+    return (
+        <>
+            {showLayout && (
+                <Header currentPage={currentPage} navigate={navigate} />
+            )}
+
+            <main>
+                {/* Base Layer: HomePage remains mounted to preserve scroll/filters */}
+                <div style={{ display: showLayout ? 'block' : 'none' }}>
+                    <HomePage navigate={navigate} />
+                </div>
+
+                {/* Overlay Layer: Room Detail as a full-screen popup */}
+                {shouldShowModal && (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 9, // Below header (which is 10)
+                            background: '#fafaf9',
+                            overflowY: 'auto',
+                            animation: isClosing
+                                ? 'modalFadeOut 0.3s ease-out forwards'
+                                : 'modalSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+                        }}
+                    >
+                        <RoomDetailPage room={pageData} navigate={navigate} />
+                    </div>
+                )}
+
+                {currentPage === 'login' && <LoginPage navigate={navigate} />}
+                {currentPage === 'register' && <RegisterPage navigate={navigate} />}
+            </main>
+
+            {showLayout && <Footer navigate={navigate} />}
+
+            <style>{`
+        @keyframes modalSlideUp {
+          from { transform: translateY(100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes modalFadeOut {
+          from { opacity: 1; }
+          to { opacity: 0; }
+        }
+        /* Lock body scroll when modal is open */
+        ${shouldShowModal ? 'body { overflow: hidden; }' : ''}
+      `}</style>
+        </>
+    );
 }

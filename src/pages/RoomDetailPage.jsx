@@ -58,53 +58,93 @@ export default function RoomDetailPage({ room, navigate }) {
             <div className="container-app" style={{ paddingTop: '1.5rem', paddingBottom: '3rem' }}>
 
                 {/* Breadcrumb - Scrollable on mobile with gradients */}
-                <div style={{ position: 'relative', marginBottom: '1.25rem', overflow: 'hidden' }}>
-                    {/* Left Gradient */}
-                    <div style={{
-                        position: 'absolute', left: 0, top: 0, bottom: 0, width: '40px',
-                        background: 'linear-gradient(to right, #fafaf9 20%, transparent)',
-                        zIndex: 2, pointerEvents: 'none',
-                        opacity: scrollState.left ? 1 : 0, transition: 'opacity 0.3s'
-                    }} />
-
-                    <nav
-                        ref={breadcrumbRef}
-                        onScroll={checkScroll}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                    <button 
+                        onClick={() => navigate('home')} 
+                        style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '0.5rem', 
+                            background: '#fff', 
+                            border: '1px solid #e7e5e4', 
+                            borderRadius: '0.75rem', 
+                            padding: '0.5rem 0.75rem', 
+                            cursor: 'pointer',
+                            color: '#57534e',
                             fontSize: '0.85rem',
-                            color: '#78716c',
-                            overflowX: 'auto',
-                            whiteSpace: 'nowrap',
-                            paddingBottom: '0.4rem',
-                            msOverflowStyle: 'none',
-                            scrollbarWidth: 'none',
+                            fontWeight: 600,
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                            transition: 'all 0.2s',
+                            flexShrink: 0
+                        }}
+                        onMouseEnter={(e) => { 
+                            e.currentTarget.style.borderColor = '#d97706'; 
+                            e.currentTarget.style.color = '#d97706';
+                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(217, 119, 6, 0.1)';
+                        }}
+                        onMouseLeave={(e) => { 
+                            e.currentTarget.style.borderColor = '#e7e5e4'; 
+                            e.currentTarget.style.color = '#57534e';
+                            e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.05)';
                         }}
                     >
-                        <style>{`
-                          nav::-webkit-scrollbar { display: none; }
-                        `}</style>
-                        <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: '#d97706', cursor: 'pointer', fontWeight: 600, fontFamily: 'Inter, sans-serif', padding: 0, transition: 'color 0.2s', flexShrink: 0 }}
-                            onMouseEnter={(e) => { e.currentTarget.style.color = '#b45309'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.color = '#d97706'; }}
-                        >
-                            Trang chủ
-                        </button>
-                        <ChevronRight />
-                        <span style={{ color: '#a8a29e', flexShrink: 0 }}>{basic_info.city || 'Danh sách phòng'}</span>
-                        <ChevronRight />
-                        <span style={{ color: '#1c1917', fontWeight: 500, flexShrink: 0 }}>{basic_info.title}</span>
-                    </nav>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="m15 18-6-6 6-6" />
+                        </svg>
+                        <span className="back-btn-text">Quay lại</span>
+                    </button>
 
-                    {/* Right Gradient */}
-                    <div style={{
-                        position: 'absolute', right: 0, top: 0, bottom: 0, width: '40px',
-                        background: 'linear-gradient(to left, #fafaf9 20%, transparent)',
-                        zIndex: 2, pointerEvents: 'none',
-                        opacity: scrollState.right ? 1 : 0, transition: 'opacity 0.3s'
-                    }} />
+                    <div style={{ position: 'relative', overflow: 'hidden', flex: 1 }}>
+                        {/* Left Gradient */}
+                        <div style={{
+                            position: 'absolute', left: 0, top: 0, bottom: 0, width: '40px',
+                            background: 'linear-gradient(to right, #fafaf9 20%, transparent)',
+                            zIndex: 2, pointerEvents: 'none',
+                            opacity: scrollState.left ? 1 : 0, transition: 'opacity 0.3s'
+                        }} />
+
+                        <nav
+                            ref={breadcrumbRef}
+                            onScroll={checkScroll}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                fontSize: '0.85rem',
+                                color: '#78716c',
+                                overflowX: 'auto',
+                                whiteSpace: 'nowrap',
+                                msOverflowStyle: 'none',
+                                scrollbarWidth: 'none',
+                                height: '100%',
+                            }}
+                        >
+                            <style>{`
+                              nav::-webkit-scrollbar { display: none; }
+                              @media (max-width: 640px) {
+                                .back-btn-text { display: none; }
+                              }
+                            `}</style>
+                            <button onClick={() => navigate('home')} style={{ background: 'none', border: 'none', color: '#d97706', cursor: 'pointer', fontWeight: 600, fontFamily: 'Inter, sans-serif', padding: 0, transition: 'color 0.2s', flexShrink: 0 }}
+                                onMouseEnter={(e) => { e.currentTarget.style.color = '#b45309'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.color = '#d97706'; }}
+                            >
+                                Trang chủ
+                            </button>
+                            <ChevronRight />
+                            <span style={{ color: '#a8a29e', flexShrink: 0 }}>{basic_info.city || 'Danh sách phòng'}</span>
+                            <ChevronRight />
+                            <span style={{ color: '#1c1917', fontWeight: 500, flexShrink: 0 }}>{basic_info.title}</span>
+                        </nav>
+
+                        {/* Right Gradient */}
+                        <div style={{
+                            position: 'absolute', right: 0, top: 0, bottom: 0, width: '40px',
+                            background: 'linear-gradient(to left, #fafaf9 20%, transparent)',
+                            zIndex: 2, pointerEvents: 'none',
+                            opacity: scrollState.right ? 1 : 0, transition: 'opacity 0.3s'
+                        }} />
+                    </div>
                 </div>
 
                 <div className="detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: '2rem', alignItems: 'start' }}>
