@@ -6,7 +6,7 @@ import { formatPriceShort, formatArea, formatAddressShort, truncate } from '../.
    Displays summary info for a single listing
    ============================================ */
 export default function RoomCard({ room, onClick, style }) {
-  const { basic_info, room_features, media_contact, metadata, monthly_costs } = room;
+  const { basic_info, room_features, media_contact, metadata } = room;
   const mainImage = media_contact.images?.[0] || `https://picsum.photos/seed/${room.listing_id}/600/400`;
   const isAvailable = metadata.status === 'available';
 

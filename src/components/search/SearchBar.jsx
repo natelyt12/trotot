@@ -9,8 +9,7 @@ export default function SearchBar({ onSearch, initialValue = '' }) {
   const inputRef = useRef(null);
   const wrapperRef = useRef(null);
 
-  // Popular searches
-  const popularSearches = ['Hà Nội', 'TP. Hồ Chí Minh', 'Phòng gần trường', 'Studio', 'Chung cư mini'];
+
 
   // Close suggestions on outside click
   useEffect(() => {
@@ -68,7 +67,7 @@ export default function SearchBar({ onSearch, initialValue = '' }) {
           {/* Input */}
           <input
             ref={inputRef}
-            type="search"
+            type="text"
             id="hero-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -114,19 +113,30 @@ export default function SearchBar({ onSearch, initialValue = '' }) {
           <button
             type="submit"
             className="btn-primary"
-            style={{ borderRadius: '0.625rem', margin: '0.375rem', flexShrink: 0 }}
+            style={{ 
+              borderRadius: '0.625rem', 
+              margin: '0.375rem', 
+              flexShrink: 0,
+              padding: '0.5rem 0.825rem',
+              minWidth: '44px',
+              height: 'calc(100% - 0.75rem)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.4rem'
+            }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.35-4.35" />
             </svg>
-            <span>Tìm kiếm</span>
+            <span className="hidden-mobile">Tìm kiếm</span>
           </button>
         </div>
       </form>
 
       {/* Suggestions dropdown */}
-      {showSuggestions && (filteredSuggestions.length > 0 || query.length === 0) && (
+      {showSuggestions && filteredSuggestions.length > 0 && (
         <div
           style={{
             position: 'absolute',
@@ -142,75 +152,40 @@ export default function SearchBar({ onSearch, initialValue = '' }) {
             animation: 'slideDown 0.2s ease',
           }}
         >
-          {/* Popular searches (when empty) */}
-          {query.length === 0 && (
-            <div style={{ padding: '0.875rem 1rem' }}>
-              <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#a8a29e', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Tìm kiếm phổ biến
-              </p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {popularSearches.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => handleSuggestionClick(s)}
-                    style={{
-                      padding: '0.3rem 0.75rem',
-                      background: '#fef3c7',
-                      color: '#92400e',
-                      border: '1px solid #fde68a',
-                      borderRadius: '999px',
-                      fontSize: '0.825rem',
-                      fontWeight: 500,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                      fontFamily: 'Inter, sans-serif',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fde68a'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fef3c7'; }}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
           {/* City matches */}
-          {filteredSuggestions.length > 0 && (
-            <ul style={{ listStyle: 'none', padding: '0.5rem 0', margin: 0 }}>
-              {filteredSuggestions.map((city) => (
-                <li key={city}>
-                  <button
-                    type="button"
-                    onClick={() => handleSuggestionClick(city)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.625rem',
-                      width: '100%',
-                      padding: '0.625rem 1rem',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '0.9rem',
-                      color: '#1c1917',
-                      fontFamily: 'Inter, sans-serif',
-                      transition: 'background 0.15s',
-                      textAlign: 'left',
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fffbeb'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
-                      <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    {city}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <ul style={{ listStyle: 'none', padding: '0.5rem 0', margin: 0 }}>
+            {filteredSuggestions.map((city) => (
+              <li key={city}>
+                <button
+                  type="button"
+                  onClick={() => handleSuggestionClick(city)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.625rem',
+                    width: '100%',
+                    padding: '0.625rem 1rem',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    color: '#1c1917',
+                    fontFamily: 'Inter, sans-serif',
+                    transition: 'background 0.15s',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#fffbeb'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'none'; }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  {city}
+                </button>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

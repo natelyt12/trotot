@@ -87,32 +87,6 @@ export default function RegisterPage({ navigate }) {
             Tạo tài khoản
           </h1>
 
-          {/* Role toggle */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem', background: '#f5f5f4', borderRadius: '0.75rem', padding: '0.25rem' }}>
-            {[{ value: 'tenant', label: 'Người thuê', icon: 'user' }, { value: 'landlord', label: 'Chủ nhà', icon: 'home' }].map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setForm((p) => ({ ...p, role: opt.value }))}
-                style={{
-                  padding: '0.5rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  background: form.role === opt.value ? '#fff' : 'transparent',
-                  color: form.role === opt.value ? '#d97706' : '#78716c',
-                  fontWeight: form.role === opt.value ? 600 : 400,
-                  cursor: 'pointer',
-                  fontSize: '0.875rem',
-                  fontFamily: 'Inter, sans-serif',
-                  transition: 'all 0.2s',
-                  boxShadow: form.role === opt.value ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-
           <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             {/* Name */}
             <div>
@@ -188,6 +162,41 @@ export default function RegisterPage({ navigate }) {
               Đăng nhập
             </button>
           </p>
+
+          {/* Back Button */}
+          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <button 
+              onClick={() => navigate('home')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                background: 'none',
+                border: 'none',
+                color: '#78716c',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontFamily: 'Inter, sans-serif',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+              }}
+              onMouseEnter={(e) => { 
+                e.currentTarget.style.color = '#1c1917';
+                e.currentTarget.style.background = '#f5f5f4';
+              }}
+              onMouseLeave={(e) => { 
+                e.currentTarget.style.color = '#78716c';
+                e.currentTarget.style.background = 'none';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Quay lại trang chủ
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -173,6 +173,41 @@ export default function LoginPage({ navigate }) {
               Đăng ký ngay
             </button>
           </p>
+
+          {/* Back Button */}
+          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <button 
+              onClick={() => navigate('home')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                background: 'none',
+                border: 'none',
+                color: '#78716c',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                fontFamily: 'Inter, sans-serif',
+                padding: '0.5rem 1rem',
+                borderRadius: '0.5rem',
+              }}
+              onMouseEnter={(e) => { 
+                e.currentTarget.style.color = '#1c1917';
+                e.currentTarget.style.background = '#f5f5f4';
+              }}
+              onMouseLeave={(e) => { 
+                e.currentTarget.style.color = '#78716c';
+                e.currentTarget.style.background = 'none';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Quay lại trang chủ
+            </button>
+          </div>
         </div>
       </div>
     </div>
