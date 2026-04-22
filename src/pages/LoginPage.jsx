@@ -1,215 +1,196 @@
 import { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 /* ============================================
-   LoginPage – UI-only login form
-   Auth logic will be connected to backend later
+   LoginPage – Connected to Supabase Auth
    ============================================ */
 export default function LoginPage({ navigate }) {
-  const [form, setForm] = useState({ phone: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+    const [form, setForm] = useState({ email: '', password: '' });
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    setError('');
-  };
+    const handleChange = (e) => {
+        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+        setError('');
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // TODO: Connect to auth API
-    if (!form.phone || !form.password) {
-      setError('Vui lòng điền đầy đủ thông tin.');
-      return;
-    }
-    // Mock: navigate home on submit
-    navigate('home');
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!form.email || !form.password) {
+            setError('Vui lòng điền đầy đủ thông tin.');
+            return;
+        }
 
-  return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #1c1917 0%, #292524 50%, #3c2a1e 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1.5rem',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Decorative blobs */}
-      <div style={{ position: 'absolute', top: '-100px', right: '-100px', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(217,119,6,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        setLoading(true);
+        try {
+            const { data, error: authError } = await supabase.auth.signInWithPassword({
+                email: form.email,
+                password: form.password,
+            });
 
-      <div style={{ position: 'relative', width: '100%', maxWidth: '420px' }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <button
-            onClick={() => navigate('home')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}
-          >
-            <div style={{ width: '56px', height: '56px', background: 'linear-gradient(135deg, #d97706, #f59e0b)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(217,119,6,0.4)' }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </div>
-            <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.75rem', color: '#fff', letterSpacing: '-0.02em' }}>
-              Trọ<span style={{ color: '#f59e0b' }}>Tốt</span>
-            </span>
-          </button>
-          <p style={{ color: '#78716c', fontSize: '0.9rem', marginTop: '0.5rem', fontFamily: 'Inter, sans-serif' }}>
-            Đăng nhập để tiếp tục tìm phòng
-          </p>
-        </div>
+            if (authError) throw authError;
 
-        {/* Card */}
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.95)',
-            backdropFilter: 'blur(20px)',
-            borderRadius: '1.25rem',
-            padding: '2rem',
-            border: '1px solid rgba(255,255,255,0.8)',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-          }}
-        >
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', fontWeight: 700, color: '#1c1917', marginBottom: '1.5rem', textAlign: 'center' }}>
-            Đăng nhập
-          </h1>
+            // Successful login
+            navigate('home');
+        } catch (err) {
+            // Dịch thông báo lỗi sang tiếng Việt
+            let friendlyMessage = err.message;
+            if (err.message === 'Invalid login credentials') {
+                friendlyMessage = 'Email hoặc mật khẩu không chính xác.';
+            } else if (err.message === 'Email not confirmed') {
+                friendlyMessage = 'Vui lòng xác nhận email trước khi đăng nhập.';
+            }
+            setError(friendlyMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-          {error && (
-            <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '0.625rem', padding: '0.625rem 0.875rem', marginBottom: '1rem', color: '#dc2626', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-              {error}
-            </div>
-          )}
+    return (
+        <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-linear-to-br from-stone-900 via-stone-800 to-[#3c2a1e]">
+            {/* Decorative blobs */}
+            <div className="absolute -top-[100px] -right-[100px] w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(245,158,11,0.12)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute -bottom-[80px] -left-[80px] w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(217,119,6,0.08)_0%,transparent_70%)] pointer-events-none" />
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div>
-              <label htmlFor="phone" className="form-label">Số điện thoại</label>
-              <div style={{ position: 'relative' }}>
-                <div style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#a8a29e' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l1.27-.95a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
+            <div className="relative w-full max-w-[420px]">
+                {/* Logo */}
+                <div className="text-center mb-8">
+                    <button
+                        onClick={() => navigate('home')}
+                        className="bg-transparent border-none cursor-pointer inline-flex flex-col items-center gap-3"
+                    >
+                        <div className="w-14 h-14 bg-linear-to-br from-amber-600 to-amber-500 rounded-2xl flex items-center justify-center shadow-[0_4px_20px_rgba(217,119,6,0.4)]">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                <polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                        </div>
+                        <span className="font-extrabold text-[1.75rem] text-white tracking-tight font-heading">
+                            Trọ<span className="text-amber-500">Tốt</span>
+                        </span>
+                    </button>
+                    <p className="text-stone-500 text-[0.9rem] mt-2 font-sans">
+                        Đăng nhập để tiếp tục tìm phòng
+                    </p>
                 </div>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="0901 234 567"
-                  className="input"
-                  style={{ paddingLeft: '2.5rem' }}
-                  autoComplete="tel"
-                />
-              </div>
-            </div>
 
-            <div>
-              <label htmlFor="password" className="form-label">Mật khẩu</label>
-              <div style={{ position: 'relative' }}>
-                <div style={{ position: 'absolute', left: '0.875rem', top: '50%', transform: 'translateY(-50%)', color: '#a8a29e' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
+                {/* Card */}
+                {/* Card */}
+                <div className="bg-white/95 backdrop-blur-[20px] rounded-[1.25rem] p-8 border border-white/80 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+                    <h1 className="text-[1.4rem] font-bold text-stone-900 mb-6 text-center font-heading">
+                        Đăng nhập
+                    </h1>
+
+                    {error && (
+                        <div className="bg-red-100 border border-red-300 rounded-[0.625rem] py-2.5 px-3.5 mb-4 text-red-600 text-[0.875rem] flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <div>
+                            <label htmlFor="email" className="form-label">Email</label>
+                            <div className="relative">
+                                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value={form.email}
+                                    onChange={handleChange}
+                                    placeholder="example@gmail.com"
+                                    className="input pl-10!"
+                                    autoComplete="email"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="password" className="form-label">Mật khẩu</label>
+                            <div className="relative">
+                                <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    id="password"
+                                    name="password"
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    placeholder="••••••••"
+                                    className="input pl-10! pr-10!"
+                                    autoComplete="current-password"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-stone-400 flex"
+                                    aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        {showPassword
+                                            ? <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></>
+                                            : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>
+                                        }
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                            <button type="button" className="bg-transparent border-none text-amber-600 text-[0.85rem] font-semibold cursor-pointer font-sans transition-colors duration-200 hover:text-amber-700">
+                                Quên mật khẩu?
+                            </button>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className={`btn-primary rounded-md! ${loading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
+                            disabled={loading}
+                        >
+                            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                        </button>
+                    </form>
+
+                    {/* Divider */}
+                    <div className="flex items-center gap-3 my-5">
+                        <div className="flex-1 h-px bg-stone-200" />
+                        <span className="text-[0.8rem] text-stone-400 font-medium">hoặc</span>
+                        <div className="flex-1 h-px bg-stone-200" />
+                    </div>
+
+                    <p className="text-center text-[0.875rem] text-stone-600">
+                        Chưa có tài khoản?{' '}
+                        <button
+                            onClick={() => navigate('register')}
+                            className="bg-transparent border-none text-amber-600 font-bold cursor-pointer font-sans text-[0.875rem] transition-colors duration-200 hover:text-amber-700"
+                        >
+                            Đăng ký ngay
+                        </button>
+                    </p>
+
+                    {/* Back Button */}
+                    <div className="mt-6 flex justify-center">
+                        <button
+                            onClick={() => navigate('home')}
+                            className="flex items-center gap-1.5 bg-transparent border-none text-stone-500 text-[0.875rem] font-semibold cursor-pointer transition-all duration-200 font-sans py-2 px-4 rounded-lg hover:text-stone-900 hover:bg-stone-100"
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg>
+                            Quay lại trang chủ
+                        </button>
+                    </div>
                 </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="input"
-                  style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem' }}
-                  autoComplete="current-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{ position: 'absolute', right: '0.875rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#a8a29e', display: 'flex' }}
-                  aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    {showPassword
-                      ? <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></>
-                      : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>
-                    }
-                  </svg>
-                </button>
-              </div>
             </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button type="button" style={{ background: 'none', border: 'none', color: '#d97706', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'color 0.2s' }}>
-                Quên mật khẩu?
-              </button>
-            </div>
-
-            <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem', fontSize: '0.95rem' }}>
-              Đăng nhập
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1.25rem 0' }}>
-            <div style={{ flex: 1, height: '1px', background: '#e7e5e4' }} />
-            <span style={{ fontSize: '0.8rem', color: '#a8a29e', fontWeight: 500 }}>hoặc</span>
-            <div style={{ flex: 1, height: '1px', background: '#e7e5e4' }} />
-          </div>
-
-          <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#57534e' }}>
-            Chưa có tài khoản?{' '}
-            <button
-              onClick={() => navigate('register')}
-              style={{ background: 'none', border: 'none', color: '#d97706', fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', transition: 'color 0.2s' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = '#b45309'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = '#d97706'; }}
-            >
-              Đăng ký ngay
-            </button>
-          </p>
-
-          {/* Back Button */}
-          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
-            <button 
-              onClick={() => navigate('home')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                background: 'none',
-                border: 'none',
-                color: '#78716c',
-                fontSize: '0.875rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                fontFamily: 'Inter, sans-serif',
-                padding: '0.5rem 1rem',
-                borderRadius: '0.5rem',
-              }}
-              onMouseEnter={(e) => { 
-                e.currentTarget.style.color = '#1c1917';
-                e.currentTarget.style.background = '#f5f5f4';
-              }}
-              onMouseLeave={(e) => { 
-                e.currentTarget.style.color = '#78716c';
-                e.currentTarget.style.background = 'none';
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-              Quay lại trang chủ
-            </button>
-          </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

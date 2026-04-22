@@ -12,41 +12,19 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
     return (
         <aside
             id="room-filters"
-            className="filter-sidebar-aside"
-            style={{
-                background: '#fff',
-                borderRadius: '1rem',
-                border: '1px solid #e7e5e4',
-                padding: '1.25rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.25rem',
-            }}
+            className="filter-sidebar-aside bg-white rounded-lg border border-stone-200 p-5 flex flex-col gap-5"
         >
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
                     </svg>
-                    <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 700, color: '#1c1917', margin: 0 }}>
+                    <h2 className="text-base font-bold text-stone-900 m-0" style={{ fontFamily: 'var(--font-heading)' }}>
                         Bộ lọc
                     </h2>
                     {activeFilterCount > 0 && (
-                        <span
-                            style={{
-                                background: '#d97706',
-                                color: '#fff',
-                                borderRadius: '999px',
-                                width: '20px',
-                                height: '20px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '0.7rem',
-                                fontWeight: 700,
-                            }}
-                        >
+                        <span className="bg-amber-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[0.7rem] font-bold">
                             {activeFilterCount}
                         </span>
                     )}
@@ -54,18 +32,7 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
                 {activeFilterCount > 0 && (
                     <button
                         onClick={resetFilters}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#d97706',
-                            fontSize: '0.8rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            fontFamily: 'Inter, sans-serif',
-                            transition: 'color 0.2s',
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.color = '#b45309'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.color = '#d97706'; }}
+                        className="bg-transparent border-none text-amber-600 text-[0.8rem] font-semibold cursor-pointer font-sans transition-colors duration-200 hover:text-amber-700"
                     >
                         Xóa tất cả
                     </button>
@@ -73,18 +40,7 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
             </div>
 
             {/* Results count */}
-            <div
-                style={{
-                    background: '#fffbeb',
-                    border: '1px solid #fde68a',
-                    borderRadius: '0.625rem',
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.825rem',
-                    color: '#92400e',
-                    fontWeight: 500,
-                    textAlign: 'center',
-                }}
-            >
+            <div className="bg-amber-50 border border-amber-200 rounded-[0.625rem] py-2 px-3 text-[0.825rem] text-amber-800 font-medium text-center">
                 Tìm thấy <strong>{filteredCount}</strong> / {totalCount} phòng
             </div>
 
@@ -106,7 +62,7 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
 
             {/* Price range */}
             <FilterSection title="Giá thuê">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div className="flex flex-col gap-2">
                     {PRICE_RANGES.map((range) => {
                         const isActive = filters.priceMin === range.min && filters.priceMax === range.max;
                         return (
@@ -121,25 +77,7 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
                                         updateFilter('priceMax', range.max);
                                     }
                                 }}
-                                style={{
-                                    width: '100%',
-                                    textAlign: 'left',
-                                    padding: '0.5rem 0.75rem',
-                                    borderRadius: '0.5rem',
-                                    border: isActive ? '1.5px solid #d97706' : '1.5px solid #e7e5e4',
-                                    background: isActive ? '#fffbeb' : '#fff',
-                                    color: isActive ? '#92400e' : '#57534e',
-                                    fontSize: '0.85rem',
-                                    fontWeight: isActive ? 600 : 400,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.15s',
-                                    fontFamily: 'Inter, sans-serif',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                }}
-                                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = '#fafaf9'; }}
-                                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = '#fff'; }}
+                                className={`w-full text-left py-2 px-3 rounded-md border-[1.5px] text-[0.85rem] cursor-pointer transition-all duration-150 font-sans flex justify-between items-center ${isActive ? 'border-amber-600 bg-amber-50 text-amber-800 font-semibold' : 'border-stone-200 bg-white text-stone-600 font-normal hover:bg-stone-50'}`}
                             >
                                 <span>{range.label}</span>
                                 {isActive && (
@@ -155,7 +93,7 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
 
             {/* Area filter */}
             <FilterSection title="Diện tích">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div className="flex flex-col gap-2">
                     {AREA_RANGES.map((range) => {
                         const isActive = filters.areaMin === range.min && filters.areaMax === range.max;
                         return (
@@ -170,25 +108,7 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
                                         updateFilter('areaMax', range.max);
                                     }
                                 }}
-                                style={{
-                                    width: '100%',
-                                    textAlign: 'left',
-                                    padding: '0.5rem 0.75rem',
-                                    borderRadius: '0.5rem',
-                                    border: isActive ? '1.5px solid #d97706' : '1.5px solid #e7e5e4',
-                                    background: isActive ? '#fffbeb' : '#fff',
-                                    color: isActive ? '#92400e' : '#57534e',
-                                    fontSize: '0.85rem',
-                                    fontWeight: isActive ? 600 : 400,
-                                    cursor: 'pointer',
-                                    transition: 'all 0.15s',
-                                    fontFamily: 'Inter, sans-serif',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                }}
-                                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = '#fafaf9'; }}
-                                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = '#fff'; }}
+                                className={`w-full text-left py-2 px-3 rounded-md border-[1.5px] text-[0.85rem] cursor-pointer transition-all duration-150 font-sans flex justify-between items-center ${isActive ? 'border-amber-600 bg-amber-50 text-amber-800 font-semibold' : 'border-stone-200 bg-white text-stone-600 font-normal hover:bg-stone-50'}`}
                             >
                                 <span>{range.label}</span>
                                 {isActive && (
@@ -204,30 +124,12 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
 
             {/* Bathroom type */}
             <FilterSection title="Nhà vệ sinh">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div className="flex flex-col gap-1.5">
                     {[{ value: '', label: 'Tất cả' }, { value: 'private', label: 'Riêng tư' }, { value: 'shared', label: 'Chung' }].map((opt) => (
                         <button
                             key={opt.value}
                             onClick={() => updateFilter('bathroomType', opt.value)}
-                            style={{
-                                width: '100%',
-                                textAlign: 'left',
-                                padding: '0.5rem 0.75rem',
-                                borderRadius: '0.5rem',
-                                border: filters.bathroomType === opt.value ? '1.5px solid #d97706' : '1.5px solid #e7e5e4',
-                                background: filters.bathroomType === opt.value ? '#fffbeb' : '#fff',
-                                color: filters.bathroomType === opt.value ? '#92400e' : '#57534e',
-                                fontSize: '0.85rem',
-                                fontWeight: filters.bathroomType === opt.value ? 600 : 400,
-                                cursor: 'pointer',
-                                transition: 'all 0.15s',
-                                fontFamily: 'Inter, sans-serif',
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                            }}
-                            onMouseEnter={(e) => { if (filters.bathroomType !== opt.value) e.currentTarget.style.background = '#fafaf9'; }}
-                            onMouseLeave={(e) => { if (filters.bathroomType !== opt.value) e.currentTarget.style.background = '#fff'; }}
+                            className={`w-full text-left py-2 px-3 rounded-md border-[1.5px] text-[0.85rem] cursor-pointer transition-all duration-150 font-sans flex justify-between items-center ${filters.bathroomType === opt.value ? 'border-amber-600 bg-amber-50 text-amber-800 font-semibold' : 'border-stone-200 bg-white text-stone-600 font-normal hover:bg-stone-50'}`}
                         >
                             <span>{opt.label}</span>
                             {filters.bathroomType === opt.value && (
@@ -242,21 +144,13 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
 
             {/* Amenities */}
             <FilterSection title="Tiện nghi">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                <div className="flex flex-col gap-1.5">
                     {Object.entries(AMENITIES).map(([key, { label }]) => {
                         const isChecked = filters.amenities.includes(key);
                         return (
                             <label
                                 key={key}
-                                className="checkbox-label"
-                                style={{
-                                    padding: '0.35rem 0.5rem',
-                                    borderRadius: '0.5rem',
-                                    transition: 'background 0.15s',
-                                    fontWeight: isChecked ? 500 : 400,
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = '#fffbeb'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                className={`checkbox-label py-1.5 px-2 rounded-md transition-colors duration-150 hover:bg-amber-50 cursor-pointer ${isChecked ? 'font-medium' : 'font-normal'}`}
                             >
                                 <input
                                     type="checkbox"
@@ -293,7 +187,7 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
 function FilterSection({ title, children }) {
     return (
         <div>
-            <p style={{ fontFamily: 'var(--font-heading)', fontSize: '0.85rem', fontWeight: 700, color: '#1c1917', marginBottom: '0.625rem', margin: '0 0 0.625rem 0' }}>
+            <p className="text-[0.85rem] font-bold text-stone-900 m-0 mb-2.5" style={{ fontFamily: 'var(--font-heading)' }}>
                 {title}
             </p>
             {children}

@@ -10,7 +10,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 3500000,
+            deposit_amount: 1750000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -50,7 +50,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 6500000,
+            deposit_amount: 4550000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 0,
@@ -87,7 +87,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 1450000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 80000, unit: "người" },
             internet: 50000,
@@ -124,7 +124,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 12000000,
+            deposit_amount: 14400000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 0, unit: "free" },
             internet: 0,
@@ -162,7 +162,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 1200000,
+            deposit_amount: 1550000,
             electricity: { price: 0, unit: "included" },
             water: { price: 0, unit: "included" },
             internet: 0,
@@ -200,7 +200,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 3300000,
             electricity: { price: 3000, unit: "kWh" },
             water: { price: 25000, unit: "m3" },
             internet: 80000,
@@ -237,7 +237,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 4500000,
+            deposit_amount: 8100000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -277,7 +277,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 2800000,
+            deposit_amount: 5600000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 15000, unit: "m3" },
             internet: 50000,
@@ -314,7 +314,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 5500000,
+            deposit_amount: 12100000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -351,7 +351,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 2000000,
+            deposit_amount: 5000000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 80000, unit: "người" },
             internet: 50000,
@@ -388,7 +388,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 3200000,
+            deposit_amount: 1600000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 80000,
@@ -425,7 +425,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 7500000,
+            deposit_amount: 5250000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 150000,
@@ -462,7 +462,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 2500000,
+            deposit_amount: 2000000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 25000, unit: "m3" },
             internet: 80000,
@@ -499,7 +499,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 8000000,
+            deposit_amount: 9600000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 100000,
@@ -536,7 +536,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 1950000,
             electricity: { price: 3000, unit: "kWh" },
             water: { price: 50000, unit: "người" },
             internet: 50000,
@@ -573,7 +573,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 3800000,
+            deposit_amount: 5700000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 80000, unit: "người" },
             internet: 100000,
@@ -610,7 +610,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 2900000,
             electricity: { price: 0, unit: "included" },
             water: { price: 0, unit: "included" },
             internet: 0,
@@ -647,7 +647,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 5000000,
+            deposit_amount: 10000000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -684,7 +684,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 2200000,
+            deposit_amount: 4850000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 50000,
@@ -721,7 +721,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 9000000,
+            deposit_amount: 22500000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 25000, unit: "m3" },
             internet: 150000,
@@ -758,7 +758,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 3500000,
+            deposit_amount: 1750000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -798,7 +798,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 6500000,
+            deposit_amount: 4550000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 0,
@@ -835,7 +835,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 1450000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 80000, unit: "người" },
             internet: 50000,
@@ -872,7 +872,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 12000000,
+            deposit_amount: 14400000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 0, unit: "free" },
             internet: 0,
@@ -910,7 +910,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 1200000,
+            deposit_amount: 1550000,
             electricity: { price: 0, unit: "included" },
             water: { price: 0, unit: "included" },
             internet: 0,
@@ -948,7 +948,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 3300000,
             electricity: { price: 3000, unit: "kWh" },
             water: { price: 25000, unit: "m3" },
             internet: 80000,
@@ -985,7 +985,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 4500000,
+            deposit_amount: 8100000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -1025,7 +1025,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 2800000,
+            deposit_amount: 5600000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 15000, unit: "m3" },
             internet: 50000,
@@ -1062,7 +1062,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 5500000,
+            deposit_amount: 12100000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -1099,7 +1099,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 2000000,
+            deposit_amount: 5000000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 80000, unit: "người" },
             internet: 50000,
@@ -1136,7 +1136,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 3200000,
+            deposit_amount: 1600000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 80000,
@@ -1173,7 +1173,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 7500000,
+            deposit_amount: 5250000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 150000,
@@ -1210,7 +1210,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 2500000,
+            deposit_amount: 2000000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 25000, unit: "m3" },
             internet: 80000,
@@ -1247,7 +1247,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 8000000,
+            deposit_amount: 9600000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 100000,
@@ -1284,7 +1284,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 1950000,
             electricity: { price: 3000, unit: "kWh" },
             water: { price: 50000, unit: "người" },
             internet: 50000,
@@ -1321,7 +1321,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 3800000,
+            deposit_amount: 5700000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 80000, unit: "người" },
             internet: 100000,
@@ -1358,7 +1358,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 2900000,
             electricity: { price: 0, unit: "included" },
             water: { price: 0, unit: "included" },
             internet: 0,
@@ -1395,7 +1395,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 5000000,
+            deposit_amount: 10000000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -1432,7 +1432,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 2200000,
+            deposit_amount: 4850000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 50000,
@@ -1469,7 +1469,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 9000000,
+            deposit_amount: 22500000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 25000, unit: "m3" },
             internet: 150000,
@@ -1507,7 +1507,7 @@ export const ROOM_MOCK_DATA = [
             city: "Đà Nẵng",
         },
         monthly_costs: {
-            deposit_amount: 4200000,
+            deposit_amount: 2100000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 50000, unit: "người" },
             internet: 0,
@@ -1544,7 +1544,7 @@ export const ROOM_MOCK_DATA = [
             city: "Cần Thơ",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 1050000,
             electricity: { price: 3000, unit: "kWh" },
             water: { price: 8000, unit: "m3" },
             internet: 50000,
@@ -1581,7 +1581,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hải Phòng",
         },
         monthly_costs: {
-            deposit_amount: 3000000,
+            deposit_amount: 2400000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 15000, unit: "m3" },
             internet: 80000,
@@ -1618,7 +1618,7 @@ export const ROOM_MOCK_DATA = [
             city: "Lâm Đồng",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 2400000,
             electricity: { price: 0, unit: "included" },
             water: { price: 0, unit: "included" },
             internet: 0,
@@ -1655,7 +1655,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 4000000,
+            deposit_amount: 5200000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -1692,7 +1692,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 21000000,
+            deposit_amount: 15750000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 0, unit: "included" },
             internet: 0,
@@ -1729,7 +1729,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Huế",
         },
         monthly_costs: {
-            deposit_amount: 500000,
+            deposit_amount: 2150000,
             electricity: { price: 3000, unit: "kWh" },
             water: { price: 50000, unit: "người" },
             internet: 30000,
@@ -1766,7 +1766,7 @@ export const ROOM_MOCK_DATA = [
             city: "Nha Trang",
         },
         monthly_costs: {
-            deposit_amount: 5000000,
+            deposit_amount: 10000000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 15000, unit: "m3" },
             internet: 100000,
@@ -1803,7 +1803,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 3200000,
+            deposit_amount: 7050000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -1840,7 +1840,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 2800000,
+            deposit_amount: 7000000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 18000, unit: "m3" },
             internet: 50000,
@@ -1877,7 +1877,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 4500000,
+            deposit_amount: 2250000,
             electricity: { price: 0, unit: "split" },
             water: { price: 0, unit: "split" },
             internet: 0,
@@ -1914,7 +1914,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Vũng Tàu",
         },
         monthly_costs: {
-            deposit_amount: 1000000,
+            deposit_amount: 1750000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 15000, unit: "m3" },
             internet: 50000,
@@ -1951,7 +1951,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 5200000,
+            deposit_amount: 4150000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 30000, unit: "m3" },
             internet: 100000,
@@ -1988,7 +1988,7 @@ export const ROOM_MOCK_DATA = [
             city: "Hà Nội",
         },
         monthly_costs: {
-            deposit_amount: 500000,
+            deposit_amount: 2150000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 50000,
@@ -2025,7 +2025,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 50000000,
+            deposit_amount: 32500000,
             electricity: { price: 4000, unit: "kWh" },
             water: { price: 0, unit: "included" },
             internet: 0,
@@ -2062,7 +2062,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 1700000,
+            deposit_amount: 2550000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 15000, unit: "m3" },
             internet: 50000,
@@ -2099,7 +2099,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 3800000,
+            deposit_amount: 6850000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 100000,
@@ -2136,7 +2136,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 3000000,
+            deposit_amount: 6000000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 50000,
@@ -2173,7 +2173,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 2800000,
+            deposit_amount: 6150000,
             electricity: { price: 3800, unit: "kWh" },
             water: { price: 100000, unit: "người" },
             internet: 100000,
@@ -2210,7 +2210,7 @@ export const ROOM_MOCK_DATA = [
             city: "TP. Hồ Chí Minh",
         },
         monthly_costs: {
-            deposit_amount: 3500000,
+            deposit_amount: 8750000,
             electricity: { price: 3500, unit: "kWh" },
             water: { price: 20000, unit: "m3" },
             internet: 100000,

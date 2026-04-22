@@ -41,108 +41,53 @@ export default function HomePage({ navigate }) {
     ];
 
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--color-brand-50)' }}>
+        <div className="min-h-screen bg-stone-50">
             {/* ---- HERO SECTION ---- */}
             <section
-                style={{
-                    background: 'linear-gradient(135deg, #1c1917 0%, #292524 40%, #3c2a1e 100%)',
-                    paddingTop: '96px',
-                    paddingBottom: '0',
-                    position: 'relative',
-                    overflow: 'hidden',
-                }}
+                className="pt-50 pb-30 relative overflow-hidden bg-linear-to-br from-stone-900 via-stone-800 to-[#3c2a1e]"
             >
                 {/* Decorative blobs */}
                 <div
-                    style={{
-                        position: 'absolute',
-                        top: '-80px',
-                        right: '-80px',
-                        width: '400px',
-                        height: '400px',
-                        background: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)',
-                        pointerEvents: 'none',
-                    }}
+                    className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(245,158,11,0.15)_0%,transparent_70%)] pointer-events-none"
                 />
                 <div
-                    style={{
-                        position: 'absolute',
-                        bottom: '0',
-                        left: '-60px',
-                        width: '300px',
-                        height: '300px',
-                        background: 'radial-gradient(circle, rgba(217,119,6,0.1) 0%, transparent 70%)',
-                        pointerEvents: 'none',
-                    }}
+                    className="absolute bottom-0 -left-15 w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(217,119,6,0.1)_0%,transparent_70%)] pointer-events-none"
                 />
 
-                <div className="container-app" style={{ paddingTop: '5rem', paddingBottom: '3rem', position: 'relative' }}>
-                    <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center', paddingBottom: '4rem' }}>
+                <div className="container-app pt-20 pb-12 relative">
+                    <div className="max-w-[720px] mx-auto text-center pb-16">
                         {/* Badge */}
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '999px', padding: '0.35rem 0.875rem', marginBottom: '1.5rem' }}>
-                            <span style={{ width: '6px', height: '6px', background: '#f59e0b', borderRadius: '50%', display: 'inline-block' }} />
-                            <span style={{ color: '#fcd34d', fontSize: '0.8rem', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>
+                        <div className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/30 rounded-full py-1.5 px-3.5 mb-6">
+                            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full inline-block" />
+                            <span className="text-amber-300 text-[0.8rem] font-semibold font-sans">
                                 Nền tảng tìm trọ #1 Việt Nam
                             </span>
                         </div>
 
                         <h1
-                            style={{
-                                fontFamily: 'var(--font-heading)',
-                                fontSize: 'clamp(2.25rem, 6vw, 3.5rem)',
-                                fontWeight: 800,
-                                color: '#fff',
-                                lineHeight: 1.1,
-                                marginBottom: '1.25rem',
-                                letterSpacing: '-0.02em',
-                            }}
+                            className="text-[clamp(2.25rem,6vw,3.5rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-[-0.02em]"
+                            style={{ fontFamily: 'var(--font-heading)' }}
                         >
                             Tìm phòng trọ{' '}
-                            <span
-                                style={{
-                                    background: 'linear-gradient(90deg, #f59e0b, #fcd34d)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
-                                }}
-                            >
+                            <span className="bg-linear-to-r from-amber-500 to-amber-300 bg-clip-text text-transparent">
                                 ưng ý
                             </span>{' '}
                             trong vài phút
                         </h1>
 
-                        <p
-                            style={{
-                                color: '#a8a29e',
-                                fontSize: '1.1rem',
-                                lineHeight: 1.7,
-                                marginBottom: '2.5rem',
-                                fontFamily: 'Inter, sans-serif',
-                                maxWidth: '600px',
-                                margin: '0 auto 2.5rem'
-                            }}
-                        >
+                        <p className="text-stone-400 text-[1.1rem] leading-[1.7] font-sans max-w-[600px] mx-auto mb-10">
                             Hàng nghìn phòng được xác minh tại Hà Nội, TP. Hồ Chí Minh và khắp cả nước.
                             Miễn phí tìm kiếm, không phí trung gian.
                         </p>
 
                         {/* Call to Action Button */}
-                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <div className="flex justify-center">
                             <button
                                 onClick={scrollToListing}
-                                className="btn-primary"
-                                style={{
-                                    padding: '1.125rem 3rem',
-                                    fontSize: '1.15rem',
-                                    borderRadius: '999px',
-                                    boxShadow: '0 10px 40px rgba(217,119,6,0.5)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.875rem',
-                                    animation: 'fadeInUp 0.8s ease'
-                                }}
+                                className="btn-primary px-12! py-4! rounded-full!"
+                                style={{ animation: 'fadeInUp 0.8s ease' }}
                             >
-                                <span style={{ fontWeight: 800 }}>Tìm phòng ngay</span>
+                                <span className="font-extrabold">Tìm phòng ngay</span>
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
                                 </svg>
@@ -151,33 +96,16 @@ export default function HomePage({ navigate }) {
                     </div>
 
                     {/* Stats bar - Floating Card */}
-                    <div
-                        style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                            background: 'rgba(28,25,23,0.7)',
-                            backdropFilter: 'blur(16px)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '1.5rem',
-                            overflow: 'hidden',
-                            maxWidth: '900px',
-                            margin: '0 auto',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
-                        }}
-                    >
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] bg-stone-900/70 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden max-w-[900px] mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
                         {stats.map((stat, idx) => (
                             <div
                                 key={stat.label}
-                                style={{
-                                    padding: '1.5rem 1rem',
-                                    textAlign: 'center',
-                                    borderRight: idx < stats.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-                                }}
+                                className={`p-6 text-center ${idx < stats.length - 1 ? 'border-r border-white/5' : ''}`}
                             >
-                                <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.75rem', color: '#fcd34d', lineHeight: 1 }}>
+                                <div className="font-extrabold text-[1.75rem] text-amber-300 leading-none" style={{ fontFamily: 'var(--font-heading)' }}>
                                     {stat.value}
                                 </div>
-                                <div style={{ fontSize: '0.85rem', color: '#a8a29e', marginTop: '0.4rem', fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>
+                                <div className="text-[0.85rem] text-stone-400 mt-1.5 font-medium font-sans">
                                     {stat.label}
                                 </div>
                             </div>
@@ -187,14 +115,14 @@ export default function HomePage({ navigate }) {
             </section>
 
             {/* ---- LISTING SECTION ---- */}
-            <section id="listing-section" className="container-app" style={{ paddingTop: '2.5rem', paddingBottom: '3rem', scrollMarginTop: '50px' }}>
+            <section id="listing-section" className="container-app pt-10! pb-12! scroll-mt-[50px]">
                 {/* Mobile Filter Toggle */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
                     <div>
-                        <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 700, color: '#1c1917', margin: '0 0 0.2rem' }}>
+                        <h2 className="text-[1.25rem] font-bold text-stone-900 m-0 mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
                             Danh sách phòng trọ
                         </h2>
-                        <p style={{ color: '#78716c', fontSize: '0.875rem', margin: 0 }}>
+                        <p className="text-stone-500 text-[0.875rem] m-0">
                             {filteredRooms.length} phòng phù hợp
                             {filters.city ? ` tại ${filters.city}` : ''}
                             {filters.search ? ` với "${filters.search}"` : ''}
@@ -202,8 +130,7 @@ export default function HomePage({ navigate }) {
                     </div>
                     <button
                         onClick={() => setShowMobileFilter(!showMobileFilter)}
-                        className="btn-secondary btn-filter-toggle"
-                        style={{ fontSize: '0.85rem' }}
+                        className="btn-secondary btn-filter-toggle text-[0.85rem]"
                         aria-expanded={showMobileFilter}
                         aria-controls="room-filters"
                     >
@@ -212,20 +139,7 @@ export default function HomePage({ navigate }) {
                         </svg>
                         Bộ lọc
                         {activeFilterCount > 0 && (
-                            <span
-                                style={{
-                                    background: '#d97706',
-                                    color: '#fff',
-                                    borderRadius: '999px',
-                                    width: '18px',
-                                    height: '18px',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 700,
-                                }}
-                            >
+                            <span className="bg-amber-600 text-white rounded-full w-[18px] h-[18px] inline-flex items-center justify-center text-[0.7rem] font-bold">
                                 {activeFilterCount}
                             </span>
                         )}
@@ -234,13 +148,10 @@ export default function HomePage({ navigate }) {
 
                 {/* Layout: Sidebar + Grid */}
                 <div
-                    className="listing-layout"
+                    className="listing-layout grid gap-8 items-stretch"
                     style={{
-                        display: 'grid',
                         gridTemplateColumns: 'minmax(0, 1fr) 280px',
                         gridTemplateAreas: '"grid sidebar"',
-                        gap: '2rem',
-                        alignItems: 'stretch',
                     }}
                 >
                     {/* Filter Sidebar Area */}
