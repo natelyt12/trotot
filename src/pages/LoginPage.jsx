@@ -58,16 +58,18 @@ export default function LoginPage({ navigate }) {
                 <div className="text-center mb-8">
                     <button
                         onClick={() => navigate('home')}
-                        className="bg-transparent border-none cursor-pointer inline-flex flex-col items-center gap-3"
+                        className="bg-transparent border-none cursor-pointer inline-flex flex-col items-center gap-4 group"
                     >
-                        <div className="w-14 h-14 bg-linear-to-br from-amber-600 to-amber-500 rounded-2xl flex items-center justify-center shadow-[0_4px_20px_rgba(217,119,6,0.4)]">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                                <polyline points="9 22 9 12 15 12 15 22" />
-                            </svg>
+                        <div className="w-16 h-16 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                            <img
+                                src="/logo.png"
+                                alt="Logo"
+                                className="w-16 h-16 object-contain"
+                            />
                         </div>
-                        <span className="font-extrabold text-[1.75rem] text-white tracking-tight font-heading">
-                            Trọ<span className="text-amber-500">Tốt</span>
+                        <span className="flex items-baseline -ml-1 mt-1">
+                            <span className="font-medium text-[2.2rem] text-white tracking-tight font-heading">Trọ</span>
+                            <span className="text-amber-500 text-[2.8rem] font-bold ml-1.5" style={{ fontFamily: 'var(--font-script)' }}>Tốt</span>
                         </span>
                     </button>
                     <p className="text-stone-500 text-[0.9rem] mt-2 font-sans">

@@ -57,15 +57,11 @@ export default function Footer({ navigate }) {
                 <div className="grid gap-10 pb-10 border-b border-stone-800 grid-cols-[repeat(auto-fit,minmax(180px,1fr))]">
                     {/* Brand column */}
                     <div className="col-span-1">
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 bg-linear-to-br from-amber-600 to-amber-500 rounded-lg flex items-center justify-center">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                                    <polyline points="9 22 9 12 15 12 15 22" />
-                                </svg>
-                            </div>
-                            <span className="font-bold text-[1.15rem] text-white" style={{ fontFamily: 'var(--font-heading)' }}>
-                                Trọ<span className="text-amber-500">Tốt</span>
+                        <div className="flex items-center gap-2.5 mb-4 group cursor-pointer" onClick={() => navigate && navigate('home')}>
+                            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain rounded-md transition-transform duration-300 group-hover:scale-110" />
+                            <span className="flex items-baseline -ml-1">
+                                <span className="font-medium text-[1.25rem] text-white tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Trọ</span>
+                                <span className="text-amber-500 text-[1.5rem] font-bold ml-0.5" style={{ fontFamily: 'var(--font-script)' }}>Tốt</span>
                             </span>
                         </div>
                         <p className="text-sm leading-relaxed text-stone-400 max-w-[220px]">

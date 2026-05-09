@@ -47,7 +47,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                     .update({ total_views: (room.metadata?.total_views || 0) + 1 })
                     .eq('id', room.id)
                     .select('total_views')
-                    .single();
+                    .maybeSingle();
 
                 if (!error && data) {
                     setViews(data.total_views);
@@ -359,11 +359,19 @@ export default function RoomDetailPage({ room, navigate, user }) {
                             {/* Owner info inside price card */}
                             <p className="text-[0.8rem] text-stone-400 mb-2 font-medium">Thông tin người đăng:</p>
                             <div className="flex items-center gap-3 mb-5">
-                                <div className="w-10 h-10 bg-linear-to-br from-amber-600 to-amber-500 rounded-full flex items-center justify-center shrink-0">
-                                    <span className="text-white font-bold text-[0.95rem] font-heading">
-                                        {media_contact.contact.name.charAt(0)}
-                                    </span>
-                                </div>
+                                {media_contact.contact.avatar ? (
+                                    <img 
+                                        src={media_contact.contact.avatar} 
+                                        alt={media_contact.contact.name}
+                                        className="w-10 h-10 rounded-full object-cover border border-stone-200"
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 bg-linear-to-br from-amber-600 to-amber-500 rounded-full flex items-center justify-center shrink-0">
+                                        <span className="text-white font-bold text-[0.95rem] font-heading">
+                                            {media_contact.contact.name?.charAt(0) || 'U'}
+                                        </span>
+                                    </div>
+                                )}
                                 <div className="flex-1">
                                     <p className="font-bold text-[0.95rem] text-stone-900 leading-none mb-1">
                                         {media_contact.contact.name}

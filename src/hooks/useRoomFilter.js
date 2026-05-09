@@ -39,7 +39,7 @@ export const useRoomFilter = () => {
 
       let query = supabase
         .from('rooms')
-        .select('*', { count: 'exact' });
+        .select('*, profiles(*)', { count: 'exact' });
 
       // Apply Filters
       if (filters.city) query = query.eq('city', filters.city);
@@ -98,6 +98,20 @@ export const useRoomFilter = () => {
           district: r.district,
           ward: r.ward,
           address: r.address
+        },
+        media_contact: {
+          ...r.media_contact,
+          contact: (() => {
+            const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
+            if (!profile) return r.media_contact.contact;
+            
+            return {
+              name: profile.full_name || r.media_contact.contact.name,
+              phone: profile.phone || r.media_contact.contact.phone,
+              role: profile.role || r.media_contact.contact.role,
+              avatar: profile.avatar_url || r.media_contact.contact.avatar
+            };
+          })()
         },
         metadata: {
           is_verified: r.is_verified,

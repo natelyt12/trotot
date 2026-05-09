@@ -73,8 +73,8 @@ export default function HomePage({ navigate }) {
                             className="text-[clamp(2.25rem,6vw,3.5rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-[-0.02em]"
                             style={{ fontFamily: 'var(--font-heading)' }}
                         >
-                            Tìm phòng trọ{' '}
-                            <span className="bg-linear-to-r from-amber-500 to-amber-300 bg-clip-text text-transparent">
+                            Tìm phòng{' '}
+                            <span className="bg-linear-to-r from-amber-500 to-amber-300 bg-clip-text text-transparent px-1.5" style={{ fontFamily: 'var(--font-script)', fontSize: '1.7em' }}>
                                 ưng ý
                             </span>{' '}
                             trong vài phút
@@ -189,7 +189,7 @@ export default function HomePage({ navigate }) {
                             <div className="bg-red-50 border border-red-100 text-red-600 p-8 rounded-xl text-center">
                                 <p className="font-bold mb-2 text-red-700">Đã có lỗi xảy ra!</p>
                                 <p className="text-[0.9rem] opacity-80">{error}</p>
-                                <button 
+                                <button
                                     onClick={() => window.location.reload()}
                                     className="mt-6 px-6 py-2 bg-red-600 text-white rounded-lg text-[0.85rem] font-bold hover:bg-red-700 transition-colors"
                                 >
@@ -202,7 +202,7 @@ export default function HomePage({ navigate }) {
                                     rooms={filteredRooms}
                                     onRoomClick={handleRoomClick}
                                 />
-                                
+
                                 {hasMore && (
                                     <div className="flex justify-center mt-12 mb-8">
                                         <button
@@ -215,7 +215,7 @@ export default function HomePage({ navigate }) {
                                         </button>
                                     </div>
                                 )}
-                                
+
                                 {!hasMore && totalCount > 0 && (
                                     <p className="text-center text-stone-400 text-[0.85rem] mt-12 mb-8 italic">
                                         — Đã hiển thị tất cả {totalCount} kết quả —

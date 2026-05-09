@@ -69,15 +69,13 @@ export default function RegisterPage({ navigate }) {
             <div className="relative w-full max-w-[460px]">
                 {/* Logo */}
                 <div className="text-center mb-7">
-                    <button onClick={() => navigate('home')} className="bg-transparent border-none cursor-pointer inline-flex flex-col items-center gap-2.5">
-                        <div className="w-[52px] h-[52px] bg-linear-to-br from-amber-600 to-amber-500 rounded-[14px] flex items-center justify-center shadow-[0_4px_20px_rgba(217,119,6,0.4)]">
-                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                                <polyline points="9 22 9 12 15 12 15 22" />
-                            </svg>
+                    <button onClick={() => navigate('home')} className="bg-transparent border-none cursor-pointer inline-flex flex-col items-center gap-3 group">
+                        <div className="w-[52px] h-[52px] rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
                         </div>
-                        <span className="font-extrabold text-[1.6rem] text-white tracking-[-0.02em]" style={{ fontFamily: 'var(--font-heading)' }}>
-                            Trọ<span className="text-amber-500">Tốt</span>
+                        <span className="flex items-baseline -ml-1 mt-1">
+                            <span className="font-medium text-[1.8rem] text-white tracking-tight font-heading">Trọ</span>
+                            <span className="text-amber-500 text-[2.3rem] font-bold ml-1.5" style={{ fontFamily: 'var(--font-script)' }}>Tốt</span>
                         </span>
                     </button>
                     <p className="text-stone-500 text-[0.875rem] mt-1.5">Tạo tài khoản miễn phí ngay hôm nay</p>

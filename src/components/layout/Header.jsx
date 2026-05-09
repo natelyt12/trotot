@@ -40,17 +40,16 @@ export default function Header({ currentPage, navigate, user }) {
                 {/* Logo */}
                 <button
                     onClick={() => navigate('home')}
-                    className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0"
+                    className="flex items-center gap-3 bg-transparent border-none cursor-pointer p-0 group"
                 >
-                    <div className="w-9 h-9 bg-linear-to-br from-amber-600 to-amber-500 rounded-[10px] flex items-center justify-center shadow-[0_2px_8px_rgba(217,119,6,0.35)]">
-                        {/* House icon */}
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                            <polyline points="9 22 9 12 15 12 15 22" />
-                        </svg>
-                    </div>
-                    <span className="font-bold text-[1.2rem] text-stone-900 tracking-[-0.01em]" style={{ fontFamily: 'var(--font-heading)' }}>
-                        Trọ <span className="text-amber-600">Tốt</span>
+                    <img
+                        src="/logo.png"
+                        alt="Trọ Tốt Logo"
+                        className="w-9 h-9 object-contain rounded-lg transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <span className="flex items-baseline -ml-1">
+                        <span className="font-medium text-[1.45rem] text-stone-900 tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>Trọ</span>
+                        <span className="text-amber-600 text-[1.7rem] font-bold ml-1" style={{ fontFamily: 'var(--font-script)' }}>Tốt</span>
                     </span>
                 </button>
 

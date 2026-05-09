@@ -90,7 +90,7 @@ export default function RoomCard({ room, onClick, style }) {
                 <div className="h-px bg-stone-100 my-1" />
 
                 {/* Amenities */}
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5 mb-2">
                     {amenityBadges.map((key) => (
                         <span key={key} className="badge badge-amber">
                             <AppIcon name={key} size={12} />
@@ -100,9 +100,28 @@ export default function RoomCard({ room, onClick, style }) {
                     {extraCount > 0 && (
                         <span className="badge badge-gray">+{extraCount} khác</span>
                     )}
-                    {room_features.amenities.length === 0 && (
-                        <span className="badge badge-gray">Phòng trống</span>
+                </div>
+
+                {/* Landlord Info - Mini Footer */}
+                <div className="flex items-center gap-2 mt-auto pt-2 border-t border-stone-50">
+                    {media_contact.contact.avatar ? (
+                        <img 
+                            src={media_contact.contact.avatar} 
+                            alt={media_contact.contact.name}
+                            className="w-6 h-6 rounded-full object-cover border border-stone-100"
+                        />
+                    ) : (
+                        <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center text-[0.6rem] font-bold text-amber-700">
+                            {media_contact.contact.name?.charAt(0)}
+                        </div>
                     )}
+                    <span className="text-[0.75rem] text-stone-400 font-medium truncate">
+                        {media_contact.contact.name}
+                    </span>
+                    <div className="ml-auto flex items-center gap-1 text-[0.7rem] text-stone-300">
+                         <AppIcon name="eye" size={10} />
+                         {metadata.total_views || 0}
+                    </div>
                 </div>
             </div>
         </article>

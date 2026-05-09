@@ -59,8 +59,8 @@ export default function App() {
 
 
         // Only scroll to top for "major" page changes (login, register, home)
-        // but NOT when we are just opening/closing the Room Detail modal overlay.
-        if (page !== 'room-detail' && currentPage !== 'room-detail') {
+        // but NOT when we are just opening/closing the Room Detail or Profile modal overlay.
+        if (!['room-detail', 'profile'].includes(page) && !['room-detail', 'profile'].includes(currentPage)) {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -95,13 +95,23 @@ export default function App() {
 
             // Assume it's a room slug
             try {
+                // Fetch room along with its owner profile
                 const { data: room, error } = await supabase
                     .from('rooms')
-                    .select('*')
+                    .select('*, profiles(*)')
                     .eq('slug', path)
                     .single();
                 
                 if (room && !error) {
+                    // If we have profile data, use it to override the mock contact info
+                    const profile = Array.isArray(room.profiles) ? room.profiles[0] : room.profiles;
+                    const ownerContact = profile ? {
+                        name: profile.full_name || room.media_contact.contact.name,
+                        phone: profile.phone || room.media_contact.contact.phone,
+                        role: profile.role || room.media_contact.contact.role,
+                        avatar: profile.avatar_url || room.media_contact.contact.avatar
+                    } : room.media_contact.contact;
+
                     // Reconstruct the nested structure as expected by RoomDetailPage
                     const mappedRoom = {
                         ...room,
@@ -114,6 +124,10 @@ export default function App() {
                             district: room.district,
                             ward: room.ward,
                             address: room.address
+                        },
+                        media_contact: {
+                            ...room.media_contact,
+                            contact: ownerContact
                         },
                         metadata: {
                             is_verified: room.is_verified,
