@@ -51,6 +51,8 @@ export default function App() {
                 setIsClosing(false);
                 setCurrentPage('home');
                 setPageData(null);
+                // Update URL back to home
+                window.history.pushState(null, '', '/');
             }, 400); // Match animation duration
             return;
         }
@@ -62,9 +64,84 @@ export default function App() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        // --- SLUG ROUTING LOGIC ---
+        if (page === 'room-detail' && data?.slug) {
+            window.history.pushState(null, '', `/${data.slug}`);
+        } else if (page === 'home') {
+            window.history.pushState(null, '', '/');
+        } else if (['login', 'register', 'profile'].includes(page)) {
+            window.history.pushState(null, '', `/${page}`);
+        }
+
         setCurrentPage(page);
         setPageData(data);
     };
+
+    // Handle initial URL and Back/Forward buttons
+    useEffect(() => {
+        const handleLocationChange = async () => {
+            const path = window.location.pathname.slice(1); // Remove leading /
+            
+            if (!path) {
+                setCurrentPage('home');
+                setPageData(null);
+                return;
+            }
+
+            if (['login', 'register', 'profile'].includes(path)) {
+                setCurrentPage(path);
+                return;
+            }
+
+            // Assume it's a room slug
+            try {
+                const { data: room, error } = await supabase
+                    .from('rooms')
+                    .select('*')
+                    .eq('slug', path)
+                    .single();
+                
+                if (room && !error) {
+                    // Reconstruct the nested structure as expected by RoomDetailPage
+                    const mappedRoom = {
+                        ...room,
+                        basic_info: {
+                            title: room.title,
+                            room_type: room.room_type,
+                            price_monthly: room.price_monthly,
+                            area_sqm: room.area_sqm,
+                            city: room.city,
+                            district: room.district,
+                            ward: room.ward,
+                            address: room.address
+                        },
+                        metadata: {
+                            is_verified: room.is_verified,
+                            status: room.status,
+                            total_views: room.total_views,
+                            total_favorites: room.total_favorites,
+                            created_at: room.created_at,
+                            updated_at: room.updated_at
+                        }
+                    };
+                    setCurrentPage('room-detail');
+                    setPageData(mappedRoom);
+                } else {
+                    // Fallback to home if slug not found
+                    setCurrentPage('home');
+                }
+            } catch (err) {
+                console.error('Error fetching room by slug:', err);
+                setCurrentPage('home');
+            }
+        };
+
+        handleLocationChange();
+
+        // Listen for back/forward buttons
+        window.addEventListener('popstate', handleLocationChange);
+        return () => window.removeEventListener('popstate', handleLocationChange);
+    }, []);
 
     const showLayout = !PAGES_WITHOUT_LAYOUT.includes(currentPage);
 

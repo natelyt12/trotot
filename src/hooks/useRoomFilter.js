@@ -55,12 +55,12 @@ export const useRoomFilter = () => {
       if (filters.verifiedOnly) query = query.eq('is_verified', true);
       
       if (filters.bathroomType) {
-        query = query.eq('room_features->>bathroom_type', filters.bathroomType);
+        query = query.contains('room_features', { bathroom_type: filters.bathroomType });
       }
       
       if (filters.amenities.length > 0) {
-        // Supabase JSONB contains
-        query = query.contains('room_features->amenities', filters.amenities);
+        // Correct Supabase JSONB contains syntax: column name + object structure
+        query = query.contains('room_features', { amenities: filters.amenities });
       }
 
       if (filters.search.trim()) {
