@@ -77,13 +77,13 @@ export default function LoginPage({ navigate }) {
 
                 {/* Card */}
                 {/* Card */}
-                <div className="bg-white/95 backdrop-blur-[20px] rounded-[1.25rem] p-8 border border-white/80 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+                <div className="bg-white/95 backdrop-blur-[20px] rounded-xl p-8 border border-white/80 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
                     <h1 className="text-[1.4rem] font-bold text-stone-900 mb-6 text-center font-heading">
                         Đăng nhập
                     </h1>
 
                     {error && (
-                        <div className="bg-red-100 border border-red-300 rounded-[0.625rem] py-2.5 px-3.5 mb-4 text-red-600 text-[0.875rem] flex items-center gap-2">
+                        <div className="bg-red-100 border border-red-300 rounded-md py-2.5 px-3.5 mb-4 text-red-600 text-[0.875rem] flex items-center gap-2">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                             {error}
                         </div>

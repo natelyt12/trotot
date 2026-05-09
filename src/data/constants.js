@@ -3,11 +3,14 @@
 
 export const AMENITIES = {
   bed: { label: 'Giường', icon: 'bed' },
-  air_conditioner: { label: 'Điều hòa', icon: 'thermometer' },
-  fridge: { label: 'Tủ lạnh', icon: 'package' },
-  wardrobe: { label: 'Tủ quần áo', icon: 'archive' },
-  kitchen: { label: 'Thiết bị bếp', icon: 'flame' },
-  washing_machine: { label: 'Máy giặt', icon: 'rotate-ccw' },
+  air_conditioner: { label: 'Điều hòa', icon: 'air_conditioner' },
+  fridge: { label: 'Tủ lạnh', icon: 'fridge' },
+  wardrobe: { label: 'Tủ quần áo', icon: 'wardrobe' },
+  kitchen: { label: 'Thiết bị bếp', icon: 'kitchen' },
+  washing_machine: { label: 'Máy giặt', icon: 'washing_machine' },
+  wifi: { label: 'Wifi', icon: 'wifi' },
+  elevator: { label: 'Thang máy', icon: 'elevator' },
+  balcony: { label: 'Ban công', icon: 'balcony' },
 };
 
 export const BATHROOM_TYPES = {

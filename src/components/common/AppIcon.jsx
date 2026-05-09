@@ -35,7 +35,11 @@ import {
     TbMenu2,
     TbUser,
     TbSmartHome,
-    TbClock
+    TbClock,
+    TbElevator,
+    TbFence,
+    TbCopy,
+    TbEye
 } from 'react-icons/tb';
 import { PiWashingMachine } from "react-icons/pi";
 
@@ -53,6 +57,8 @@ const ICON_MAP = {
     washing_machine: PiWashingMachine,
     wifi: TbWifi,
     toilet_paper: TbToiletPaper,
+    elevator: TbElevator,
+    balcony: TbFence,
 
     // Stats & Info
     price: TbCurrencyDollar,
@@ -84,12 +90,14 @@ const ICON_MAP = {
     alert: TbAlertTriangle,
     check: TbCheck,
     x: TbX,
+    copy: TbCopy,
 
     // Section headers
     'credit-card': TbCreditCard,
     'check-square': TbListCheck,
     'shield': TbShieldCheck,
     'message-circle': TbMessageCircle,
+    eye: TbEye,
 };
 
 export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 2, style, className, ...props }) {

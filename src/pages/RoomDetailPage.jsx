@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { supabase } from '../lib/supabase';
 import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES, PARKING_TYPES } from '../data/constants.js';
 import {
     formatPrice,
@@ -18,6 +19,7 @@ import Breadcrumb from '../components/common/Breadcrumb.jsx';
 export default function RoomDetailPage({ room, navigate, user }) {
     const [activeImage, setActiveImage] = useState(0);
     const [showPhone, setShowPhone] = useState(false);
+    const [views, setViews] = useState(room?.metadata?.total_views || 0);
 
     // Breadcrumb scroll & gradient logic
     const breadcrumbRef = useRef(null);
@@ -31,6 +33,32 @@ export default function RoomDetailPage({ room, navigate, user }) {
             right: el.scrollLeft < el.scrollWidth - el.clientWidth - 10
         });
     };
+
+    // Increment views on mount
+    useEffect(() => {
+        if (!room?.id) return;
+
+        const incrementViews = async () => {
+            try {
+                // Atomic increment using a direct update (Race conditions possible but simple)
+                // Better: use an RPC call if available on Supabase
+                const { data, error } = await supabase
+                    .from('rooms')
+                    .update({ total_views: (room.metadata?.total_views || 0) + 1 })
+                    .eq('id', room.id)
+                    .select('total_views')
+                    .single();
+
+                if (!error && data) {
+                    setViews(data.total_views);
+                }
+            } catch (err) {
+                console.error('Failed to increment views:', err);
+            }
+        };
+
+        incrementViews();
+    }, [room?.id]);
 
     useEffect(() => {
         const el = breadcrumbRef.current;
@@ -51,7 +79,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
 
     const { basic_info, monthly_costs, room_features, rules_utilities, media_contact, metadata } = room;
     const images = media_contact.images.length > 0
-        ? media_contact.images
+        ? media_contact.images.map(img => typeof img === 'string' ? img : img.url)
         : [`https://picsum.photos/seed/${room.listing_id}/800/500`];
     const isAvailable = metadata.status === 'available';
 
@@ -92,14 +120,17 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         {STATUS_LABELS[metadata.status]?.label || metadata.status}
                                     </span>
                                 </div>
-                                {metadata.is_verified && (
-                                    <div className="absolute top-4 right-4">
+                                <div className="absolute top-4 right-4 flex gap-2">
+                                    {metadata.is_verified && (
                                         <span className="badge badge-blue text-[0.82rem]">
                                             <AppIcon name="verified" size={11} strokeWidth={2.5} />
                                             Đã xác minh
                                         </span>
-                                    </div>
-                                )}
+                                    )}
+                                    <button className="w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-stone-600 hover:text-red-500 transition-colors shadow-sm cursor-pointer">
+                                        <AppIcon name="heart" size={18} />
+                                    </button>
+                                </div>
                                 {/* Prev/Next arrows */}
                                 {images.length > 1 && (
                                     <>
@@ -127,7 +158,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         <button
                                             key={idx}
                                             onClick={() => setActiveImage(idx)}
-                                            className={`w-[72px] h-[56px] flex-shrink-0 rounded-md overflow-hidden border-2 transition-colors duration-200 cursor-pointer p-0 ${activeImage === idx ? 'border-amber-600' : 'border-transparent'}`}
+                                            className={`w-[72px] h-[56px] shrink-0 rounded-md overflow-hidden border-2 transition-colors duration-200 cursor-pointer p-0 ${activeImage === idx ? 'border-amber-600' : 'border-transparent'}`}
                                             aria-label={`Xem ảnh ${idx + 1}`}
                                         >
                                             <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
@@ -142,22 +173,42 @@ export default function RoomDetailPage({ room, navigate, user }) {
                             <h1 className="text-2xl font-bold text-stone-900 mb-3 leading-tight font-heading">
                                 {basic_info.title}
                             </h1>
-                            <div className="flex items-center gap-2 text-stone-500 text-[0.925rem] mb-6">
+                            <div className="flex items-center gap-2 text-stone-500 text-[0.925rem] mb-4">
                                 <AppIcon name="location" size={16} />
                                 <span>{basic_info.address}, {basic_info.district}, {basic_info.city}</span>
+                            </div>
+
+                            {/* Views & Favorites bar */}
+                            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-6 py-3 border-y border-stone-100">
+                                <div className="flex items-center gap-1.5 text-stone-600 text-[0.85rem]">
+                                    <AppIcon name="eye" size={16} className="text-stone-400" />
+                                    <span className="font-medium">{views.toLocaleString()}</span>
+                                    <span className="text-stone-400">lượt xem</span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-stone-600 text-[0.85rem]">
+                                    <AppIcon name="heart" size={16} className="text-stone-400" />
+                                    <span className="font-medium">{(metadata.total_favorites || 0).toLocaleString()}</span>
+                                    <span className="text-stone-400">lượt lưu</span>
+                                </div>
+                                <div className="hidden sm:block h-3 w-px bg-stone-200" />
+                                <div className="flex items-center gap-1.5 text-stone-500 text-[0.85rem]">
+                                    <AppIcon name="clock" size={16} className="text-stone-400" />
+                                    <span>Cập nhật: {formatDate(metadata.updated_at)}</span>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-stone-50 rounded-lg border border-stone-100">
                                 <StatItem icon="price" label="Giá thuê" value={formatPrice(basic_info.price_monthly)} highlight />
                                 <StatItem icon="area" label="Diện tích" value={formatArea(basic_info.area_sqm)} />
-                                <StatItem icon="occupants" label="Tối đa" value={`${rules_utilities.max_occupants} người`} />
+                                <StatItem icon="occupants" label="Tối đa" value={`${room_features.counts.capacity} người`} />
+                                <StatItem icon="bathroom" label="Vệ sinh" value={BATHROOM_TYPES[room_features.bathroom_type] || 'Khép kín'} />
                             </div>
 
                             {/* Description */}
                             <div className="mt-8">
                                 <SectionTitle icon="photo">Mô tả chi tiết</SectionTitle>
                                 <div className="mt-4 text-stone-700 leading-relaxed whitespace-pre-line text-[0.95rem]">
-                                    {basic_info.description}
+                                    {media_contact.description}
                                 </div>
                             </div>
 
@@ -174,8 +225,13 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                 <CostRow label="Điện" value={formatElectricity(monthly_costs.electricity)} />
                                 <CostRow label="Nước" value={formatWater(monthly_costs.water)} />
                                 <CostRow label="Internet" value={
-                                    monthly_costs.internet === 0 ? 'Bao gồm / Không có'
-                                        : `${new Intl.NumberFormat('vi-VN').format(monthly_costs.internet)} đ/tháng`
+                                    monthly_costs.internet > 0
+                                        ? `${new Intl.NumberFormat('vi-VN').format(monthly_costs.internet)} đ/tháng`
+                                        : (room_features.amenities.includes('wifi') ? 'Miễn phí (Đã bao gồm)' : 'Không có')
+                                } />
+                                <CostRow label="Gửi xe" value={
+                                    (monthly_costs.parking_fee === 0 || !monthly_costs.parking_fee) ? 'Miễn phí / Không có'
+                                        : `${new Intl.NumberFormat('vi-VN').format(monthly_costs.parking_fee)} đ/tháng`
                                 } />
                             </div>
                             {monthly_costs.extra_services.length > 0 && (
@@ -222,12 +278,6 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                 <RuleRow label="Thú cưng" value={rules_utilities.is_pet_allowed ? '✓ Được phép' : '✗ Không cho phép'} ok={rules_utilities.is_pet_allowed} />
                                 <RuleRow label="Giặt đồ" value={LAUNDRY_TYPES[rules_utilities.laundry_type] || rules_utilities.laundry_type} />
                                 <RuleRow label="Chung chủ" value={rules_utilities.is_shared_with_host ? 'Có' : 'Không'} />
-                                <RuleRow
-                                    label="Đỗ xe"
-                                    value={room_features.parking.has_parking
-                                        ? `${PARKING_TYPES[room_features.parking.type]} ${room_features.parking.fee === 0 ? '(Miễn phí)' : `(${new Intl.NumberFormat('vi-VN').format(room_features.parking.fee)} đ)`}`
-                                        : 'Không có'}
-                                />
                             </div>
                         </div>
 
@@ -291,7 +341,20 @@ export default function RoomDetailPage({ room, navigate, user }) {
                             <div className="text-[0.85rem] text-stone-400 mt-1">
                                 {formatArea(basic_info.area_sqm)} • Đặt cọc: {formatDeposit(monthly_costs.deposit_amount)}
                             </div>
-                            <div className="h-px bg-stone-100 my-4" />
+                            {/* Listing ID & Copy */}
+                            <div className="flex items-center justify-between bg-stone-50 rounded-md p-2 px-3 my-2 border border-stone-100">
+                                <span className="text-[0.75rem] text-stone-500 font-medium uppercase tracking-wider">Mã tin: {room.listing_id}</span>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(room.listing_id);
+                                        // Optional: Add a temporary toast or change icon
+                                    }}
+                                    className="p-1.5 hover:bg-stone-200 rounded-md transition-colors text-stone-400 hover:text-amber-600 cursor-pointer"
+                                    title="Sao chép mã tin"
+                                >
+                                    <AppIcon name="copy" size={14} />
+                                </button>
+                            </div>
 
                             {/* Owner info inside price card */}
                             <p className="text-[0.8rem] text-stone-400 mb-2 font-medium">Thông tin người đăng:</p>

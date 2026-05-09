@@ -2,7 +2,6 @@ import { useState } from 'react';
 import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
 import { useRoomFilter } from '../hooks/useRoomFilter.js';
-import { getAvailableCities } from '../data/rooms.js';
 
 /* ============================================
    HomePage – Main listing + search + filters
@@ -16,6 +15,12 @@ export default function HomePage({ navigate }) {
         toggleAmenity,
         activeFilterCount,
         totalCount,
+        getAvailableCities,
+        loading,
+        loadingMore,
+        hasMore,
+        loadMore,
+        error
     } = useRoomFilter();
 
     const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -124,7 +129,10 @@ export default function HomePage({ navigate }) {
                         </h2>
                         <p className="text-stone-500 text-[0.875rem] m-0">
                             {filteredRooms.length} phòng phù hợp
-                            {filters.city ? ` tại ${filters.city}` : ''}
+                            {(() => {
+                                const loc = [filters.ward, filters.district, filters.city].filter(Boolean).join(', ');
+                                return loc ? ` tại ${loc}` : '';
+                            })()}
                             {filters.search ? ` với "${filters.search}"` : ''}
                         </p>
                     </div>
@@ -172,10 +180,49 @@ export default function HomePage({ navigate }) {
 
                     {/* Main Content Area */}
                     <div style={{ gridArea: 'grid' }}>
-                        <RoomGrid
-                            rooms={filteredRooms}
-                            onRoomClick={handleRoomClick}
-                        />
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center py-20 gap-4">
+                                <div className="w-10 h-10 border-4 border-stone-200 border-t-amber-600 rounded-full animate-spin" />
+                                <p className="text-stone-500 font-medium">Đang tải danh sách phòng...</p>
+                            </div>
+                        ) : error ? (
+                            <div className="bg-red-50 border border-red-100 text-red-600 p-8 rounded-xl text-center">
+                                <p className="font-bold mb-2 text-red-700">Đã có lỗi xảy ra!</p>
+                                <p className="text-[0.9rem] opacity-80">{error}</p>
+                                <button 
+                                    onClick={() => window.location.reload()}
+                                    className="mt-6 px-6 py-2 bg-red-600 text-white rounded-lg text-[0.85rem] font-bold hover:bg-red-700 transition-colors"
+                                >
+                                    Thử lại
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <RoomGrid
+                                    rooms={filteredRooms}
+                                    onRoomClick={handleRoomClick}
+                                />
+                                
+                                {hasMore && (
+                                    <div className="flex justify-center mt-12 mb-8">
+                                        <button
+                                            onClick={loadMore}
+                                            disabled={loadingMore}
+                                            className="px-8 py-3 bg-white border-[1.5px] border-stone-200 text-stone-700 rounded-full font-bold hover:border-amber-500 hover:text-amber-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
+                                        >
+                                            {loadingMore && <div className="w-4 h-4 border-2 border-stone-200 border-t-amber-600 rounded-full animate-spin" />}
+                                            {loadingMore ? 'Đang tải thêm...' : 'Xem thêm kết quả'}
+                                        </button>
+                                    </div>
+                                )}
+                                
+                                {!hasMore && totalCount > 0 && (
+                                    <p className="text-center text-stone-400 text-[0.85rem] mt-12 mb-8 italic">
+                                        — Đã hiển thị tất cả {totalCount} kết quả —
+                                    </p>
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             </section>

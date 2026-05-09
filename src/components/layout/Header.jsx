@@ -32,17 +32,17 @@ export default function Header({ currentPage, navigate, user }) {
 
     return (
         <header
-            className={`fixed z-10 transition-all duration-300 ease-in-out ${isScrolled ? 'top-0 left-0 right-0' : 'top-3 left-4 right-4'}`}
+            className="fixed z-10 top-0 left-0 right-0 transition-all duration-300 ease-in-out"
         >
             <nav
-                className={`backdrop-blur-md border border-white/80 shadow-[0_2px_20px_rgba(0,0,0,0.08)] px-6 flex items-center justify-between h-16 transition-all duration-300 ease-out ${isScrolled ? 'bg-white/95 rounded-none' : 'bg-white/90 rounded-lg'}`}
+                className={`backdrop-blur-md border-b border-white/80 shadow-nav px-6 flex items-center justify-between h-16 transition-all duration-300 ease-out rounded-none ${isScrolled ? 'bg-white/95' : 'bg-white/90'}`}
             >
                 {/* Logo */}
                 <button
                     onClick={() => navigate('home')}
                     className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0"
                 >
-                    <div className="w-9 h-9 bg-gradient-to-br from-amber-600 to-amber-500 rounded-[10px] flex items-center justify-center shadow-[0_2px_8px_rgba(217,119,6,0.35)]">
+                    <div className="w-9 h-9 bg-linear-to-br from-amber-600 to-amber-500 rounded-[10px] flex items-center justify-center shadow-[0_2px_8px_rgba(217,119,6,0.35)]">
                         {/* House icon */}
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -80,7 +80,7 @@ export default function Header({ currentPage, navigate, user }) {
                                         {user.user_metadata?.full_name || 'Người dùng'}
                                     </div>
                                     <div className="text-xs text-stone-500">
-                                        {user.user_metadata?.role === 'landlord' ? 'Chủ trọ' :
+                                        {user.user_metadata?.role === 'landlord' ? 'Chủ nhà' :
                                             user.user_metadata?.role === 'agent' ? 'Môi giới' : 'Người thuê'}
                                     </div>
                                 </div>
@@ -98,22 +98,13 @@ export default function Header({ currentPage, navigate, user }) {
                                 </div>
                             </button>
                         ) : (
-                            <>
-                                <button
-                                    onClick={() => navigate('login')}
-                                    className="btn-ghost"
-                                    style={{ fontSize: '0.875rem' }}
-                                >
-                                    Đăng nhập
-                                </button>
-                                <button
-                                    onClick={() => navigate('register')}
-                                    className="btn-primary rounded-md!"
-                                    style={{ fontSize: '0.875rem' }}
-                                >
-                                    Tạo tài khoản
-                                </button>
-                            </>
+                            <button
+                                onClick={() => navigate('login')}
+                                className="btn-primary rounded-md!"
+                                style={{ fontSize: '0.875rem' }}
+                            >
+                                Đăng nhập
+                            </button>
                         )}
                     </div>
 
@@ -141,7 +132,7 @@ export default function Header({ currentPage, navigate, user }) {
             {/* Mobile dropdown */}
             {mobileOpen && (
                 <div
-                    className={`bg-white/98 backdrop-blur-xl p-4 ${isScrolled ? 'rounded-none border-none border-t border-t-stone-100 mt-0 shadow-[0_4px_12px_rgba(0,0,0,0.05)]' : 'rounded-xl border border-white/80 border-t-white/80 mt-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.12)]'}`}
+                    className="bg-white/98 backdrop-blur-xl p-4 rounded-none border-t border-t-stone-100 mt-0 shadow-[0_10px_40px_rgba(0,0,0,0.12)]"
                     style={{
                         animation: 'slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     }}
@@ -154,7 +145,7 @@ export default function Header({ currentPage, navigate, user }) {
                                 className="w-full bg-stone-50 p-4 rounded-xl flex items-center justify-between border-none cursor-pointer text-left"
                             >
                                 <div className="flex items-center gap-3">
-                                    <div className="w-[44px] h-[44px] rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-[1.1rem]">
+                                    <div className="w-[44px] h-[44px] rounded-xl bg-linear-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-bold text-[1.1rem]">
                                         {user.user_metadata?.avatar_url ? (
                                             <img src={user.user_metadata.avatar_url} alt="avatar" className="w-full h-full object-cover rounded-xl" />
                                         ) : (
@@ -166,7 +157,7 @@ export default function Header({ currentPage, navigate, user }) {
                                             {user.user_metadata?.full_name || 'Người dùng'}
                                         </div>
                                         <div className="text-[0.8rem] text-stone-500">
-                                            {user.user_metadata?.role === 'landlord' ? 'Chủ trọ' :
+                                            {user.user_metadata?.role === 'landlord' ? 'Chủ nhà' :
                                                 user.user_metadata?.role === 'agent' ? 'Môi giới' : 'Người thuê'}
                                         </div>
                                     </div>
@@ -179,15 +170,9 @@ export default function Header({ currentPage, navigate, user }) {
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => { navigate('login'); setMobileOpen(false); }}
-                                    className="btn-ghost flex-1 justify-center border border-stone-200 text-sm"
-                                >
-                                    Đăng nhập
-                                </button>
-                                <button
-                                    onClick={() => { navigate('register'); setMobileOpen(false); }}
                                     className="btn-primary flex-1 justify-center text-sm"
                                 >
-                                    Tạo tài khoản
+                                    Đăng nhập
                                 </button>
                             </div>
                         )}

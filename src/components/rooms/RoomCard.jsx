@@ -7,8 +7,8 @@ import AppIcon from '../common/AppIcon.jsx';
    Displays summary info for a single listing
    ============================================ */
 export default function RoomCard({ room, onClick, style }) {
-    const { basic_info, room_features, media_contact, metadata } = room;
-    const mainImage = media_contact.images?.[0] || `https://picsum.photos/seed/${room.listing_id}/600/400`;
+    const { basic_info, room_features, media_contact, metadata, monthly_costs } = room;
+    const mainImage = media_contact.images?.[0]?.url || `https://picsum.photos/seed/${room.listing_id}/600/400`;
     const isAvailable = metadata.status === 'available';
 
     const amenityBadges = room_features.amenities.slice(0, 4);
@@ -18,7 +18,7 @@ export default function RoomCard({ room, onClick, style }) {
         <article
             onClick={onClick}
             style={style}
-            className="bg-white rounded-md border border-stone-200 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden cursor-pointer transition-all duration-[250ms] ease-out flex flex-col hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)]"
+            className="bg-white rounded-md border border-stone-200 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden cursor-pointer transition-all duration-250 ease-out flex flex-col hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)]"
             role="button"
             tabIndex={0}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick?.(); }}
@@ -29,7 +29,7 @@ export default function RoomCard({ room, onClick, style }) {
                 <img
                     src={mainImage}
                     alt={basic_info.title}
-                    className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover/img:scale-[1.04]"
+                    className="w-full h-full object-cover transition-transform duration-400 ease-out group-hover/img:scale-[1.04]"
                     loading="lazy"
                     onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/fallback${room.listing_id}/600/400`; }}
                 />
@@ -50,7 +50,7 @@ export default function RoomCard({ room, onClick, style }) {
                 </div>
                 {/* Image count badge */}
                 {media_contact.images.length > 1 && (
-                    <div className="absolute bottom-3 right-3 bg-black/55 backdrop-blur-[4px] text-white rounded-lg px-2 py-1 text-xs font-medium flex items-center gap-1">
+                    <div className="absolute bottom-3 right-3 bg-black/55 backdrop-blur-xs text-white rounded-lg px-2 py-1 text-xs font-medium flex items-center gap-1">
                         <AppIcon name="photo" size={14} />
                         {media_contact.images.length}
                     </div>
@@ -103,20 +103,6 @@ export default function RoomCard({ room, onClick, style }) {
                     {room_features.amenities.length === 0 && (
                         <span className="badge badge-gray">Phòng trống</span>
                     )}
-                </div>
-
-                {/* Bottom row: parking + bathroom */}
-                <div className="flex gap-2 mt-auto pt-1">
-                    {room_features.parking.has_parking && (
-                        <span className="flex items-center gap-1 text-[0.775rem] text-stone-600">
-                            <AppIcon name="parking" size={14} />
-                            Chỗ đỗ xe
-                        </span>
-                    )}
-                    <span className="flex items-center gap-1 text-[0.775rem] text-stone-600">
-                        <AppIcon name="bathroom" size={14} />
-                        WC {room_features.bathroom_type === 'private' ? 'riêng' : 'chung'}
-                    </span>
                 </div>
             </div>
         </article>

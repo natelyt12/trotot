@@ -1,16 +1,47 @@
-// Data layer - re-exports mock data for easy future DB integration
-// To connect to a real API, only change this file.
+import { supabase } from '../lib/supabase.js';
 
-import { ROOM_MOCK_DATA } from './mock_room_data.js';
+/**
+ * Fetches a single room by its listing_id from Supabase
+ */
+export const getRoomById = async (id) => {
+    try {
+        const { data, error } = await supabase
+            .from('rooms')
+            .select('*')
+            .eq('listing_id', id)
+            .single();
 
-export const getRooms = () => ROOM_MOCK_DATA;
+        if (error) throw error;
+        if (!data) return null;
 
-export const getRoomById = (id) =>
-  ROOM_MOCK_DATA.find((room) => room.listing_id === id) || null;
-
-export const getAvailableCities = () => {
-  const cities = ROOM_MOCK_DATA.map((r) => r.basic_info.city).filter(Boolean);
-  return [...new Set(cities)].sort();
+        // Reconstruct nested structure
+        return {
+            ...data,
+            basic_info: {
+                title: data.title,
+                room_type: data.room_type,
+                price_monthly: data.price_monthly,
+                area_sqm: data.area_sqm,
+                city: data.city,
+                district: data.district,
+                ward: data.ward,
+                address: data.address
+            },
+            metadata: {
+                is_verified: data.is_verified,
+                status: data.status,
+                total_views: data.total_views,
+                total_favorites: data.total_favorites,
+                created_at: data.created_at,
+                updated_at: data.updated_at
+            }
+        };
+    } catch (err) {
+        console.error('Error fetching room detail:', err);
+        return null;
+    }
 };
 
-export { ROOM_MOCK_DATA };
+// Fallback mock data for local testing if needed
+import { MOCK_ROOM } from './mock_room_data.js';
+export { MOCK_ROOM };

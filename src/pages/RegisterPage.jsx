@@ -84,7 +84,7 @@ export default function RegisterPage({ navigate }) {
                 </div>
 
                 {/* Card */}
-                <div className="bg-white/95 backdrop-blur-[20px] rounded-[1.25rem] p-8 border border-white/80 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
+                <div className="bg-white/95 backdrop-blur-[20px] rounded-xl p-8 border border-white/80 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
                     <h1 className="text-[1.3rem] font-bold text-stone-900 mb-5 text-center" style={{ fontFamily: 'var(--font-heading)' }}>
                         Tạo tài khoản
                     </h1>

@@ -1,20 +1,10 @@
 import { useState } from 'react';
 import RoomCard from './RoomCard.jsx';
 
-const PAGE_SIZE = 15;
-
 /* ============================================
-   RoomGrid Component – paginated grid of cards
+   RoomGrid Component – simple grid of cards
    ============================================ */
 export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
-    const [page, setPage] = useState(1);
-    const totalPages = Math.ceil(rooms.length / PAGE_SIZE);
-    const paginatedRooms = rooms.slice(0, page * PAGE_SIZE);
-    const hasMore = page < totalPages;
-
-    // Reset to page 1 when rooms change
-    const handleLoadMore = () => setPage((p) => p + 1);
-
     if (isLoading) {
         return (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
@@ -46,46 +36,23 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
     }
 
     return (
-        <div>
-            {/* Grid */}
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
-                {paginatedRooms.map((room, idx) => (
-                    <div
-                        key={room.listing_id}
-                        style={{
-                            animation: 'fadeInUp 0.4s ease forwards',
-                            animationDelay: `${Math.min(idx % PAGE_SIZE, 8) * 60}ms`,
-                            opacity: 0,
-                        }}
-                    >
-                        <RoomCard
-                            room={room}
-                            onClick={() => onRoomClick(room)}
-                            style={{ height: '100%' }}
-                        />
-                    </div>
-                ))}
-            </div>
-
-            {/* Load more */}
-            {hasMore && (
-                <div className="flex justify-center mt-8">
-                    <button
-                        onClick={handleLoadMore}
-                        className="btn-secondary py-3 px-8"
-                    >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m6 9 6 6 6-6" />
-                        </svg>
-                        Xem thêm ({rooms.length - paginatedRooms.length} phòng còn lại)
-                    </button>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+            {rooms.map((room, idx) => (
+                <div
+                    key={room.listing_id}
+                    style={{
+                        animation: 'fadeInUp 0.4s ease forwards',
+                        animationDelay: `${Math.min(idx % 12, 8) * 60}ms`,
+                        opacity: 0,
+                    }}
+                >
+                    <RoomCard
+                        room={room}
+                        onClick={() => onRoomClick(room)}
+                        style={{ height: '100%' }}
+                    />
                 </div>
-            )}
-
-            {/* Total shown */}
-            <p className="text-center mt-4 text-stone-400 text-[0.825rem]">
-                Hiển thị {paginatedRooms.length} / {rooms.length} phòng
-            </p>
+            ))}
         </div>
     );
 }
