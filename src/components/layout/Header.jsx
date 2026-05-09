@@ -32,7 +32,7 @@ export default function Header({ currentPage, navigate, user }) {
 
     return (
         <header
-            className="fixed z-10 top-0 left-0 right-0 transition-all duration-300 ease-in-out"
+            className="fixed z-10 top-0 left-0 right-0 transition-all duration-300 ease-in-out hidden md:block"
         >
             <nav
                 className={`backdrop-blur-md border-b border-white/80 shadow-nav px-6 flex items-center justify-between h-16 transition-all duration-300 ease-out rounded-none ${isScrolled ? 'bg-white/95' : 'bg-white/90'}`}

@@ -49,7 +49,7 @@ export default function HomePage({ navigate }) {
         <div className="min-h-screen bg-stone-50">
             {/* ---- HERO SECTION ---- */}
             <section
-                className="pt-50 pb-30 relative overflow-hidden bg-linear-to-br from-stone-900 via-stone-800 to-[#3c2a1e]"
+                className="pt-24 md:pt-50 pb-30 relative overflow-hidden bg-linear-to-br from-stone-900 via-stone-800 to-[#3c2a1e]"
             >
                 {/* Decorative blobs */}
                 <div
@@ -59,7 +59,7 @@ export default function HomePage({ navigate }) {
                     className="absolute bottom-0 -left-15 w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(217,119,6,0.1)_0%,transparent_70%)] pointer-events-none"
                 />
 
-                <div className="container-app pt-20 pb-12 relative">
+                <div className="container-app pt-10 md:pt-20 pb-12 relative">
                     <div className="max-w-[720px] mx-auto text-center pb-16">
                         {/* Badge */}
                         <div className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/30 rounded-full py-1.5 px-3.5 mb-6">

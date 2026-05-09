@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import Breadcrumb from '../components/common/Breadcrumb';
+import AppIcon from '../components/common/AppIcon.jsx';
+
 
 /* ============================================
    ProfilePage – Account Manager Overlay
@@ -112,17 +113,20 @@ export default function ProfilePage({ user, navigate, isClosing }) {
     // Note: isClosing and animationClass were unused in the previous version
 
     return (
-        <div className="w-full min-h-full bg-stone-50 pb-20">
-            <div className="max-w-[1200px] mx-auto p-8 pt-[100px] relative">
-
-                {/* Breadcrumb */}
-                <Breadcrumb
-                    navigate={navigate}
-                    paths={[
-                        { label: 'Trang chủ', page: 'home' },
-                        { label: 'Thông tin tài khoản' }
-                    ]}
-                />
+        <div className="w-full min-h-full bg-stone-50 pb-24 md:pb-0">
+            <div className="max-w-[1200px] mx-auto p-8 pt-12 md:pt-[100px] relative">
+                {/* Back Button */}
+                <div className="mb-6">
+                    <button
+                        onClick={() => navigate('home')}
+                        className="flex items-center gap-2 bg-white border border-stone-200 rounded-full pr-4 pl-2 py-2 cursor-pointer text-stone-600 text-[0.9rem] font-bold shadow-sm transition-all duration-300 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 group"
+                    >
+                        <div className="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                            <AppIcon name="chevronLeft" size={14} strokeWidth={3} />
+                        </div>
+                        <span>Quay lại</span>
+                    </button>
+                </div>
 
                 {/* Navigation / Header */}
                 <div className="flex items-center my-6">
@@ -266,7 +270,7 @@ export default function ProfilePage({ user, navigate, isClosing }) {
                         </div>
                     </main>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

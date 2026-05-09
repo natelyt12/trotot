@@ -438,7 +438,7 @@ label.form-label {
 @media (max-width: 1024px) {
     .filter-sidebar-aside {
         position: static;
-        max-height: 420px; /* Reduced height as requested for mobile */
+        max-height: 600px; /* Increased height for better visibility on mobile */
         width: 100% !important;
         max-width: none !important;
     }

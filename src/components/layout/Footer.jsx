@@ -51,7 +51,7 @@ export default function Footer({ navigate }) {
     ];
 
     return (
-        <footer className="bg-stone-900 text-stone-300 pt-12 pb-6 mt-16">
+        <footer className="bg-stone-900 text-stone-300 pt-12 pb-24 md:pb-6 mt-16">
             <div className="container-app">
                 {/* Top section */}
                 <div className="grid gap-10 pb-10 border-b border-stone-800 grid-cols-[repeat(auto-fit,minmax(180px,1fr))]">

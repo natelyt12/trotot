@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES, PARKING_TYPES } from '../data/constants.js';
+import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from '../data/constants.js';
 import {
     formatPrice,
     formatArea,
@@ -10,7 +10,6 @@ import {
     formatDeposit,
 } from '../utils/formatters.js';
 import AppIcon from '../components/common/AppIcon.jsx';
-import Breadcrumb from '../components/common/Breadcrumb.jsx';
 
 
 /* ============================================
@@ -21,18 +20,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
     const [showPhone, setShowPhone] = useState(false);
     const [views, setViews] = useState(room?.metadata?.total_views || 0);
 
-    // Breadcrumb scroll & gradient logic
-    const breadcrumbRef = useRef(null);
-    const [scrollState, setScrollState] = useState({ left: false, right: false });
 
-    const checkScroll = () => {
-        const el = breadcrumbRef.current;
-        if (!el) return;
-        setScrollState({
-            left: el.scrollLeft > 10,
-            right: el.scrollLeft < el.scrollWidth - el.clientWidth - 10
-        });
-    };
 
     // Increment views on mount
     useEffect(() => {
@@ -60,14 +48,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
         incrementViews();
     }, [room?.id]);
 
-    useEffect(() => {
-        const el = breadcrumbRef.current;
-        if (el) {
-            // Auto scroll to end
-            el.scrollLeft = el.scrollWidth;
-            checkScroll();
-        }
-    }, [room?.listing_id]);
+
 
     if (!room) {
         return (
@@ -84,18 +65,20 @@ export default function RoomDetailPage({ room, navigate, user }) {
     const isAvailable = metadata.status === 'available';
 
     return (
-        <div className="min-h-screen bg-stone-50 pt-20">
+        <div className="min-h-screen bg-stone-50 pt-6 md:pt-20 pb-24 md:pb-0">
             <div className="container-app py-6 md:pb-12">
-
-                {/* Breadcrumb - Using shared component */}
-                <Breadcrumb
-                    navigate={navigate}
-                    paths={[
-                        { label: 'Trang chủ', page: 'home' },
-                        { label: basic_info.city || 'Phòng trọ' },
-                        { label: basic_info.title }
-                    ]}
-                />
+                {/* Action Bar / Back Button */}
+                <div className="flex items-center mb-6">
+                    <button
+                        onClick={() => navigate('home')}
+                        className="flex items-center gap-2 bg-white border border-stone-200 rounded-xl pl-2 pr-4 py-2 cursor-pointer text-stone-600 text-[0.9rem] font-bold shadow-sm transition-all duration-300 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 group"
+                    >
+                        <div className="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                            <AppIcon name="chevronLeft" size={14} strokeWidth={3} />
+                        </div>
+                        <span>Quay lại</span>
+                    </button>
+                </div>
 
 
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
@@ -360,8 +343,8 @@ export default function RoomDetailPage({ room, navigate, user }) {
                             <p className="text-[0.8rem] text-stone-400 mb-2 font-medium">Thông tin người đăng:</p>
                             <div className="flex items-center gap-3 mb-5">
                                 {media_contact.contact.avatar ? (
-                                    <img 
-                                        src={media_contact.contact.avatar} 
+                                    <img
+                                        src={media_contact.contact.avatar}
                                         alt={media_contact.contact.name}
                                         className="w-10 h-10 rounded-full object-cover border border-stone-200"
                                     />

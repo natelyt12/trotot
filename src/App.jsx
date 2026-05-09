@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase';
 
 import Header from './components/layout/Header.jsx';
 import Footer from './components/layout/Footer.jsx';
+import BottomNav from './components/layout/BottomNav.jsx';
 import HomePage from './pages/HomePage.jsx';
 import RoomDetailPage from './pages/RoomDetailPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
@@ -200,6 +201,7 @@ export default function App() {
             </main>
 
             {showLayout && <Footer navigate={navigate} />}
+            {showLayout && <BottomNav currentPage={currentPage} navigate={navigate} user={user} />}
 
             <style>{`
                 @keyframes modalSlideUp {

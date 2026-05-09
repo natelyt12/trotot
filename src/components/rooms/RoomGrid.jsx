@@ -7,7 +7,7 @@ import RoomCard from './RoomCard.jsx';
 export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
     if (isLoading) {
         return (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 sm:gap-5">
                 {Array.from({ length: 6 }).map((_, i) => (
                     <SkeletonCard key={i} />
                 ))}
@@ -36,7 +36,7 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
     }
 
     return (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 sm:gap-5">
             {rooms.map((room, idx) => (
                 <div
                     key={room.listing_id}
@@ -59,9 +59,9 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
 
 function SkeletonCard() {
     return (
-        <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden">
-            <div className="skeleton h-[200px]" />
-            <div className="p-4 flex flex-col gap-3">
+        <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden flex flex-row sm:flex-col">
+            <div className="skeleton w-[130px] h-auto sm:w-full sm:h-[200px] shrink-0" />
+            <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
                 <div className="flex justify-between">
                     <div className="skeleton h-5 w-[45%]" />
                     <div className="skeleton h-5 w-[20%]" />
