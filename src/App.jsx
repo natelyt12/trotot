@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import { mapSupabaseRoom } from './utils/roomMapper.js';
 import { FavoritesProvider } from './context/FavoritesContext.jsx';
+import { ModalProvider } from './context/ModalContext.jsx';
 
 
 /*
@@ -22,6 +23,20 @@ import { FavoritesProvider } from './context/FavoritesContext.jsx';
  */
 
 const PAGES_WITHOUT_LAYOUT = ['login', 'register'];
+
+/**
+ * ScrollLock - Quản lý khóa cuộn mà không làm biến mất thanh cuộn (tránh layout shift)
+ */
+function ScrollLock({ isActive }) {
+    if (!isActive) return null;
+    return (
+        <style>{`
+            html { 
+                overflow: hidden !important; 
+            }
+        `}</style>
+    );
+}
 
 export default function App() {
     const [currentPage, setCurrentPage] = useState('home');
@@ -148,7 +163,8 @@ export default function App() {
 
 
     return (
-        <FavoritesProvider user={user}>
+        <ModalProvider>
+            <FavoritesProvider user={user}>
             {showLayout && (
                 <Header 
                     currentPage={currentPage} 
@@ -179,16 +195,15 @@ export default function App() {
                 )}
 
                 {currentPage === 'login' && <LoginPage navigate={navigate} />}
-                {currentPage === 'register' && <RegisterPage navigate={navigate} />}
+                {currentPage === 'register' && <RegisterPage navigate={navigate} initialData={pageData} />}
             </main>
 
             {showLayout && <Footer navigate={navigate} />}
             {showLayout && <BottomNav currentPage={currentPage} navigate={navigate} user={user} />}
 
-            {/* Body scroll lock when modal open */}
-            {shouldShowModal && (
-                <style>{`body { overflow: hidden; }`}</style>
-            )}
-        </FavoritesProvider>
+            {/* Scroll lock handler */}
+            <ScrollLock isActive={shouldShowModal} />
+            </FavoritesProvider>
+        </ModalProvider>
     );
 }

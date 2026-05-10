@@ -42,7 +42,8 @@ import {
     TbEye,
     TbPlayerPlay,
     TbLock,
-    TbTrash
+    TbTrash,
+    TbPencil
 } from 'react-icons/tb';
 import { PiWashingMachine } from "react-icons/pi";
 
@@ -104,6 +105,8 @@ const ICON_MAP = {
     play: TbPlayerPlay,
     lock: TbLock,
     trash: TbTrash,
+    close: TbX,
+    edit: TbPencil,
 };
 
 export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 2, style, className, ...props }) {

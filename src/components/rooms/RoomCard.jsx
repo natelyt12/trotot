@@ -2,6 +2,7 @@ import { AMENITIES, ROOM_TYPES } from '../../data/constants.js';
 import { formatPriceShort, formatArea, formatAddressShort, truncate } from '../../utils/formatters.js';
 import AppIcon from '../common/AppIcon.jsx';
 import { useFavorites } from '../../context/FavoritesContext.jsx';
+import { useModal } from '../../context/ModalContext.jsx';
 
 /* ============================================
    RoomCard Component
@@ -10,6 +11,7 @@ import { useFavorites } from '../../context/FavoritesContext.jsx';
 export default function RoomCard({ room, onClick, style }) {
     const { basic_info, media_contact, metadata, room_features, id: roomId } = room;
     const { isFavorite, toggleFavorite } = useFavorites();
+    const { showModal } = useModal();
     
     const mainImage = media_contact.images?.[0]?.url || `https://picsum.photos/seed/${room.listing_id}/600/400`;
     const isAvailable = metadata.status === 'available';
@@ -22,7 +24,11 @@ export default function RoomCard({ room, onClick, style }) {
         e.stopPropagation();
         const result = await toggleFavorite(roomId);
         if (result?.error === 'login_required') {
-            alert('Vui lòng đăng nhập để lưu tin!');
+            showModal({
+                title: 'Thông báo',
+                message: 'Vui lòng đăng nhập để lưu tin!',
+                type: 'warning'
+            });
         }
     };
 

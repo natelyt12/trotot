@@ -34,7 +34,7 @@ export default function Header({ currentPage, navigate, user }) {
     };
 
     const roleLabel = (role) => {
-        if (role === 'landlord') return 'Chủ nhà';
+        if (role === 'landlord') return 'Bên cho thuê';
         if (role === 'agent') return 'Môi giới';
         return 'Người thuê';
     };

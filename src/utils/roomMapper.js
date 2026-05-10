@@ -7,10 +7,10 @@ export const mapSupabaseRoom = (room) => {
 
     // Handle profile data (Supabase join result)
     const profile = Array.isArray(room.profiles) ? room.profiles[0] : room.profiles;
-    
+
     // Construct owner contact info from profile data (Supabase join result)
     const ownerContact = {
-        name: profile?.full_name || 'Chủ nhà',
+        name: profile?.full_name || 'Bên cho thuê',
         phone: profile?.phone || 'Chưa cập nhật',
         role: profile?.role || 'landlord',
         avatar: profile?.avatar_url || ''
@@ -30,8 +30,8 @@ export const mapSupabaseRoom = (room) => {
         },
         media_contact: {
             ...room.media_contact,
-            video_urls: Array.isArray(room.media_contact?.video_urls) 
-                ? room.media_contact.video_urls 
+            video_urls: Array.isArray(room.media_contact?.video_urls)
+                ? room.media_contact.video_urls
                 : (room.media_contact?.video_url ? [room.media_contact.video_url] : []),
             contact: ownerContact
         },

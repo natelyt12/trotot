@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useModal } from '../context/ModalContext';
 import { supabase } from '../lib/supabase';
 import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from '../data/constants.js';
 import {
@@ -11,12 +12,14 @@ import {
 } from '../utils/formatters.js';
 import AppIcon from '../components/common/AppIcon.jsx';
 import { useFavorites } from '../context/FavoritesContext.jsx';
+import CommentSection from '../components/rooms/CommentSection.jsx';
 
 
 /* ============================================
    RoomDetailPage – Full listing details
    ============================================ */
 export default function RoomDetailPage({ room, navigate, user }) {
+    const { showModal } = useModal();
     const { isFavorite, toggleFavorite } = useFavorites();
     const [activeImage, setActiveImage] = useState(0);
     const [showPhone, setShowPhone] = useState(false);
@@ -27,7 +30,13 @@ export default function RoomDetailPage({ room, navigate, user }) {
     const handleToggleFavorite = async () => {
         const result = await toggleFavorite(room?.id);
         if (result?.error === 'login_required') {
-            alert('Vui lòng đăng nhập để lưu tin!');
+            showModal({
+                title: 'Thông báo',
+                message: 'Vui lòng đăng nhập để lưu tin!',
+                type: 'warning',
+                confirmText: 'Đăng nhập ngay',
+                onConfirm: () => navigate('login')
+            });
         }
     };
 
@@ -59,111 +68,6 @@ export default function RoomDetailPage({ room, navigate, user }) {
         incrementViews();
     }, [room?.id, room.metadata?.total_views]);
 
-    // ============================================
-    // COMMENTS LOGIC
-    // ============================================
-    const [comments, setComments] = useState([]);
-    const [newComment, setNewComment] = useState('');
-    const [loadingComments, setLoadingComments] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
-    const [lastCommentTime, setLastCommentTime] = useState(0);
-    const [activeMenuId, setActiveMenuId] = useState(null);
-
-    useEffect(() => {
-        if (!room?.id) return;
-        const fetchComments = async () => {
-            setLoadingComments(true);
-            try {
-                const { data, error } = await supabase
-                    .from('comments')
-                    .select('*, profiles(full_name, avatar_url)')
-                    .eq('room_id', room.id)
-                    .order('created_at', { ascending: false });
-                
-                if (!error && data) {
-                    setComments(data);
-                }
-            } catch (err) {
-                console.error('Error fetching comments:', err);
-            } finally {
-                setLoadingComments(false);
-            }
-        };
-        fetchComments();
-    }, [room?.id]);
-
-    const handleCommentSubmit = async () => {
-        if (!user) {
-            alert('Vui lòng đăng nhập để bình luận!');
-            navigate('login');
-            return;
-        }
-        if (!newComment.trim()) return;
-
-        // Spam prevention: 60 seconds limit
-        const now = Date.now();
-        if (now - lastCommentTime < 60000) {
-            alert('Vui lòng đợi 1 phút trước khi gửi bình luận tiếp theo.');
-            return;
-        }
-
-        setSubmitting(true);
-        try {
-            const { data, error } = await supabase
-                .from('comments')
-                .insert([
-                    { room_id: room.id, user_id: user.id, content: newComment.trim() }
-                ])
-                .select('*, profiles(full_name, avatar_url)')
-                .single();
-
-            if (error) throw error;
-            
-            if (data) {
-                setComments([data, ...comments]);
-                setNewComment('');
-                setLastCommentTime(now);
-            }
-        } catch (err) {
-            console.error('Error submitting comment:', err);
-            alert('Có lỗi xảy ra khi gửi bình luận.');
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const handleCommentDelete = async (commentId) => {
-        if (!confirm('Bạn có chắc chắn muốn xóa bình luận này?')) return;
-        try {
-            const { error } = await supabase
-                .from('comments')
-                .delete()
-                .eq('id', commentId)
-                .eq('user_id', user.id); // Extra safety
-
-            if (error) throw error;
-            setComments(comments.filter(c => c.id !== commentId));
-        } catch (err) {
-            console.error('Error deleting comment:', err);
-            alert('Có lỗi xảy ra khi xóa bình luận.');
-        }
-        setActiveMenuId(null);
-    };
-
-    const handleCommentReport = () => {
-        alert('Tính năng báo cáo bình luận đang được phát triển.');
-        setActiveMenuId(null);
-    };
-
-    // Click outside to close menu
-    useEffect(() => {
-        const handleClickOutside = () => setActiveMenuId(null);
-        if (activeMenuId) {
-            window.addEventListener('click', handleClickOutside);
-        }
-        return () => window.removeEventListener('click', handleClickOutside);
-    }, [activeMenuId]);
-
 
     if (!room) {
         return (
@@ -193,9 +97,9 @@ export default function RoomDetailPage({ room, navigate, user }) {
                 <div className="flex items-center mb-6">
                     <button
                         onClick={() => navigate(room?.fromProfile ? 'profile' : 'home')}
-                        className="flex items-center gap-2.5 bg-white border border-stone-200 !rounded-full pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
+                        className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
                     >
-                        <div className="w-7 h-7 !rounded-full bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
+                        <div className="w-7 h-7 rounded-full! bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
                             <AppIcon name="chevronLeft" size={14} strokeWidth={3.5} />
                         </div>
                         <span>Quay lại</span>
@@ -263,13 +167,13 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                     <>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); setActiveImage(prev => (prev > 0 ? prev - 1 : mediaItems.length - 1)); }}
-                                            className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 !rounded-full bg-black/80 hover:bg-black flex items-center justify-center text-white shadow-md transition-colors z-8 border-none cursor-pointer"
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full! bg-black/80 hover:bg-black flex items-center justify-center text-white shadow-md transition-colors z-8 border-none cursor-pointer"
                                         >
                                             <AppIcon name="chevronLeft" size={20} />
                                         </button>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); setActiveImage(prev => (prev < mediaItems.length - 1 ? prev + 1 : 0)); }}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 !rounded-full bg-black/80 hover:bg-black flex items-center justify-center text-white shadow-md transition-colors z-10 border-none cursor-pointer"
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full! bg-black/80 hover:bg-black flex items-center justify-center text-white shadow-md transition-colors z-10 border-none cursor-pointer"
                                         >
                                             <AppIcon name="chevronRight" size={20} />
                                         </button>
@@ -308,7 +212,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                             <div className="flex items-center gap-4 mb-5 flex-wrap">
                                 <button
                                     onClick={handleToggleFavorite}
-                                    className={`flex items-center gap-2 px-4 py-2 !rounded-full font-bold text-sm transition-all border cursor-pointer ${favorited
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-full! font-bold text-sm transition-all border cursor-pointer ${favorited
                                         ? 'bg-red-50 border-red-200 text-red-600'
                                         : 'bg-stone-100 border-stone-200 text-stone-600 hover:bg-stone-200'
                                         }`}
@@ -432,116 +336,19 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                     <AppIcon name="location" size={24} />
                                 </div>
                                 <p className="text-amber-900 font-bold mb-1">Bản đồ đang được cập nhật</p>
-                                <p className="text-amber-700/70 text-sm max-w-[280px]">Vị trí chính xác sẽ được hiển thị khi chủ nhà hoàn tất xác minh tọa độ.</p>
+                                <p className="text-amber-700/70 text-sm max-w-[280px]">Vị trí chính xác sẽ được hiển thị khi Bên cho thuê hoàn tất xác minh tọa độ.</p>
                             </div>
                         </div>
 
                         {/* Comments */}
-                        <div className="bg-white border border-stone-200 p-6 rounded-xl">
-                            <SectionTitle icon="messages">Bình luận & Hỏi đáp</SectionTitle>
-                            
-                            {/* Comment Input */}
-                            <div className="mt-6 mb-8 relative">
-                                {!user && (
-                                    <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-lg border border-stone-200">
-                                        <p className="text-stone-700 font-medium mb-2">Đăng nhập để tham gia thảo luận</p>
-                                        <button onClick={() => navigate('login')} className="px-4 py-1.5 bg-amber-500 text-white rounded-full text-sm font-bold hover:bg-amber-600 transition-colors cursor-pointer border-none">Đăng nhập ngay</button>
-                                    </div>
-                                )}
-                                <textarea
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    placeholder="Viết câu hỏi hoặc bình luận của bạn..."
-                                    className="input w-full min-h-[100px] p-4 text-[0.95rem] resize-none border-stone-900/20 focus:border-amber-500 rounded-lg outline-none"
-                                    disabled={!user || submitting}
-                                />
-                                <div className="flex justify-end mt-3">
-                                    <button 
-                                        onClick={handleCommentSubmit}
-                                        disabled={!user || submitting || !newComment.trim()}
-                                        className="inline-flex items-center justify-center bg-amber-500 text-white rounded-full px-6 py-2 hover:bg-amber-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-none font-bold text-sm"
-                                    >
-                                        {submitting ? 'Đang gửi...' : 'Gửi bình luận'}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Comment list */}
-                            <div className="flex flex-col gap-6">
-                                {loadingComments ? (
-                                    <div className="text-center py-6 text-stone-400 text-sm">Đang tải bình luận...</div>
-                                ) : comments.length === 0 ? (
-                                    <div className="text-center py-8 bg-stone-50 rounded-lg border border-dashed border-stone-200 text-stone-500 text-sm">
-                                        Chưa có bình luận nào. Hãy là người đầu tiên đặt câu hỏi!
-                                    </div>
-                                ) : (
-                                    comments.map(comment => (
-                                        <div key={comment.id} className="flex gap-4 group relative">
-                                            <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm shrink-0 overflow-hidden bg-amber-500"
-                                                style={comment.profiles?.avatar_url ? { backgroundImage: `url(${comment.profiles.avatar_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
-                                            >
-                                                {!comment.profiles?.avatar_url && (comment.profiles?.full_name || 'U').charAt(0).toUpperCase()}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <div>
-                                                        <h4 className="text-[0.9rem] font-bold text-stone-900">{comment.profiles?.full_name || 'Người dùng'}</h4>
-                                                        <span className="text-[0.75rem] text-stone-400">{formatDate(comment.created_at)}</span>
-                                                    </div>
-                                                    
-                                                    {/* 3-dot Menu */}
-                                                    {user && (
-                                                        <div className="relative">
-                                                            <button 
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setActiveMenuId(activeMenuId === comment.id ? null : comment.id);
-                                                                }}
-                                                                className="p-1 text-stone-400 hover:text-stone-700 rounded-md hover:bg-stone-100 cursor-pointer border-none bg-transparent"
-                                                            >
-                                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                                                            </button>
-                                                            
-                                                            {activeMenuId === comment.id && (
-                                                                <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-stone-200 rounded-lg shadow-lg overflow-hidden z-20 animate-fade-in py-1">
-                                                                    {user.id === comment.user_id ? (
-                                                                        <button 
-                                                                            onClick={() => handleCommentDelete(comment.id)}
-                                                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer border-none bg-transparent flex items-center gap-2"
-                                                                        >
-                                                                            <AppIcon name="trash" size={14} />
-                                                                            Xóa bình luận
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button 
-                                                                            onClick={handleCommentReport}
-                                                                            className="w-full text-left px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 cursor-pointer border-none bg-transparent flex items-center gap-2"
-                                                                        >
-                                                                            <AppIcon name="alert" size={14} />
-                                                                            Báo cáo
-                                                                        </button>
-                                                                    )}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <p className="text-[0.9rem] text-stone-700 leading-relaxed whitespace-pre-wrap mt-1">
-                                                    {comment.content}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
+                        <CommentSection room={room} user={user} navigate={navigate} />
                     </div>
 
                     {/* ---- RIGHT COLUMN: Contact sidebar ---- */}
                     <div className="flex flex-col gap-4 lg:sticky lg:top-[88px]">
                         {/* Price card */}
                         <div className="bg-white border border-stone-200 p-6 rounded-xl">
-                            <div className="text-[1.8rem] text-amber-600! tracking-tight font-heading">
+                            <div className="text-[1.8rem] text-amber-600! font-bold tracking-tight font-heading">
                                 {formatPrice(basic_info.price_monthly)}
                             </div>
                             <div className="text-[0.85rem] text-stone-400 mt-1">
@@ -553,9 +360,8 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                 <button
                                     onClick={() => {
                                         navigator.clipboard.writeText(room.listing_id);
-                                        // Optional: Add a temporary toast or change icon
                                     }}
-                                    className="p-1.5 hover:bg-stone-200 rounded-md transition-colors text-stone-400 hover:text-amber-600 cursor-pointer"
+                                    className="p-1.5 hover:bg-stone-200 rounded-md transition-colors text-stone-400 hover:text-amber-600 cursor-pointer border-none bg-transparent"
                                     title="Sao chép mã tin"
                                 >
                                     <AppIcon name="copy" size={14} />
@@ -583,7 +389,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         {media_contact.contact.name}
                                     </p>
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold ${media_contact.contact.role === 'landlord' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
-                                        {media_contact.contact.role === 'landlord' ? 'Chủ nhà' : 'Môi giới'}
+                                        {media_contact.contact.role === 'landlord' ? 'Bên cho thuê' : 'Môi giới'}
                                     </span>
                                 </div>
                             </div>
@@ -594,11 +400,16 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         if (user) {
                                             setShowPhone(true);
                                         } else {
-                                            alert('Vui lòng đăng nhập để xem thông tin');
-                                            navigate('login');
+                                            showModal({
+                                                title: 'Yêu cầu đăng nhập',
+                                                message: 'Vui lòng đăng nhập để xem thông tin liên hệ',
+                                                type: 'info',
+                                                confirmText: 'Đăng nhập',
+                                                onConfirm: () => navigate('login')
+                                            });
                                         }
                                     }}
-                                    className="flex items-center justify-center gap-2.5 w-full py-3 !rounded-full text-white border-none cursor-pointer transition-colors duration-200 bg-amber-500 hover:bg-amber-600"
+                                    className="flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none cursor-pointer transition-colors duration-200 bg-amber-500 hover:bg-amber-600"
                                 >
                                     <AppIcon name="phone" size={20} strokeWidth={2.5} />
                                     <span>{showPhone ? media_contact.contact.phone : 'Liên hệ ngay'}</span>
@@ -609,11 +420,16 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         if (user) {
                                             setShowPhone(true);
                                         } else {
-                                            alert('Vui lòng đăng nhập để xem thông tin');
-                                            navigate('login');
+                                            showModal({
+                                                title: 'Yêu cầu đăng nhập',
+                                                message: 'Vui lòng đăng nhập để xem thông tin liên hệ',
+                                                type: 'info',
+                                                confirmText: 'Đăng nhập',
+                                                onConfirm: () => navigate('login')
+                                            });
                                         }
                                     }}
-                                    className="flex items-center justify-center gap-2.5 w-full py-3 !rounded-full text-white bg-[#0068ff] hover:bg-[#005ae0] transition-colors duration-200 cursor-pointer border-none"
+                                    className="flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white bg-[#0068ff] hover:bg-[#005ae0] transition-colors duration-200 cursor-pointer border-none"
                                 >
                                     <AppIcon name="messages" size={20} strokeWidth={2.5} />
                                     <span>Nhắn tin qua Zalo</span>
@@ -683,3 +499,4 @@ function RuleRow({ label, value, ok }) {
         </div>
     );
 }
+

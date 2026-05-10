@@ -101,7 +101,7 @@ export default function HomePage({ navigate, user }) {
                         <div className="flex justify-center">
                             <button
                                 onClick={scrollToListing}
-                                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-10 py-3.5 !rounded-full font-bold text-base cursor-pointer border-none transition-colors duration-200"
+                                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-10 py-3.5 rounded-full! font-bold text-base cursor-pointer border-none transition-colors duration-200"
                                 style={{ animation: 'fadeInUp 0.8s ease' }}
                             >
                                 Tìm phòng ngay

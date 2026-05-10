@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useModal } from '../context/ModalContext';
 import { supabase } from '../lib/supabase';
 import AppIcon from '../components/common/AppIcon.jsx';
 import { useFavorites } from '../context/FavoritesContext.jsx';
@@ -11,13 +12,14 @@ import RoomGrid from '../components/rooms/RoomGrid.jsx';
    Flat design, amber palette
    ============================================ */
 export default function ProfilePage({ user, navigate, initialData }) {
+    const { showModal } = useModal();
     const { favorites } = useFavorites();
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [savedRooms, setSavedRooms] = useState([]);
     const [loadingSaved, setLoadingSaved] = useState(false);
-    
+
     const [commentedRooms, setCommentedRooms] = useState([]);
     const [loadingCommented, setLoadingCommented] = useState(false);
 
@@ -99,7 +101,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                         .from('rooms')
                         .select('*, profiles(*)')
                         .in('id', favorites);
-                    
+
                     if (error) throw error;
                     setSavedRooms(data.map(mapSupabaseRoom));
                 } catch (err) {
@@ -124,9 +126,9 @@ export default function ProfilePage({ user, navigate, initialData }) {
                         .select('*, rooms(*, profiles(*))')
                         .eq('user_id', user.id)
                         .order('created_at', { ascending: false });
-                    
+
                     if (error) throw error;
-                    
+
                     if (data) {
                         // Group by room_id
                         const grouped = data.reduce((acc, comment) => {
@@ -141,7 +143,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                             acc[roomId].count += 1;
                             return acc;
                         }, {});
-                        
+
                         setCommentedRooms(Object.values(grouped).sort((a, b) => new Date(b.lastCommentAt) - new Date(a.lastCommentAt)));
                     }
                 } catch (err) {
@@ -254,26 +256,39 @@ export default function ProfilePage({ user, navigate, initialData }) {
 
     const handleDeleteAccount = async () => {
         if (!deletePassword) return;
-        if (!window.confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa tài khoản vĩnh viễn?')) return;
-        setLoading(true);
-        try {
-            const { error: authError } = await supabase.auth.signInWithPassword({
-                email: user.email,
-                password: deletePassword,
-            });
-            if (authError) throw new Error('Mật khẩu xác nhận không chính xác.');
 
-            const { error } = await supabase.rpc('delete_user_account');
-            if (error) throw error;
+        showModal({
+            title: 'Xác nhận xóa tài khoản',
+            message: 'CẢNH BÁO: Bạn có chắc chắn muốn xóa tài khoản vĩnh viễn? Mọi dữ liệu sẽ bị mất và không thể khôi phục.',
+            type: 'error',
+            confirmText: 'Xác nhận xóa',
+            cancelText: 'Hủy bỏ',
+            onConfirm: async () => {
+                setLoading(true);
+                try {
+                    const { error: authError } = await supabase.auth.signInWithPassword({
+                        email: user.email,
+                        password: deletePassword,
+                    });
+                    if (authError) throw new Error('Mật khẩu xác nhận không chính xác.');
 
-            await supabase.auth.signOut();
-            alert('Tài khoản của bạn đã được xóa thành công.');
-            navigate('home');
-        } catch (err) {
-            setMessage({ type: 'error', text: `Lỗi: ${err.message}` });
-        } finally {
-            setLoading(false);
-        }
+                    const { error } = await supabase.rpc('delete_user_account');
+                    if (error) throw error;
+
+                    await supabase.auth.signOut();
+                    showModal({
+                        title: 'Thành công',
+                        message: 'Tài khoản của bạn đã được xóa thành công.',
+                        type: 'success',
+                        onConfirm: () => navigate('home')
+                    });
+                } catch (err) {
+                    setMessage({ type: 'error', text: `Lỗi: ${err.message}` });
+                } finally {
+                    setLoading(false);
+                }
+            }
+        });
     };
 
     // Shared input class
@@ -287,9 +302,9 @@ export default function ProfilePage({ user, navigate, initialData }) {
                 <div className="mb-6">
                     <button
                         onClick={() => navigate('home')}
-                        className="flex items-center gap-2.5 bg-white border border-stone-200 !rounded-full pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
+                        className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
                     >
-                        <div className="w-7 h-7 !rounded-full bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
+                        <div className="w-7 h-7 rounded-full! bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
                             <AppIcon name="chevronLeft" size={14} strokeWidth={3.5} />
                         </div>
                         <span>Quay lại trang chủ</span>
@@ -437,7 +452,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                             {[
                                                 { id: 'tenant', label: 'Người thuê' },
                                                 { id: 'agent', label: 'Môi giới' },
-                                                { id: 'landlord', label: 'Chủ nhà' },
+                                                { id: 'landlord', label: 'Bên cho thuê' },
                                             ].map((opt) => (
                                                 <button
                                                     key={opt.id}
@@ -472,15 +487,15 @@ export default function ProfilePage({ user, navigate, initialData }) {
                             <div className="animate-fade-in">
                                 <TabHeader icon="heart" title="Tin đăng đã lưu" />
                                 <div className="mt-4">
-                                    <RoomGrid 
-                                        rooms={savedRooms} 
-                                        isLoading={loadingSaved} 
+                                    <RoomGrid
+                                        rooms={savedRooms}
+                                        isLoading={loadingSaved}
                                         onRoomClick={(room) => navigate('room-detail', { ...room, fromProfile: true })}
                                     />
                                     {!loadingSaved && savedRooms.length === 0 && (
                                         <div className="text-center py-12 bg-stone-50 rounded-xl border border-dashed border-stone-200">
                                             <p className="text-stone-400 text-sm">Bạn chưa lưu tin đăng nào.</p>
-                                            <button 
+                                            <button
                                                 onClick={() => navigate('home')}
                                                 className="mt-3 text-amber-600 font-bold text-sm hover:underline cursor-pointer"
                                             >
@@ -508,7 +523,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                         </div>
                                     ) : (
                                         commentedRooms.map(({ room, count }) => (
-                                            <div 
+                                            <div
                                                 key={room.id}
                                                 onClick={() => navigate('room-detail', { ...room, fromProfile: true })}
                                                 className="flex flex-col sm:flex-row gap-4 p-4 border border-stone-200 rounded-xl hover:border-amber-300 hover:shadow-md transition-all cursor-pointer bg-white group"
@@ -516,9 +531,9 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                                 {/* Thumbnail */}
                                                 <div className="w-full sm:w-32 h-24 rounded-lg bg-stone-100 overflow-hidden shrink-0 relative">
                                                     {room.media_contact?.images?.[0]?.url ? (
-                                                        <img 
-                                                            src={room.media_contact.images[0].url} 
-                                                            alt={room.basic_info.title} 
+                                                        <img
+                                                            src={room.media_contact.images[0].url}
+                                                            alt={room.basic_info.title}
                                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                             onError={(e) => { e.currentTarget.src = `../public/images/placeholder.png`; }}
                                                         />
@@ -528,7 +543,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                                         </div>
                                                     )}
                                                 </div>
-                                                
+
                                                 {/* Info */}
                                                 <div className="flex-1 flex flex-col justify-between min-w-0">
                                                     <div>
