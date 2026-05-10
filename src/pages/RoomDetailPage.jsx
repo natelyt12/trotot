@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from '../data/constants.js';
 import {
@@ -10,15 +10,26 @@ import {
     formatDeposit,
 } from '../utils/formatters.js';
 import AppIcon from '../components/common/AppIcon.jsx';
+import { useFavorites } from '../context/FavoritesContext.jsx';
 
 
 /* ============================================
    RoomDetailPage – Full listing details
    ============================================ */
 export default function RoomDetailPage({ room, navigate, user }) {
+    const { isFavorite, toggleFavorite } = useFavorites();
     const [activeImage, setActiveImage] = useState(0);
     const [showPhone, setShowPhone] = useState(false);
     const [views, setViews] = useState(room?.metadata?.total_views || 0);
+
+    const favorited = isFavorite(room?.id);
+
+    const handleToggleFavorite = async () => {
+        const result = await toggleFavorite(room?.id);
+        if (result?.error === 'login_required') {
+            alert('Vui lòng đăng nhập để lưu tin!');
+        }
+    };
 
 
 
@@ -46,8 +57,112 @@ export default function RoomDetailPage({ room, navigate, user }) {
         };
 
         incrementViews();
+    }, [room?.id, room.metadata?.total_views]);
+
+    // ============================================
+    // COMMENTS LOGIC
+    // ============================================
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState('');
+    const [loadingComments, setLoadingComments] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
+    const [lastCommentTime, setLastCommentTime] = useState(0);
+    const [activeMenuId, setActiveMenuId] = useState(null);
+
+    useEffect(() => {
+        if (!room?.id) return;
+        const fetchComments = async () => {
+            setLoadingComments(true);
+            try {
+                const { data, error } = await supabase
+                    .from('comments')
+                    .select('*, profiles(full_name, avatar_url)')
+                    .eq('room_id', room.id)
+                    .order('created_at', { ascending: false });
+                
+                if (!error && data) {
+                    setComments(data);
+                }
+            } catch (err) {
+                console.error('Error fetching comments:', err);
+            } finally {
+                setLoadingComments(false);
+            }
+        };
+        fetchComments();
     }, [room?.id]);
 
+    const handleCommentSubmit = async () => {
+        if (!user) {
+            alert('Vui lòng đăng nhập để bình luận!');
+            navigate('login');
+            return;
+        }
+        if (!newComment.trim()) return;
+
+        // Spam prevention: 60 seconds limit
+        const now = Date.now();
+        if (now - lastCommentTime < 60000) {
+            alert('Vui lòng đợi 1 phút trước khi gửi bình luận tiếp theo.');
+            return;
+        }
+
+        setSubmitting(true);
+        try {
+            const { data, error } = await supabase
+                .from('comments')
+                .insert([
+                    { room_id: room.id, user_id: user.id, content: newComment.trim() }
+                ])
+                .select('*, profiles(full_name, avatar_url)')
+                .single();
+
+            if (error) throw error;
+            
+            if (data) {
+                setComments([data, ...comments]);
+                setNewComment('');
+                setLastCommentTime(now);
+            }
+        } catch (err) {
+            console.error('Error submitting comment:', err);
+            alert('Có lỗi xảy ra khi gửi bình luận.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleCommentDelete = async (commentId) => {
+        if (!confirm('Bạn có chắc chắn muốn xóa bình luận này?')) return;
+        try {
+            const { error } = await supabase
+                .from('comments')
+                .delete()
+                .eq('id', commentId)
+                .eq('user_id', user.id); // Extra safety
+
+            if (error) throw error;
+            setComments(comments.filter(c => c.id !== commentId));
+        } catch (err) {
+            console.error('Error deleting comment:', err);
+            alert('Có lỗi xảy ra khi xóa bình luận.');
+        }
+        setActiveMenuId(null);
+    };
+
+    const handleCommentReport = () => {
+        alert('Tính năng báo cáo bình luận đang được phát triển.');
+        setActiveMenuId(null);
+    };
+
+    // Click outside to close menu
+    useEffect(() => {
+        const handleClickOutside = () => setActiveMenuId(null);
+        if (activeMenuId) {
+            window.addEventListener('click', handleClickOutside);
+        }
+        return () => window.removeEventListener('click', handleClickOutside);
+    }, [activeMenuId]);
 
 
     if (!room) {
@@ -59,22 +174,29 @@ export default function RoomDetailPage({ room, navigate, user }) {
     }
 
     const { basic_info, monthly_costs, room_features, rules_utilities, media_contact, metadata } = room;
-    const images = media_contact.images.length > 0
-        ? media_contact.images.map(img => typeof img === 'string' ? img : img.url)
-        : [`https://picsum.photos/seed/${room.listing_id}/800/500`];
+    const videos = Array.isArray(media_contact.video_urls)
+        ? media_contact.video_urls
+        : (media_contact.video_url ? [media_contact.video_url] : []);
+
+    const mediaItems = [
+        ...videos.map(url => ({ type: 'video', url })),
+        ...((media_contact.images?.length > 0)
+            ? media_contact.images.map(img => ({ type: 'image', url: typeof img === 'string' ? img : img.url }))
+            : [{ type: 'image', url: `https://picsum.photos/seed/${room.listing_id}/800/500` }])
+    ];
     const isAvailable = metadata.status === 'available';
 
     return (
         <div className="min-h-screen bg-stone-50 pt-6 md:pt-20 pb-24 md:pb-0">
-            <div className="container-app py-6 md:pb-12">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:pb-12">
                 {/* Action Bar / Back Button */}
                 <div className="flex items-center mb-6">
                     <button
-                        onClick={() => navigate('home')}
-                        className="flex items-center gap-2 bg-white border border-stone-200 rounded-xl pl-2 pr-4 py-2 cursor-pointer text-stone-600 text-[0.9rem] font-bold shadow-sm transition-all duration-300 hover:border-amber-500 hover:text-amber-600 hover:bg-amber-50 group"
+                        onClick={() => navigate(room?.fromProfile ? 'profile' : 'home')}
+                        className="flex items-center gap-2.5 bg-white border border-stone-200 !rounded-full pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
                     >
-                        <div className="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                            <AppIcon name="chevronLeft" size={14} strokeWidth={3} />
+                        <div className="w-7 h-7 !rounded-full bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
+                            <AppIcon name="chevronLeft" size={14} strokeWidth={3.5} />
                         </div>
                         <span>Quay lại</span>
                     </button>
@@ -86,65 +208,91 @@ export default function RoomDetailPage({ room, navigate, user }) {
                     <div className="flex flex-col gap-6">
 
                         {/* Image Gallery */}
-                        <div className="bg-white rounded-lg border border-stone-200 overflow-hidden">
-                            {/* Main image */}
-                            <div className="relative h-[300px] md:h-[450px] bg-stone-100">
-                                <img
-                                    key={activeImage}
-                                    src={images[activeImage]}
-                                    alt={`${basic_info.title} - ảnh ${activeImage + 1}`}
-                                    className="w-full h-full object-cover animate-in fade-in duration-300"
-                                    onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/err${room.listing_id}/800/500`; }}
-                                />
-                                {/* Status badge */}
-                                <div className="absolute top-4 left-4">
-                                    <span className={`${isAvailable ? 'badge badge-green' : 'badge badge-red'} text-[0.85rem] px-3 py-1.5`}>
-                                        <span className={`w-1.5 h-1.5 rounded-full inline-block ${isAvailable ? 'bg-green-600' : 'bg-red-600'}`} />
-                                        {STATUS_LABELS[metadata.status]?.label || metadata.status}
+                        <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+                            {/* Main image / video */}
+                            <div className="relative h-[300px] md:h-[450px] bg-stone-100 flex items-center justify-center">
+                                {mediaItems[activeImage].type === 'video' ? (
+                                    mediaItems[activeImage].url.includes('watch?v=') || mediaItems[activeImage].url.includes('embed') ? (
+                                        <iframe
+                                            className="w-full h-full"
+                                            src={mediaItems[activeImage].url.replace('watch?v=', 'embed/')}
+                                            title={`${basic_info.title} - video`}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        ></iframe>
+                                    ) : (
+                                        <video
+                                            controls
+                                            className="w-full h-full object-contain bg-black"
+                                            key={mediaItems[activeImage].url}
+                                        >
+                                            <source src={mediaItems[activeImage].url} type="video/mp4" />
+                                            Trình duyệt của bạn không hỗ trợ xem video.
+                                        </video>
+                                    )
+                                ) : (
+                                    <img
+                                        key={activeImage}
+                                        src={mediaItems[activeImage].url}
+                                        alt={`${basic_info.title} - ảnh ${activeImage + 1}`}
+                                        className="w-full h-full object-cover animate-fade-in"
+                                        onError={(e) => { e.currentTarget.src = `https://picsum.photos/seed/err${room.listing_id}/800/500`; }}
+                                    />
+                                )}
+                                {/* Status badges grouped */}
+                                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                                    <span
+                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold ${isAvailable
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-red-100 text-red-700'
+                                            }`}
+                                    >
+                                        <span className={`w-2 h-2 rounded-full shrink-0 ${isAvailable ? 'bg-green-600' : 'bg-red-600'}`} />
+                                        {isAvailable ? 'Còn phòng' : 'Đã cho thuê'}
                                     </span>
-                                </div>
-                                <div className="absolute top-4 right-4 flex gap-2">
+
                                     {metadata.is_verified && (
-                                        <span className="badge badge-blue text-[0.82rem]">
-                                            <AppIcon name="verified" size={11} strokeWidth={2.5} />
+                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold bg-blue-100 text-blue-700">
+                                            <AppIcon name="verified" size={13} strokeWidth={2.5} />
                                             Đã xác minh
                                         </span>
                                     )}
-                                    <button className="w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-stone-600 hover:text-red-500 transition-colors shadow-sm cursor-pointer">
-                                        <AppIcon name="heart" size={18} />
-                                    </button>
                                 </div>
                                 {/* Prev/Next arrows */}
-                                {images.length > 1 && (
+                                {mediaItems.length > 1 && (
                                     <>
                                         <button
-                                            onClick={() => setActiveImage((i) => (i - 1 + images.length) % images.length)}
-                                            className="absolute top-1/2 left-3 -translate-y-1/2 bg-black/45 backdrop-blur-sm rounded-full w-9 h-9 flex items-center justify-center cursor-pointer text-white transition-colors hover:bg-black/60"
-                                            aria-label="Ảnh trước"
+                                            onClick={(e) => { e.stopPropagation(); setActiveImage(prev => (prev > 0 ? prev - 1 : mediaItems.length - 1)); }}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 !rounded-full bg-black/80 hover:bg-black flex items-center justify-center text-white shadow-md transition-colors z-8 border-none cursor-pointer"
                                         >
-                                            <AppIcon name="chevronLeft" size={18} strokeWidth={2.5} />
+                                            <AppIcon name="chevronLeft" size={20} />
                                         </button>
                                         <button
-                                            onClick={() => setActiveImage((i) => (i + 1) % images.length)}
-                                            className="absolute top-1/2 right-3 -translate-y-1/2 bg-black/45 backdrop-blur-sm rounded-full w-9 h-9 flex items-center justify-center cursor-pointer text-white transition-colors hover:bg-black/60"
-                                            aria-label="Ảnh tiếp"
+                                            onClick={(e) => { e.stopPropagation(); setActiveImage(prev => (prev < mediaItems.length - 1 ? prev + 1 : 0)); }}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 !rounded-full bg-black/80 hover:bg-black flex items-center justify-center text-white shadow-md transition-colors z-10 border-none cursor-pointer"
                                         >
-                                            <AppIcon name="chevronRight" size={18} strokeWidth={2.5} />
+                                            <AppIcon name="chevronRight" size={20} />
                                         </button>
                                     </>
                                 )}
                             </div>
                             {/* Thumbnails */}
-                            {images.length > 1 && (
+                            {mediaItems.length > 1 && (
                                 <div className="flex gap-2 p-3 overflow-x-auto scrollbar-hide">
-                                    {images.map((img, idx) => (
+                                    {mediaItems.map((item, idx) => (
                                         <button
                                             key={idx}
                                             onClick={() => setActiveImage(idx)}
-                                            className={`w-[72px] h-[56px] shrink-0 rounded-md overflow-hidden border-2 transition-colors duration-200 cursor-pointer p-0 ${activeImage === idx ? 'border-amber-600' : 'border-transparent'}`}
-                                            aria-label={`Xem ảnh ${idx + 1}`}
+                                            className={`relative w-[72px] h-[56px] shrink-0 rounded-md overflow-hidden border-2 transition-colors duration-200 cursor-pointer p-0 bg-stone-200 flex items-center justify-center ${activeImage === idx ? 'border-amber-600' : 'border-transparent'}`}
+                                            aria-label={`Xem ${item.type === 'video' ? 'video' : 'ảnh'} ${idx + 1}`}
                                         >
-                                            <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                                            {item.type === 'video' ? (
+                                                <div className="text-stone-500">
+                                                    <AppIcon name="play" size={24} />
+                                                </div>
+                                            ) : (
+                                                <img src={item.url} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                                            )}
                                         </button>
                                     ))}
                                 </div>
@@ -152,32 +300,44 @@ export default function RoomDetailPage({ room, navigate, user }) {
                         </div>
 
                         {/* Main Info Card */}
-                        <div className="card p-6 rounded-lg">
-                            <h1 className="text-2xl font-bold text-stone-900 mb-3 leading-tight font-heading">
+                        <div className="bg-white border border-stone-200 p-6 rounded-xl">
+                            <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 mb-3 leading-tight font-heading">
                                 {basic_info.title}
                             </h1>
-                            <div className="flex items-center gap-2 text-stone-500 text-[0.925rem] mb-4">
-                                <AppIcon name="location" size={16} />
-                                <span>{basic_info.address}, {basic_info.district}, {basic_info.city}</span>
-                            </div>
 
-                            {/* Views & Favorites bar */}
-                            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-6 py-3 border-y border-stone-100">
-                                <div className="flex items-center gap-1.5 text-stone-600 text-[0.85rem]">
-                                    <AppIcon name="eye" size={16} className="text-stone-400" />
-                                    <span className="font-medium">{views.toLocaleString()}</span>
-                                    <span className="text-stone-400">lượt xem</span>
+                            <div className="flex items-center gap-4 mb-5 flex-wrap">
+                                <button
+                                    onClick={handleToggleFavorite}
+                                    className={`flex items-center gap-2 px-4 py-2 !rounded-full font-bold text-sm transition-all border cursor-pointer ${favorited
+                                        ? 'bg-red-50 border-red-200 text-red-600'
+                                        : 'bg-stone-100 border-stone-200 text-stone-600 hover:bg-stone-200'
+                                        }`}
+                                >
+                                    <AppIcon
+                                        name="heart"
+                                        size={18}
+                                        fill={favorited ? 'currentColor' : 'none'}
+                                        className={favorited ? 'animate-pulse' : ''}
+                                    />
+                                    {favorited ? 'Đã lưu tin' : 'Lưu tin'}
+                                </button>
+
+                                <div className="flex items-center gap-1.5 text-stone-500 text-sm font-medium">
+                                    <AppIcon name="eye" size={16} />
+                                    <span>{views.toLocaleString()} lượt xem</span>
                                 </div>
-                                <div className="flex items-center gap-1.5 text-stone-600 text-[0.85rem]">
-                                    <AppIcon name="heart" size={16} className="text-stone-400" />
-                                    <span className="font-medium">{(metadata.total_favorites || 0).toLocaleString()}</span>
-                                    <span className="text-stone-400">lượt lưu</span>
-                                </div>
+
                                 <div className="hidden sm:block h-3 w-px bg-stone-200" />
-                                <div className="flex items-center gap-1.5 text-stone-500 text-[0.85rem]">
-                                    <AppIcon name="clock" size={16} className="text-stone-400" />
+
+                                <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
+                                    <AppIcon name="clock" size={16} />
                                     <span>Cập nhật: {formatDate(metadata.updated_at)}</span>
                                 </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-stone-500 text-[0.925rem] mb-6">
+                                <AppIcon name="location" size={16} className="text-stone-400" />
+                                <span>{basic_info.address}, {basic_info.district}, {basic_info.city}</span>
                             </div>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-stone-50 rounded-lg border border-stone-100">
@@ -201,7 +361,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                         </div>
 
                         {/* Monthly Costs */}
-                        <div className="card p-6 rounded-lg">
+                        <div className="bg-white border border-stone-200 p-6 rounded-xl">
                             <SectionTitle icon="credit-card">Chi phí hàng tháng</SectionTitle>
                             <div className="grid grid-cols-2 gap-3 mt-4">
                                 <CostRow label="Tiền cọc" value={formatDeposit(monthly_costs.deposit_amount)} />
@@ -222,7 +382,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                     <p className="text-[0.85rem] font-semibold text-stone-600 mb-2">Dịch vụ thêm:</p>
                                     <div className="flex flex-wrap gap-2">
                                         {monthly_costs.extra_services.map((s) => (
-                                            <span key={s.name} className="badge badge-gray">
+                                            <span key={s.name} className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium">
                                                 {s.name}: {new Intl.NumberFormat('vi-VN').format(s.price)} đ
                                             </span>
                                         ))}
@@ -232,7 +392,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                         </div>
 
                         {/* Amenities */}
-                        <div className="card p-6 rounded-lg">
+                        <div className="bg-white border border-stone-200 p-6 rounded-xl">
                             <SectionTitle icon="check-square">Tiện nghi trong phòng</SectionTitle>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
                                 {Object.entries(AMENITIES).map(([key, { label }]) => {
@@ -253,7 +413,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                         </div>
 
                         {/* Rules */}
-                        <div className="card p-6 rounded-lg">
+                        <div className="bg-white border border-stone-200 p-6 rounded-xl">
                             <SectionTitle icon="shield">Nội quy & Tiện ích</SectionTitle>
                             <div className="grid grid-cols-2 gap-3 mt-4">
                                 <RuleRow label="Giờ giấc" value={CURFEW_LABELS[rules_utilities.curfew] || rules_utilities.curfew} />
@@ -265,9 +425,9 @@ export default function RoomDetailPage({ room, navigate, user }) {
                         </div>
 
                         {/* Map placeholder */}
-                        <div className="card p-6 rounded-lg">
+                        <div className="bg-white border border-stone-200 p-6 rounded-xl">
                             <SectionTitle icon="map">Vị trí trên bản đồ</SectionTitle>
-                            <div className="mt-4 bg-linear-to-br from-amber-50 to-orange-50 border border-dashed border-amber-200 rounded-lg p-10 flex flex-col items-center justify-center text-center">
+                            <div className="mt-4 bg-linear-to-br from-amber-50 to-orange-50 border border-dashed border-amber-200 rounded-xl p-10 flex flex-col items-center justify-center text-center">
                                 <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mb-3">
                                     <AppIcon name="location" size={24} />
                                 </div>
@@ -277,39 +437,102 @@ export default function RoomDetailPage({ room, navigate, user }) {
                         </div>
 
                         {/* Comments */}
-                        <div className="card p-6 rounded-lg">
+                        <div className="bg-white border border-stone-200 p-6 rounded-xl">
                             <SectionTitle icon="messages">Bình luận & Hỏi đáp</SectionTitle>
-                            <div className="mt-6 mb-8">
+                            
+                            {/* Comment Input */}
+                            <div className="mt-6 mb-8 relative">
+                                {!user && (
+                                    <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-lg border border-stone-200">
+                                        <p className="text-stone-700 font-medium mb-2">Đăng nhập để tham gia thảo luận</p>
+                                        <button onClick={() => navigate('login')} className="px-4 py-1.5 bg-amber-500 text-white rounded-full text-sm font-bold hover:bg-amber-600 transition-colors cursor-pointer border-none">Đăng nhập ngay</button>
+                                    </div>
+                                )}
                                 <textarea
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
                                     placeholder="Viết câu hỏi hoặc bình luận của bạn..."
-                                    className="input w-full min-h-[100px] p-4 text-[0.95rem] resize-none border-stone-200 focus:border-amber-500 rounded-lg"
+                                    className="input w-full min-h-[100px] p-4 text-[0.95rem] resize-none border-stone-900/20 focus:border-amber-500 rounded-lg outline-none"
+                                    disabled={!user || submitting}
                                 />
                                 <div className="flex justify-end mt-3">
-                                    <button className="btn-primary rounded-md px-6 py-2.5">Gửi bình luận</button>
+                                    <button 
+                                        onClick={handleCommentSubmit}
+                                        disabled={!user || submitting || !newComment.trim()}
+                                        className="inline-flex items-center justify-center bg-amber-500 text-white rounded-full px-6 py-2 hover:bg-amber-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-none font-bold text-sm"
+                                    >
+                                        {submitting ? 'Đang gửi...' : 'Gửi bình luận'}
+                                    </button>
                                 </div>
                             </div>
 
                             {/* Comment list */}
                             <div className="flex flex-col gap-6">
-                                {[
-                                    { id: 1, user: 'Hoàng Minh', date: '2 ngày trước', text: 'Phòng này còn không chủ nhà ơi? Nhìn sạch sẽ và rộng rãi quá.', avatar: 'HM' },
-                                    { id: 2, user: 'Lan Anh', date: '5 ngày trước', text: 'Chủ nhà rất nhiệt tình, mình vừa xem phòng chiều nay. Vị trí rất tiện lợi cho những người làm việc ở khu vực trung tâm.', avatar: 'LA' }
-                                ].map(comment => (
-                                    <div key={comment.id} className="flex gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-linear-to-br from-stone-100 to-stone-200 flex items-center justify-center font-bold text-stone-600 text-[0.85rem] shrink-0 border border-stone-200">
-                                            {comment.avatar}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex justify-between mb-1">
-                                                <h4 className="text-[0.9rem] font-bold text-stone-900">{comment.user}</h4>
-                                                <span className="text-[0.8rem] text-stone-500">{comment.date}</span>
-                                            </div>
-                                            <p className="text-[0.9rem] text-stone-700 leading-relaxed">
-                                                {comment.text}
-                                            </p>
-                                        </div>
+                                {loadingComments ? (
+                                    <div className="text-center py-6 text-stone-400 text-sm">Đang tải bình luận...</div>
+                                ) : comments.length === 0 ? (
+                                    <div className="text-center py-8 bg-stone-50 rounded-lg border border-dashed border-stone-200 text-stone-500 text-sm">
+                                        Chưa có bình luận nào. Hãy là người đầu tiên đặt câu hỏi!
                                     </div>
-                                ))}
+                                ) : (
+                                    comments.map(comment => (
+                                        <div key={comment.id} className="flex gap-4 group relative">
+                                            <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white text-sm shrink-0 overflow-hidden bg-amber-500"
+                                                style={comment.profiles?.avatar_url ? { backgroundImage: `url(${comment.profiles.avatar_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+                                            >
+                                                {!comment.profiles?.avatar_url && (comment.profiles?.full_name || 'U').charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <div>
+                                                        <h4 className="text-[0.9rem] font-bold text-stone-900">{comment.profiles?.full_name || 'Người dùng'}</h4>
+                                                        <span className="text-[0.75rem] text-stone-400">{formatDate(comment.created_at)}</span>
+                                                    </div>
+                                                    
+                                                    {/* 3-dot Menu */}
+                                                    {user && (
+                                                        <div className="relative">
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setActiveMenuId(activeMenuId === comment.id ? null : comment.id);
+                                                                }}
+                                                                className="p-1 text-stone-400 hover:text-stone-700 rounded-md hover:bg-stone-100 cursor-pointer border-none bg-transparent"
+                                                            >
+                                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                                            </button>
+                                                            
+                                                            {activeMenuId === comment.id && (
+                                                                <div className="absolute right-0 top-full mt-1 w-36 bg-white border border-stone-200 rounded-lg shadow-lg overflow-hidden z-20 animate-fade-in py-1">
+                                                                    {user.id === comment.user_id ? (
+                                                                        <button 
+                                                                            onClick={() => handleCommentDelete(comment.id)}
+                                                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer border-none bg-transparent flex items-center gap-2"
+                                                                        >
+                                                                            <AppIcon name="trash" size={14} />
+                                                                            Xóa bình luận
+                                                                        </button>
+                                                                    ) : (
+                                                                        <button 
+                                                                            onClick={handleCommentReport}
+                                                                            className="w-full text-left px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 cursor-pointer border-none bg-transparent flex items-center gap-2"
+                                                                        >
+                                                                            <AppIcon name="alert" size={14} />
+                                                                            Báo cáo
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <p className="text-[0.9rem] text-stone-700 leading-relaxed whitespace-pre-wrap mt-1">
+                                                    {comment.content}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
@@ -317,8 +540,8 @@ export default function RoomDetailPage({ room, navigate, user }) {
                     {/* ---- RIGHT COLUMN: Contact sidebar ---- */}
                     <div className="flex flex-col gap-4 lg:sticky lg:top-[88px]">
                         {/* Price card */}
-                        <div className="card p-6 rounded-lg">
-                            <div className="text-[1.6rem] font-extrabold text-amber-600 tracking-tight font-heading">
+                        <div className="bg-white border border-stone-200 p-6 rounded-xl">
+                            <div className="text-[1.8rem] text-amber-600! tracking-tight font-heading">
                                 {formatPrice(basic_info.price_monthly)}
                             </div>
                             <div className="text-[0.85rem] text-stone-400 mt-1">
@@ -349,41 +572,51 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         className="w-10 h-10 rounded-full object-cover border border-stone-200"
                                     />
                                 ) : (
-                                    <div className="w-10 h-10 bg-linear-to-br from-amber-600 to-amber-500 rounded-full flex items-center justify-center shrink-0">
-                                        <span className="text-white font-bold text-[0.95rem] font-heading">
+                                    <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center shrink-0">
+                                        <span className="text-white font-bold text-sm">
                                             {media_contact.contact.name?.charAt(0) || 'U'}
                                         </span>
                                     </div>
                                 )}
                                 <div className="flex-1">
-                                    <p className="font-bold text-[0.95rem] text-stone-900 leading-none mb-1">
+                                    <p className="font-bold text-sm text-stone-900 leading-tight mb-1">
                                         {media_contact.contact.name}
                                     </p>
-                                    <span className={`badge ${media_contact.contact.role === 'landlord' ? 'badge-amber' : 'badge-blue'} text-[0.7rem]`}>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold ${media_contact.contact.role === 'landlord' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
                                         {media_contact.contact.role === 'landlord' ? 'Chủ nhà' : 'Môi giới'}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2.5">
                                 <button
                                     onClick={() => {
                                         if (user) {
                                             setShowPhone(true);
                                         } else {
+                                            alert('Vui lòng đăng nhập để xem thông tin');
                                             navigate('login');
                                         }
                                     }}
-                                    className="btn-primary w-full justify-center py-3 rounded-md!"
+                                    className="flex items-center justify-center gap-2.5 w-full py-3 !rounded-full text-white border-none cursor-pointer transition-colors duration-200 bg-amber-500 hover:bg-amber-600"
                                 >
-                                    <AppIcon name="phone" size={24} strokeWidth={1.5} />
-                                    {showPhone ? media_contact.contact.phone : 'Hiện số điện thoại'}
+                                    <AppIcon name="phone" size={20} strokeWidth={2.5} />
+                                    <span>{showPhone ? media_contact.contact.phone : 'Liên hệ ngay'}</span>
                                 </button>
+
                                 <button
-                                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-md! text-white bg-[#0068ff] hover:bg-[#005ae0] transition-all shadow-lg shadow-blue-500/25 font-bold text-[0.9rem]"
+                                    onClick={() => {
+                                        if (user) {
+                                            setShowPhone(true);
+                                        } else {
+                                            alert('Vui lòng đăng nhập để xem thông tin');
+                                            navigate('login');
+                                        }
+                                    }}
+                                    className="flex items-center justify-center gap-2.5 w-full py-3 !rounded-full text-white bg-[#0068ff] hover:bg-[#005ae0] transition-colors duration-200 cursor-pointer border-none"
                                 >
-                                    <AppIcon name="messages" size={24} strokeWidth={1.5} />
-                                    Nhắn tin qua Zalo
+                                    <AppIcon name="messages" size={20} strokeWidth={2.5} />
+                                    <span>Nhắn tin qua Zalo</span>
                                 </button>
                             </div>
                         </div>

@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase.js';
+import { mapSupabaseRoom } from '../utils/roomMapper.js';
 
 const DEFAULT_FILTERS = {
   search: '',
@@ -16,7 +17,7 @@ const DEFAULT_FILTERS = {
   sortBy: 'newest', // newest | price_asc | price_desc | area_asc
 };
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 18;
 
 /**
  * Custom hook for Server-Side Room Filtering and Pagination
@@ -32,10 +33,13 @@ export const useRoomFilter = () => {
   const [hasMore, setHasMore] = useState(true);
 
   // Function to build and execute the query
-  const fetchRooms = useCallback(async (isLoadMore = false) => {
+  const fetchRooms = useCallback(async (targetPage, isLoadMore = false) => {
     try {
       if (isLoadMore) setLoadingMore(true);
-      else setLoading(true);
+      else {
+        setLoading(true);
+        setError(null);
+      }
 
       let query = supabase
         .from('rooms')
@@ -59,7 +63,6 @@ export const useRoomFilter = () => {
       }
       
       if (filters.amenities.length > 0) {
-        // Correct Supabase JSONB contains syntax: column name + object structure
         query = query.contains('room_features', { amenities: filters.amenities });
       }
 
@@ -78,7 +81,7 @@ export const useRoomFilter = () => {
       query = query.order(sort.column, { ascending: sort.ascending });
 
       // Pagination
-      const from = isLoadMore ? (page + 1) * ITEMS_PER_PAGE : 0;
+      const from = targetPage * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
       query = query.range(from, to);
 
@@ -86,51 +89,15 @@ export const useRoomFilter = () => {
 
       if (error) throw error;
 
-      // Reconstruct nested structure
-      const mappedData = data.map(r => ({
-        ...r,
-        basic_info: {
-          title: r.title,
-          room_type: r.room_type,
-          price_monthly: r.price_monthly,
-          area_sqm: r.area_sqm,
-          city: r.city,
-          district: r.district,
-          ward: r.ward,
-          address: r.address
-        },
-        media_contact: {
-          ...r.media_contact,
-          contact: (() => {
-            const profile = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
-            if (!profile) return r.media_contact.contact;
-            
-            return {
-              name: profile.full_name || r.media_contact.contact.name,
-              phone: profile.phone || r.media_contact.contact.phone,
-              role: profile.role || r.media_contact.contact.role,
-              avatar: profile.avatar_url || r.media_contact.contact.avatar
-            };
-          })()
-        },
-        metadata: {
-          is_verified: r.is_verified,
-          status: r.status,
-          total_views: r.total_views,
-          total_favorites: r.total_favorites,
-          created_at: r.created_at,
-          updated_at: r.updated_at
-        }
-      }));
+      const mappedData = data.map(mapSupabaseRoom);
 
       if (isLoadMore) {
         setRooms(prev => [...prev, ...mappedData]);
-        setPage(prev => prev + 1);
       } else {
         setRooms(mappedData);
-        setPage(0);
       }
 
+      setPage(targetPage);
       setTotalCount(count || 0);
       setHasMore(mappedData.length === ITEMS_PER_PAGE);
     } catch (err) {
@@ -140,21 +107,20 @@ export const useRoomFilter = () => {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [filters, page]);
+  }, [filters]); // Does not depend on page anymore
 
-  // Initial fetch and fetch on filter change
+  // Reset page and fetch when filters change
   useEffect(() => {
-    // Debounce search filter if needed, but for now just fetch
     const timer = setTimeout(() => {
-      fetchRooms(false);
-    }, 300); // Small debounce for rapid filter changes
+      fetchRooms(0, false);
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [filters]);
+  }, [filters, fetchRooms]);
 
   const loadMore = () => {
     if (!loadingMore && hasMore) {
-      fetchRooms(true);
+      fetchRooms(page + 1, true);
     }
   };
 

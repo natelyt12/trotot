@@ -9,8 +9,8 @@ import RoomDetailPage from './pages/RoomDetailPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
-
-
+import { mapSupabaseRoom } from './utils/roomMapper.js';
+import { FavoritesProvider } from './context/FavoritesContext.jsx';
 
 
 /*
@@ -45,23 +45,40 @@ export default function App() {
 
 
     const navigate = (page, data = null) => {
-        // Exit animation logic for modal (Room Detail or Profile)
-        if ((currentPage === 'room-detail' || currentPage === 'profile') && page === 'home') {
+        // Exit animation logic for modal (Room Detail)
+        if (currentPage === 'room-detail' && page !== 'room-detail') {
             setIsClosing(true);
+            
+            // Determine where we actually want to go
+            let targetPage = page;
+            let targetData = data;
+            
+            if (page === 'back') {
+                targetPage = pageData?.fromProfile ? 'profile' : 'home';
+                targetData = null;
+            }
+
             setTimeout(() => {
                 setIsClosing(false);
-                setCurrentPage('home');
-                setPageData(null);
-                // Update URL back to home
-                window.history.pushState(null, '', '/');
+                setCurrentPage(targetPage);
+                setPageData(targetData);
+                
+                // Scroll to top when moving to a new major page from a modal
+                if (targetPage !== 'home') {
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+                }
+
+                // Update URL
+                const url = targetPage === 'home' ? '/' : `/${targetPage}`;
+                window.history.pushState(null, '', url);
             }, 400); // Match animation duration
             return;
         }
 
 
-        // Only scroll to top for "major" page changes (login, register, home)
-        // but NOT when we are just opening/closing the Room Detail or Profile modal overlay.
-        if (!['room-detail', 'profile'].includes(page) && !['room-detail', 'profile'].includes(currentPage)) {
+        // Only scroll to top for "major" page changes (login, register, home, profile)
+        // but NOT when we are just opening/closing the Room Detail modal overlay.
+        if (page !== 'room-detail') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -104,41 +121,7 @@ export default function App() {
                     .single();
                 
                 if (room && !error) {
-                    // If we have profile data, use it to override the mock contact info
-                    const profile = Array.isArray(room.profiles) ? room.profiles[0] : room.profiles;
-                    const ownerContact = profile ? {
-                        name: profile.full_name || room.media_contact.contact.name,
-                        phone: profile.phone || room.media_contact.contact.phone,
-                        role: profile.role || room.media_contact.contact.role,
-                        avatar: profile.avatar_url || room.media_contact.contact.avatar
-                    } : room.media_contact.contact;
-
-                    // Reconstruct the nested structure as expected by RoomDetailPage
-                    const mappedRoom = {
-                        ...room,
-                        basic_info: {
-                            title: room.title,
-                            room_type: room.room_type,
-                            price_monthly: room.price_monthly,
-                            area_sqm: room.area_sqm,
-                            city: room.city,
-                            district: room.district,
-                            ward: room.ward,
-                            address: room.address
-                        },
-                        media_contact: {
-                            ...room.media_contact,
-                            contact: ownerContact
-                        },
-                        metadata: {
-                            is_verified: room.is_verified,
-                            status: room.status,
-                            total_views: room.total_views,
-                            total_favorites: room.total_favorites,
-                            created_at: room.created_at,
-                            updated_at: room.updated_at
-                        }
-                    };
+                    const mappedRoom = mapSupabaseRoom(room);
                     setCurrentPage('room-detail');
                     setPageData(mappedRoom);
                 } else {
@@ -161,11 +144,11 @@ export default function App() {
     const showLayout = !PAGES_WITHOUT_LAYOUT.includes(currentPage);
 
     // Determine if modal should be in the DOM
-    const shouldShowModal = currentPage === 'room-detail' || currentPage === 'profile' || isClosing;
+    const shouldShowModal = currentPage === 'room-detail' || isClosing;
 
 
     return (
-        <>
+        <FavoritesProvider user={user}>
             {showLayout && (
                 <Header 
                     currentPage={currentPage} 
@@ -177,22 +160,21 @@ export default function App() {
 
             <main>
                 {/* Base Layer: HomePage remains mounted to preserve scroll/filters */}
-                <div className={showLayout ? 'block' : 'hidden'}>
-                    <HomePage navigate={navigate} />
+                <div className={(showLayout && currentPage !== 'profile' && !(currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
+                    <HomePage navigate={navigate} user={user} />
                 </div>
 
-                {/* Overlay Layer: Room Detail / Profile as a popup */}
+                {/* Profile Layer: Also keep mounted or show based on context */}
+                <div className={(currentPage === 'profile' || (currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
+                    <ProfilePage user={user} navigate={navigate} initialData={pageData} />
+                </div>
+
+                {/* Overlay Layer: Room Detail as a popup */}
                 {shouldShowModal && (
                     <div
-                        className={`fixed inset-0 z-9 overflow-y-auto ${isClosing ? 'pointer-events-none' : 'pointer-events-auto'}`}
-                        style={{
-                            animation: isClosing
-                                ? 'modalFadeOut 0.3s ease-out forwards'
-                                : 'modalSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards'
-                        }}
+                        className={`fixed inset-0 z-50 overflow-y-auto ${isClosing ? 'pointer-events-none animate-modal-out' : 'pointer-events-auto animate-modal-up'}`}
                     >
                         {currentPage === 'room-detail' && <RoomDetailPage room={pageData} navigate={navigate} user={user} isClosing={isClosing} />}
-                        {currentPage === 'profile' && <ProfilePage user={user} navigate={navigate} isClosing={isClosing} />}
                     </div>
                 )}
 
@@ -203,18 +185,10 @@ export default function App() {
             {showLayout && <Footer navigate={navigate} />}
             {showLayout && <BottomNav currentPage={currentPage} navigate={navigate} user={user} />}
 
-            <style>{`
-                @keyframes modalSlideUp {
-                    from { transform: translateY(100%); opacity: 0; }
-                    to { transform: translateY(0); opacity: 1; }
-                }
-                @keyframes modalFadeOut {
-                    from { opacity: 1; }
-                    to { opacity: 0; }
-                }
-                /* Lock body scroll when modal is open */
-                ${shouldShowModal ? 'body { overflow: hidden; }' : ''}
-            `}</style>
-        </>
+            {/* Body scroll lock when modal open */}
+            {shouldShowModal && (
+                <style>{`body { overflow: hidden; }`}</style>
+            )}
+        </FavoritesProvider>
     );
 }

@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
 import { useRoomFilter } from '../hooks/useRoomFilter.js';
 
 /* ============================================
-   HomePage – Main listing + search + filters
+   HomePage – Listing + search + filters
+   Flat design, amber palette
    ============================================ */
-export default function HomePage({ navigate }) {
+export default function HomePage({ navigate, user }) {
     const {
         filters,
         filteredRooms,
@@ -28,18 +29,30 @@ export default function HomePage({ navigate }) {
 
     const scrollToListing = () => {
         const el = document.getElementById('listing-section');
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // Auto-scroll to results when filters change
+    useEffect(() => {
+        // We use a small delay to ensure the loading state or results have started updating
+        // and to avoid scrolling on the very first mount if filters are at default
+        if (activeFilterCount > 0) {
+            scrollToListing();
         }
+    }, [filters, activeFilterCount]);
+
+    const handleRoomClick = (room) => navigate('room-detail', room);
+
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 11) return 'Chào buổi sáng';
+        if (hour >= 11 && hour < 14) return 'Chào buổi trưa';
+        if (hour >= 14 && hour < 18) return 'Chào buổi chiều';
+        return 'Chào buổi tối';
     };
 
-    const handleRoomClick = (room) => {
-        navigate('room-detail', room);
-    };
-
-    // Stats derived from data
     const stats = [
-        { value: `${totalCount}+`, label: 'Phòng đăng ký' },
+        { value: `300+`, label: 'Phòng đăng ký' },
         { value: `${cities.length}`, label: 'Thành phố' },
         { value: '500+', label: 'Chủ trọ tin cậy' },
         { value: '4.8★', label: 'Đánh giá trung bình' },
@@ -47,70 +60,72 @@ export default function HomePage({ navigate }) {
 
     return (
         <div className="min-h-screen bg-stone-50">
-            {/* ---- HERO SECTION ---- */}
-            <section
-                className="pt-24 md:pt-50 pb-30 relative overflow-hidden bg-linear-to-br from-stone-900 via-stone-800 to-[#3c2a1e]"
-            >
-                {/* Decorative blobs */}
-                <div
-                    className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-[radial-gradient(circle,rgba(245,158,11,0.15)_0%,transparent_70%)] pointer-events-none"
-                />
-                <div
-                    className="absolute bottom-0 -left-15 w-[300px] h-[300px] bg-[radial-gradient(circle,rgba(217,119,6,0.1)_0%,transparent_70%)] pointer-events-none"
-                />
 
-                <div className="container-app pt-10 md:pt-20 pb-12 relative">
-                    <div className="max-w-[720px] mx-auto text-center pb-16">
+            {/* ---- HERO SECTION ---- */}
+            <section className="pt-24 md:pt-48 pb-28 relative overflow-hidden bg-stone-900">
+                {/* Subtle amber tint blobs */}
+                <div className="absolute -top-20 -right-20 w-96 h-96 bg-amber-500/10 rounded-lg pointer-events-none blur-3xl" />
+                <div className="absolute bottom-0 -left-16 w-72 h-72 bg-amber-600/8 rounded-lg pointer-events-none blur-3xl" />
+
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
+                    <div className="max-w-2xl mx-auto text-center pb-16">
+
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/30 rounded-full py-1.5 px-3.5 mb-6">
-                            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full inline-block" />
-                            <span className="text-amber-300 text-[0.8rem] font-semibold font-sans">
+                        <div className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/25 rounded-full px-3 py-1 mb-6">
+                            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                            <span className="text-amber-300 text-xs font-semibold">
                                 Nền tảng tìm trọ #1 Việt Nam
                             </span>
                         </div>
 
                         <h1
-                            className="text-[clamp(2.25rem,6vw,3.5rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-[-0.02em]"
+                            className="text-[clamp(2rem,6vw,3.25rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-tight"
                             style={{ fontFamily: 'var(--font-heading)' }}
                         >
                             Tìm phòng{' '}
-                            <span className="bg-linear-to-r from-amber-500 to-amber-300 bg-clip-text text-transparent px-1.5" style={{ fontFamily: 'var(--font-script)', fontSize: '1.7em' }}>
+                            <span
+                                className="text-amber-400 px-3"
+                                style={{ fontFamily: 'var(--font-script)', fontSize: '1.65em' }}
+                            >
                                 ưng ý
                             </span>{' '}
                             trong vài phút
                         </h1>
 
-                        <p className="text-stone-400 text-[1.1rem] leading-[1.7] font-sans max-w-[600px] mx-auto mb-10">
+                        <p className="text-stone-400 text-lg leading-relaxed max-w-xl mx-auto mb-10">
                             Hàng nghìn phòng được xác minh tại Hà Nội, TP. Hồ Chí Minh và khắp cả nước.
                             Miễn phí tìm kiếm, không phí trung gian.
                         </p>
 
-                        {/* Call to Action Button */}
+                        {/* CTA */}
                         <div className="flex justify-center">
                             <button
                                 onClick={scrollToListing}
-                                className="btn-primary px-12! py-4! rounded-full!"
+                                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-10 py-3.5 !rounded-full font-bold text-base cursor-pointer border-none transition-colors duration-200"
                                 style={{ animation: 'fadeInUp 0.8s ease' }}
                             >
-                                <span className="font-extrabold">Tìm phòng ngay</span>
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                Tìm phòng ngay
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
                                 </svg>
                             </button>
                         </div>
                     </div>
 
-                    {/* Stats bar - Floating Card */}
-                    <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] bg-stone-900/70 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden max-w-[900px] mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+                    {/* Stats bar */}
+                    <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] bg-stone-800 border border-stone-700 rounded-xl overflow-hidden max-w-3xl mx-auto">
                         {stats.map((stat, idx) => (
                             <div
                                 key={stat.label}
-                                className={`p-6 text-center ${idx < stats.length - 1 ? 'border-r border-white/5' : ''}`}
+                                className={`p-5 text-center ${idx < stats.length - 1 ? 'border-r border-stone-700' : ''}`}
                             >
-                                <div className="font-extrabold text-[1.75rem] text-amber-300 leading-none" style={{ fontFamily: 'var(--font-heading)' }}>
+                                <div
+                                    className="font-extrabold text-[1.6rem] text-amber-400 leading-none"
+                                    style={{ fontFamily: 'var(--font-heading)' }}
+                                >
                                     {stat.value}
                                 </div>
-                                <div className="text-[0.85rem] text-stone-400 mt-1.5 font-medium font-sans">
+                                <div className="text-xs text-stone-400 mt-1.5 font-medium">
                                     {stat.label}
                                 </div>
                             </div>
@@ -120,78 +135,65 @@ export default function HomePage({ navigate }) {
             </section>
 
             {/* ---- LISTING SECTION ---- */}
-            <section id="listing-section" className="container-app pt-10! pb-12! scroll-mt-[50px]">
-                {/* Mobile Filter Toggle */}
+            <section id="listing-section" className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-12 scroll-mt-14">
+
+                {/* Section header + mobile filter toggle */}
                 <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
                     <div>
-                        <h2 className="text-[1.25rem] font-bold text-stone-900 m-0 mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
-                            Danh sách phòng trọ
+                        <h2
+                            className="text-2xl font-extrabold text-stone-900 tracking-tight flex items-baseline flex-wrap"
+                            style={{ fontFamily: 'var(--font-heading)' }}
+                        >
+                            <span className="text-amber-500 mr-2.5" style={{ fontFamily: 'var(--font-script)', fontSize: '1.25em' }}>{getGreeting()}</span>
+                            <span>{user?.user_metadata?.full_name || ""}</span>
                         </h2>
-                        <p className="text-stone-500 text-[0.875rem] m-0">
-                            {filteredRooms.length} phòng phù hợp
-                            {(() => {
-                                const loc = [filters.ward, filters.district, filters.city].filter(Boolean).join(', ');
-                                return loc ? ` tại ${loc}` : '';
-                            })()}
-                            {filters.search ? ` với "${filters.search}"` : ''}
-                        </p>
+                        <p className="text-stone-500 text-sm font-medium mt-1">Khám phá không gian sống lý tưởng dành riêng cho bạn.</p>
                     </div>
+
+                    {/* Mobile filter button */}
                     <button
                         onClick={() => setShowMobileFilter(!showMobileFilter)}
-                        className="btn-secondary btn-filter-toggle text-[0.85rem]"
+                        className="lg:hidden inline-flex items-center gap-2 bg-white border border-stone-200 text-stone-700 px-4 py-2 rounded-full text-sm font-semibold cursor-pointer hover:border-amber-500 hover:text-amber-600 transition-colors duration-200"
                         aria-expanded={showMobileFilter}
                         aria-controls="room-filters"
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
                         </svg>
                         Bộ lọc
                         {activeFilterCount > 0 && (
-                            <span className="bg-amber-600 text-white rounded-full w-[18px] h-[18px] inline-flex items-center justify-center text-[0.7rem] font-bold">
+                            <span className="bg-amber-500 text-white rounded-full w-4 h-4 inline-flex items-center justify-center text-[0.65rem] font-bold">
                                 {activeFilterCount}
                             </span>
                         )}
                     </button>
                 </div>
 
-                {/* Layout: Sidebar + Grid */}
-                <div
-                    className="listing-layout grid gap-8 items-stretch"
-                    style={{
-                        gridTemplateColumns: 'minmax(0, 1fr) 280px',
-                        gridTemplateAreas: '"grid sidebar"',
-                    }}
-                >
-                    {/* Filter Sidebar Area */}
-                    <div
-                        className={`filter-sidebar-container ${showMobileFilter ? 'mobile-visible' : ''}`}
-                        style={{ gridArea: 'sidebar' }}
-                    >
+                {/* Layout: Grid (left) + Sidebar (right) */}
+                <div className="flex flex-col lg:flex-row-reverse gap-6 items-start">
+
+                    {/* Sidebar */}
+                    <div className={`w-full lg:w-[280px] lg:shrink-0 filter-sidebar-aside ${showMobileFilter ? 'block' : 'hidden lg:block'}`}>
                         <RoomFilters
                             filters={filters}
                             updateFilter={updateFilter}
                             resetFilters={resetFilters}
                             toggleAmenity={toggleAmenity}
                             activeFilterCount={activeFilterCount}
-                            totalCount={totalCount}
-                            filteredCount={filteredRooms.length}
                         />
                     </div>
 
-                    {/* Main Content Area */}
-                    <div style={{ gridArea: 'grid' }}>
+                    {/* Main content */}
+                    <div className="flex-1 min-w-0 min-h-[70vh]">
                         {loading ? (
-                            <div className="flex flex-col items-center justify-center py-20 gap-4">
-                                <div className="w-10 h-10 border-4 border-stone-200 border-t-amber-600 rounded-full animate-spin" />
-                                <p className="text-stone-500 font-medium">Đang tải danh sách phòng...</p>
-                            </div>
+                            <RoomGrid rooms={[]} isLoading={true} />
                         ) : error ? (
-                            <div className="bg-red-50 border border-red-100 text-red-600 p-8 rounded-xl text-center">
-                                <p className="font-bold mb-2 text-red-700">Đã có lỗi xảy ra!</p>
-                                <p className="text-[0.9rem] opacity-80">{error}</p>
+                            <div className="bg-red-50 border border-red-200 text-red-700 p-8 rounded-xl text-center">
+                                <p className="font-bold mb-2">Đã có lỗi xảy ra!</p>
+                                <p className="text-sm opacity-80 m-0">{error}</p>
                                 <button
                                     onClick={() => window.location.reload()}
-                                    className="mt-6 px-6 py-2 bg-red-600 text-white rounded-lg text-[0.85rem] font-bold hover:bg-red-700 transition-colors"
+                                    className="mt-5 px-5 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 transition-colors duration-200 border-none cursor-pointer"
                                 >
                                     Thử lại
                                 </button>
@@ -204,21 +206,24 @@ export default function HomePage({ navigate }) {
                                 />
 
                                 {hasMore && (
-                                    <div className="flex justify-center mt-12 mb-8">
+                                    <div className="flex justify-center mt-10 mb-6">
                                         <button
+                                            type="button"
                                             onClick={loadMore}
                                             disabled={loadingMore}
-                                            className="px-8 py-3 bg-white border-[1.5px] border-stone-200 text-stone-700 rounded-full font-bold hover:border-amber-500 hover:text-amber-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
+                                            className="inline-flex items-center gap-2 px-8 py-2.5 bg-white border border-stone-200 text-stone-700 rounded-full font-semibold text-sm cursor-pointer hover:border-amber-500 hover:text-amber-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {loadingMore && <div className="w-4 h-4 border-2 border-stone-200 border-t-amber-600 rounded-full animate-spin" />}
+                                            {loadingMore && (
+                                                <div className="w-4 h-4 border-2 border-stone-200 border-t-amber-500 rounded-full animate-spin" />
+                                            )}
                                             {loadingMore ? 'Đang tải thêm...' : 'Xem thêm kết quả'}
                                         </button>
                                     </div>
                                 )}
 
                                 {!hasMore && totalCount > 0 && (
-                                    <p className="text-center text-stone-400 text-[0.85rem] mt-12 mb-8 italic">
-                                        — Đã hiển thị tất cả {totalCount} kết quả —
+                                    <p className="text-center text-stone-400 text-sm mt-10 mb-6 italic m-0">
+                                        — Đã hiển thị tất cả kết quả —
                                     </p>
                                 )}
                             </>
@@ -226,29 +231,6 @@ export default function HomePage({ navigate }) {
                     </div>
                 </div>
             </section>
-
-            {/* Responsive styles */}
-            <style>{`
-                .btn-filter-toggle {
-                    display: none !important;
-                }
-
-                @media (max-width: 1024px) {
-                    .btn-filter-toggle {
-                        display: inline-flex !important;
-                    }
-                    .listing-layout {
-                        display: block !important;
-                    }
-                    .filter-sidebar-container {
-                        display: none;
-                        margin-bottom: 2rem;
-                    }
-                    .filter-sidebar-container.mobile-visible {
-                        display: block;
-                    }
-                }
-            `}</style>
         </div>
     );
 }

@@ -1,15 +1,17 @@
-import { useState } from 'react';
 import RoomCard from './RoomCard.jsx';
 
 /* ============================================
-   RoomGrid Component – simple grid of cards
+   RoomGrid Component – grid of RoomCards
+   Flat design, amber palette
    ============================================ */
 export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
     if (isLoading) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 sm:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                    <SkeletonCard key={i} />
+                    <div key={i} style={{ animationDelay: `${i * 100}ms` }} className="animate-fade-in">
+                        <SkeletonCard />
+                    </div>
                 ))}
             </div>
         );
@@ -17,18 +19,21 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
 
     if (rooms.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 px-8 gap-4 bg-white rounded-2xl border border-stone-200">
-                <div className="w-[72px] h-[72px] bg-amber-100 rounded-full flex items-center justify-center">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex flex-col items-center justify-center py-16 px-8 gap-4 bg-white rounded-xl border border-stone-200">
+                <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="11" cy="11" r="8" />
                         <path d="m21 21-4.35-4.35" />
                         <path d="M8 11h6M11 8v6" />
                     </svg>
                 </div>
-                <h3 className="text-[1.1rem] font-semibold text-stone-900 m-0" style={{ fontFamily: 'var(--font-heading)' }}>
+                <h3
+                    className="text-base font-semibold text-stone-900 m-0"
+                    style={{ fontFamily: 'var(--font-heading)' }}
+                >
                     Không tìm thấy phòng nào
                 </h3>
-                <p className="text-stone-500 text-[0.9rem] text-center m-0">
+                <p className="text-stone-500 text-sm text-center m-0">
                     Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm khác nhé!
                 </p>
             </div>
@@ -36,12 +41,12 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {rooms.map((room, idx) => (
                 <div
                     key={room.listing_id}
+                    className="animate-fade-in-up"
                     style={{
-                        animation: 'fadeInUp 0.4s ease forwards',
                         animationDelay: `${Math.min(idx % 12, 8) * 60}ms`,
                         opacity: 0,
                     }}
@@ -59,19 +64,15 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
 
 function SkeletonCard() {
     return (
-        <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden flex flex-row sm:flex-col">
-            <div className="skeleton w-[130px] h-auto sm:w-full sm:h-[200px] shrink-0" />
+        <div className="bg-white rounded border border-stone-200 overflow-hidden flex flex-row sm:flex-col">
+            <div className="skeleton w-[130px] sm:w-full sm:h-[200px] shrink-0" />
             <div className="p-3 sm:p-4 flex flex-col gap-3 flex-1">
-                <div className="flex justify-between">
-                    <div className="skeleton h-5 w-[45%]" />
-                    <div className="skeleton h-5 w-[20%]" />
-                </div>
+                <div className="skeleton h-5 w-[45%]" />
                 <div className="skeleton h-4 w-[90%]" />
                 <div className="skeleton h-3.5 w-[70%]" />
                 <div className="flex gap-1.5">
-                    <div className="skeleton h-[22px] w-[60px] rounded-full" />
-                    <div className="skeleton h-[22px] w-[70px] rounded-full" />
-                    <div className="skeleton h-[22px] w-[55px] rounded-full" />
+                    <div className="skeleton h-5 w-14 rounded" />
+                    <div className="skeleton h-5 w-16 rounded" />
                 </div>
             </div>
         </div>
