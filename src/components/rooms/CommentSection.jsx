@@ -662,13 +662,15 @@ function CommentItem({
                             </button>
                         </div>
 
-                        <button
-                            onClick={onReplyClick}
-                            className="text-stone-500 text-[0.75rem] font-bold hover:text-amber-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1"
-                        >
-                            <AppIcon name="messages" size={13} />
-                            Phản hồi
-                        </button>
+                        {user && (
+                            <button
+                                onClick={onReplyClick}
+                                className="text-stone-500 text-[0.75rem] font-bold hover:text-amber-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1"
+                            >
+                                <AppIcon name="messages" size={13} />
+                                Phản hồi
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
