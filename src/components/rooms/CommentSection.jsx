@@ -136,6 +136,17 @@ export default function CommentSection({ room, user, navigate }) {
 
     const handleReplySubmit = async () => {
         if (!user || !replyContent.trim() || !replyTo) return;
+
+        const now = Date.now();
+        if (now - lastCommentTime < 60000) {
+            showModal({
+                title: 'Chậm lại một chút',
+                message: 'Vui lòng đợi 1 phút trước khi gửi phản hồi tiếp theo.',
+                type: 'warning'
+            });
+            return;
+        }
+
         setSubmitting(true);
         const { parentId, userName } = replyTo;
         const finalContent = userName ? `@${userName}\u200B ${replyContent.trim()}` : replyContent.trim();
@@ -164,6 +175,7 @@ export default function CommentSection({ room, user, navigate }) {
             }));
             setReplyContent('');
             setReplyTo(null);
+            setLastCommentTime(now);
         } catch (err) {
             console.error('Error submitting reply:', err);
         } finally {
