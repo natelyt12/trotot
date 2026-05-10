@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import VerificationForm from '../components/auth/VerificationForm.jsx';
+import { useModal } from '../context/ModalContext.jsx';
 
 /* ============================================
    RegisterPage – Flat design, amber palette
    ============================================ */
 export default function RegisterPage({ navigate, initialData }) {
+    const { showModal } = useModal();
     const [step, setStep] = useState(1); // 1: Info, 2: Verification
     const [showRoleSelector, setShowRoleSelector] = useState(!!initialData?.role && initialData.role !== 'tenant');
     const [form, setForm] = useState({
@@ -37,6 +39,8 @@ export default function RegisterPage({ navigate, initialData }) {
         const nameRegex = /^[a-zA-Z0-9\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]+$/;
         if (!form.name.trim()) {
             errs.name = 'Vui lòng nhập tên người dùng.';
+        } else if (form.name.trim().length > 30) {
+            errs.name = 'Tên người dùng không được vượt quá 30 ký tự.';
         } else if (!nameRegex.test(form.name)) {
             errs.name = 'Tên chỉ bao gồm chữ cái, số và khoảng trắng.';
         }
@@ -82,20 +86,77 @@ export default function RegisterPage({ navigate, initialData }) {
 
         setLoading(true);
         try {
+            // 1. Kiểm tra Tên người dùng đã tồn tại chưa
+            const { data: existingName } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('full_name', form.name.trim())
+                .maybeSingle();
+
+            if (existingName) {
+                showModal({
+                    title: 'Tên người dùng đã tồn tại',
+                    message: 'Tên người dùng này đã được người khác sử dụng. Vui lòng chọn một tên khác.',
+                    type: 'warning'
+                });
+                setLoading(false);
+                return;
+            }
+
+            // 2. Kiểm tra Số điện thoại đã tồn tại chưa
+            const { data: existingPhone } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('phone', form.phone.trim())
+                .maybeSingle();
+
+            if (existingPhone) {
+                showModal({
+                    title: 'Số điện thoại đã tồn tại',
+                    message: 'Số điện thoại này đã được liên kết với một tài khoản khác. Vui lòng sử dụng số khác hoặc Đăng nhập.',
+                    type: 'warning'
+                });
+                setLoading(false);
+                return;
+            }
+
+            // 3. Tiến hành đăng ký
             const { error } = await supabase.auth.signUp({
                 email: form.email,
                 password: form.password,
                 options: {
                     data: {
-                        full_name: form.name,
-                        phone: form.phone,
+                        full_name: form.name.trim(),
+                        phone: form.phone.trim(),
                         role: form.role,
                     },
                 },
             });
-            if (error) throw error;
-            // Chuyển thẳng sang trang chủ vì Supabase tự động đăng nhập sau khi signUp thành công (nếu không bật email confirmation)
-            navigate('home');
+
+            if (error) {
+                if (error.message.includes('User already registered')) {
+                    showModal({
+                        title: 'Email đã tồn tại',
+                        message: 'Địa chỉ email này đã được sử dụng. Bạn có muốn chuyển sang trang Đăng nhập không?',
+                        type: 'info',
+                        confirmText: 'Đăng nhập ngay',
+                        cancelText: 'Hủy',
+                        onConfirm: () => navigate('login')
+                    });
+                } else {
+                    throw error;
+                }
+                setLoading(false);
+                return;
+            }
+
+            // Đăng ký thành công
+            showModal({
+                title: 'Đăng ký thành công!',
+                message: 'Chào mừng bạn đến với Trọ Tốt. Tài khoản của bạn đã sẵn sàng.',
+                type: 'success',
+                onConfirm: () => navigate('home')
+            });
         } catch (err) {
             setErrors({ server: err.message });
         } finally {
@@ -234,6 +295,7 @@ export default function RegisterPage({ navigate, initialData }) {
                                     placeholder="Nguyễn Văn A"
                                     className={inputCls}
                                     autoComplete="name"
+                                    maxLength={30}
                                 />
                                 {errors.name && <FormError>{errors.name}</FormError>}
                             </div>
