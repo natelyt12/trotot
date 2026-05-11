@@ -68,7 +68,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .animate-fade-in-up  { animation: fadeInUp   0.4s  ease         forwards; }
 .animate-slide-down  { animation: slideDown  0.25s ease         forwards; }
 .animate-modal-up    { animation: modalSlideUp  0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
-.animate-modal-out   { animation: modalFadeOut  0.3s ease-out   forwards; }
+.animate-modal-out   { animation: modalFadeOut  0.2s ease-out   forwards; }
 .animate-modal-pop   { animation: modalPop      0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 
 /* ============================================

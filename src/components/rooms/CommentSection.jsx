@@ -4,7 +4,7 @@ import { formatDate } from '../../utils/formatters.js';
 import AppIcon from '../common/AppIcon.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 
-export default function CommentSection({ room, user, navigate }) {
+export default function CommentSection({ room, user, navigate, isGridMode = false }) {
     const { showModal } = useModal();
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
@@ -310,7 +310,7 @@ export default function CommentSection({ room, user, navigate }) {
     }, [activeMenuId]);
 
     return (
-        <div className="bg-white border border-stone-200 p-6 rounded-xl">
+        <div className={isGridMode ? "p-6" : "bg-white border border-stone-200 p-6 rounded-xl"}>
             <h2 className="font-bold text-[1.05rem] text-stone-900 flex items-center gap-2 font-heading">
                 <AppIcon name="messages" color="#d97706" />
                 Bình luận & Hỏi đáp

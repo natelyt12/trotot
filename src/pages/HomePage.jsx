@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
 import { useRoomFilter } from '../hooks/useRoomFilter.js';
+import { UNIVERSITIES } from '../data/universities.js';
+import AppIcon from '../components/common/AppIcon.jsx';
+import LocationWizardModal from '../components/search/LocationWizardModal.jsx';
 
 /* ============================================
    HomePage – Listing + search + filters
@@ -21,25 +24,49 @@ export default function HomePage({ navigate, user }) {
         loadingMore,
         hasMore,
         loadMore,
-        error
+        error,
+        highlightedField,
+        highlightField
     } = useRoomFilter();
 
     const [showMobileFilter, setShowMobileFilter] = useState(false);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const cities = getAvailableCities();
+
+    // Derive display text for the fake input
+    const getLocationDisplayText = () => {
+        if (filters.university) return `Quanh ${filters.university}`;
+        if (filters.ward && filters.district && filters.city) return `${filters.ward}, ${filters.district}, ${filters.city}`;
+        if (filters.district && filters.city) return `${filters.district}, ${filters.city}`;
+        if (filters.city) return `Toàn ${filters.city}`;
+        return 'Tìm khu vực hoặc trường Đại học...';
+    };
+
+    const handleLocationComplete = (locationFilters) => {
+        updateFilter({
+            ...locationFilters,
+            search: ''
+        });
+
+        // Determine which field to focus/highlight
+        let targetField = '';
+        if (locationFilters.university) targetField = 'university';
+        else if (locationFilters.ward) targetField = 'ward';
+        else if (locationFilters.district) targetField = 'district';
+        else if (locationFilters.city) targetField = 'city';
+
+        // Auto-scroll and trigger highlight
+        setTimeout(() => {
+            scrollToListing();
+            if (targetField) highlightField(targetField);
+        }, 150);
+    };
 
     const scrollToListing = () => {
         const el = document.getElementById('listing-section');
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
-    // Auto-scroll to results when filters change
-    useEffect(() => {
-        // We use a small delay to ensure the loading state or results have started updating
-        // and to avoid scrolling on the very first mount if filters are at default
-        if (activeFilterCount > 0) {
-            scrollToListing();
-        }
-    }, [filters, activeFilterCount]);
 
     const handleRoomClick = (room) => navigate('room-detail', room);
 
@@ -97,21 +124,32 @@ export default function HomePage({ navigate, user }) {
                             Miễn phí tìm kiếm, không phí trung gian.
                         </p>
 
-                        {/* CTA */}
-                        <div className="flex justify-center">
+                        {/* Guided Search (Fake Input trigger) */}
+                        <div className="max-w-2xl mx-auto mt-6 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
                             <button
-                                onClick={scrollToListing}
-                                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-10 py-3.5 rounded-full! font-bold text-base cursor-pointer border-none transition-colors duration-200"
-                                style={{ animation: 'fadeInUp 0.8s ease' }}
+                                onClick={() => setIsLocationModalOpen(true)}
+                                className="w-full bg-stone-800/50 hover:bg-stone-800/70 border border-stone-700 p-2 pr-2 rounded-full flex items-center justify-between gap-4 transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500/10 group shadow-lg cursor-pointer"
                             >
-                                Tìm phòng ngay
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
-                                </svg>
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                    <div className="w-10 h-10 bg-stone-700/50 text-stone-300 rounded-full flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 group-hover:text-amber-500 transition-colors">
+                                        <AppIcon name="search" size={18} />
+                                    </div>
+                                    <div className="flex flex-col items-start truncate">
+                                        <span className="text-[0.65rem] font-bold text-amber-500 uppercase tracking-wider mb-0.5">Khu vực tìm kiếm</span>
+                                        <span className={`text-sm font-semibold truncate ${(filters.university || filters.city) ? 'text-white' : 'text-stone-400'
+                                            }`}>
+                                            {getLocationDisplayText()}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-amber-500 text-white px-8 py-3 rounded-full font-bold text-sm transition-all duration-200 shrink-0 group-hover:bg-amber-400">
+                                    Tìm ngay
+                                </div>
                             </button>
                         </div>
-                    </div>
 
+                    </div>
                     {/* Stats bar */}
                     <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] bg-stone-800 border border-stone-700 rounded-xl overflow-hidden max-w-3xl mx-auto">
                         {stats.map((stat, idx) => (
@@ -180,6 +218,7 @@ export default function HomePage({ navigate, user }) {
                             resetFilters={resetFilters}
                             toggleAmenity={toggleAmenity}
                             activeFilterCount={activeFilterCount}
+                            highlightedField={highlightedField}
                         />
                     </div>
 
@@ -231,6 +270,13 @@ export default function HomePage({ navigate, user }) {
                     </div>
                 </div>
             </section>
+
+            {/* Guided Search Modal */}
+            <LocationWizardModal
+                isOpen={isLocationModalOpen}
+                onClose={() => setIsLocationModalOpen(false)}
+                onComplete={handleLocationComplete}
+            />
         </div>
     );
 }

@@ -86,7 +86,7 @@ export default function App() {
                 // Update URL
                 const url = targetPage === 'home' ? '/' : `/${targetPage}`;
                 window.history.pushState(null, '', url);
-            }, 400); // Match animation duration
+            }, 250); // Match animation duration
             return;
         }
 

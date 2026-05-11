@@ -1,12 +1,15 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase.js';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
+import { UNIVERSITIES } from '../data/universities.js';
+
 
 const DEFAULT_FILTERS = {
   search: '',
   city: '',
   district: '',
   ward: '',
+  university: '',
   priceMin: 0,
   priceMax: 50000000,
   areaMin: 0,
@@ -124,15 +127,47 @@ export const useRoomFilter = () => {
     }
   };
 
-  const updateFilter = (key, value) => {
+  const [highlightedField, setHighlightedField] = useState(null);
+
+  const highlightField = (fieldId, duration = 2000) => {
+    setHighlightedField(fieldId);
+    if (duration) {
+      setTimeout(() => setHighlightedField(null), duration);
+    }
+  };
+
+  const updateFilter = (updatesOrKey, value) => {
     setFilters((prev) => {
-      const next = { ...prev, [key]: value };
-      if (key === 'city') {
-        next.district = '';
-        next.ward = '';
-      } else if (key === 'district') {
-        next.ward = '';
-      }
+      let next = { ...prev };
+      
+      const updates = typeof updatesOrKey === 'string' 
+        ? { [updatesOrKey]: value } 
+        : updatesOrKey;
+
+      Object.keys(updates).forEach(key => {
+        const val = updates[key];
+        next[key] = val;
+
+        // --- Location Dependency Rules ---
+        if (key === 'university' && val) {
+          const uni = UNIVERSITIES.find(u => u.name === val);
+          if (uni) {
+            next.city = uni.city;
+            next.district = uni.district;
+            next.ward = uni.ward || '';
+          }
+        } else if (key === 'city') {
+          if (!('district' in updates)) next.district = '';
+          if (!('ward' in updates)) next.ward = '';
+          if (!('university' in updates)) next.university = '';
+        } else if (key === 'district') {
+          if (!('ward' in updates)) next.ward = '';
+          if (!('university' in updates)) next.university = '';
+        } else if (key === 'ward') {
+          if (!('university' in updates)) next.university = '';
+        }
+      });
+
       return next;
     });
   };
@@ -150,9 +185,10 @@ export const useRoomFilter = () => {
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (filters.city) count++;
-    if (filters.district) count++;
-    if (filters.ward) count++;
+    if (filters.university) count++;
+    if (filters.city && !filters.university) count++; // Only count city if not already implied by university
+    if (filters.district && !filters.university) count++;
+    if (filters.ward && !filters.university) count++;
     if (filters.priceMin > 0 || filters.priceMax < 50000000) count++;
     if (filters.areaMin > 0 || filters.areaMax < 200) count++;
     if (filters.amenities.length > 0) count++;
@@ -196,6 +232,8 @@ export const useRoomFilter = () => {
     loadingMore,
     hasMore,
     loadMore,
-    error
+    error,
+    highlightedField,
+    highlightField
   };
 };

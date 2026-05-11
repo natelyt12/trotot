@@ -46,7 +46,7 @@ export default function GlobalModal({ config, onClose }) {
 
     return (
         <div 
-            className={`fixed inset-0 z-100 flex items-center justify-center p-4 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+            className={`fixed inset-0 z-100 flex items-center justify-center p-4 transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
         >
             {/* Scroll lock while alert is open */}
             {isOpen && (

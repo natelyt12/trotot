@@ -1,5 +1,6 @@
 import { PROVINCE } from '../../data/province.js';
 import { AMENITIES, PRICE_RANGES, AREA_RANGES } from '../../data/constants.js';
+import { UNIVERSITIES } from '../../data/universities.js';
 import AppIcon from '../common/AppIcon.jsx';
 
 /* ============================================
@@ -7,11 +8,24 @@ import AppIcon from '../common/AppIcon.jsx';
    Sidebar filter panel — flat design, amber palette
    No box-shadow, minimal borders
    ============================================ */
-export default function RoomFilters({ filters, updateFilter, resetFilters, toggleAmenity, activeFilterCount }) {
+export default function RoomFilters({ 
+    filters, 
+    updateFilter, 
+    resetFilters, 
+    toggleAmenity, 
+    activeFilterCount,
+    highlightedField 
+}) {
     const selectedProvince = PROVINCE.find(p => p.name === filters.city);
     const districts = selectedProvince ? selectedProvince.districts : [];
     const selectedDistrict = districts.find(d => d.name === filters.district);
     const wards = selectedDistrict ? selectedDistrict.wards : [];
+
+    // Helper for highlighted fields (from Location Wizard)
+    const getHighlightStyles = (field) => {
+        if (highlightedField !== field) return "";
+        return "ring-2 ring-amber-500 border-amber-500 bg-amber-50/30";
+    };
 
     return (
         <aside
@@ -45,60 +59,118 @@ export default function RoomFilters({ filters, updateFilter, resetFilters, toggl
                     </button>
                 )}
             </div>
+            
+            {/* University filter */}
+            <FilterSection title="Gần trường đại học">
+                <div className="relative">
+                    <input
+                        list="university-list"
+                        id="filter-university"
+                        value={filters.university}
+                        onChange={(e) => updateFilter('university', e.target.value)}
+                        placeholder="Tìm theo tên trường..."
+                        className={`w-full bg-white border border-stone-200 pl-3 pr-10 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300 ${getHighlightStyles('university')}`}
+                        aria-label="Lọc theo trường đại học"
+                    />
+                    <datalist id="university-list">
+                        {UNIVERSITIES.map((u, idx) => (
+                            <option key={`${u.name}-${idx}`} value={u.name} />
+                        ))}
+                    </datalist>
+                    {filters.university && (
+                        <button
+                            onClick={() => updateFilter('university', '')}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-stone-400 hover:text-stone-600 cursor-pointer p-1 flex items-center justify-center"
+                        >
+                            <AppIcon name="close" size={14} />
+                        </button>
+                    )}
+                </div>
+            </FilterSection>
 
             {/* Location filters */}
             <div className="flex flex-col gap-4">
                 <FilterSection title="Tỉnh / Thành phố">
-                    <input
-                        list="province-list"
-                        id="filter-city"
-                        value={filters.city}
-                        onChange={(e) => updateFilter('city', e.target.value)}
-                        placeholder="Chọn tỉnh thành..."
-                        className="w-full bg-white border border-stone-200 px-3 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-colors duration-200"
-                        aria-label="Lọc theo thành phố"
-                    />
-                    <datalist id="province-list">
-                        {PROVINCE.map((p) => (
-                            <option key={p.code} value={p.name} />
-                        ))}
-                    </datalist>
+                    <div className="relative">
+                        <input
+                            list="province-list"
+                            id="filter-city"
+                            value={filters.city}
+                            onChange={(e) => updateFilter('city', e.target.value)}
+                            placeholder="Chọn tỉnh thành..."
+                            className={`w-full bg-white border border-stone-200 pl-3 pr-10 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300 ${getHighlightStyles('city')}`}
+                            aria-label="Lọc theo thành phố"
+                        />
+                        <datalist id="province-list">
+                            {PROVINCE.map((p) => (
+                                <option key={p.code} value={p.name} />
+                            ))}
+                        </datalist>
+                        {filters.city && (
+                            <button
+                                onClick={() => updateFilter('city', '')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-stone-400 hover:text-stone-600 cursor-pointer p-1 flex items-center justify-center"
+                            >
+                                <AppIcon name="close" size={14} />
+                            </button>
+                        )}
+                    </div>
                 </FilterSection>
 
                 <FilterSection title="Quận / Huyện">
-                    <input
-                        list="district-list"
-                        id="filter-district"
-                        value={filters.district}
-                        onChange={(e) => updateFilter('district', e.target.value)}
-                        placeholder="Chọn quận huyện..."
-                        className="w-full bg-white border border-stone-200 px-3 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={!filters.city}
-                        aria-label="Lọc theo quận huyện"
-                    />
-                    <datalist id="district-list">
-                        {districts.map((d) => (
-                            <option key={d.code} value={d.name} />
-                        ))}
-                    </datalist>
+                    <div className="relative">
+                        <input
+                            list="district-list"
+                            id="filter-district"
+                            value={filters.district}
+                            onChange={(e) => updateFilter('district', e.target.value)}
+                            placeholder="Chọn quận huyện..."
+                            className={`w-full bg-white border border-stone-200 pl-3 pr-10 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${getHighlightStyles('district')}`}
+                            disabled={!filters.city}
+                            aria-label="Lọc theo quận huyện"
+                        />
+                        <datalist id="district-list">
+                            {districts.map((d) => (
+                                <option key={d.code} value={d.name} />
+                            ))}
+                        </datalist>
+                        {filters.district && (
+                            <button
+                                onClick={() => updateFilter('district', '')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-stone-400 hover:text-stone-600 cursor-pointer p-1 flex items-center justify-center"
+                            >
+                                <AppIcon name="close" size={14} />
+                            </button>
+                        )}
+                    </div>
                 </FilterSection>
 
                 <FilterSection title="Phường / Xã">
-                    <input
-                        list="ward-list"
-                        id="filter-ward"
-                        value={filters.ward}
-                        onChange={(e) => updateFilter('ward', e.target.value)}
-                        placeholder="Chọn phường xã..."
-                        className="w-full bg-white border border-stone-200 px-3 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        disabled={!filters.district}
-                        aria-label="Lọc theo phường xã"
-                    />
-                    <datalist id="ward-list">
-                        {wards.map((w) => (
-                            <option key={w.code} value={w.name} />
-                        ))}
-                    </datalist>
+                    <div className="relative">
+                        <input
+                            list="ward-list"
+                            id="filter-ward"
+                            value={filters.ward}
+                            onChange={(e) => updateFilter('ward', e.target.value)}
+                            placeholder="Chọn phường xã..."
+                            className={`w-full bg-white border border-stone-200 pl-3 pr-10 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${getHighlightStyles('ward')}`}
+                            disabled={!filters.district}
+                            aria-label="Lọc theo phường xã"
+                        />
+                        <datalist id="ward-list">
+                            {wards.map((w) => (
+                                <option key={w.code} value={w.name} />
+                            ))}
+                        </datalist>
+                        {filters.ward && (
+                            <button
+                                onClick={() => updateFilter('ward', '')}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-transparent border-none text-stone-400 hover:text-stone-600 cursor-pointer p-1 flex items-center justify-center"
+                            >
+                                <AppIcon name="close" size={14} />
+                            </button>
+                        )}
+                    </div>
                 </FilterSection>
             </div>
 
