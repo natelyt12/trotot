@@ -84,12 +84,29 @@ export default function ProfilePage({ user, navigate, initialData }) {
         }
     }, [initialData]);
 
-    const TABS = [
-        { id: 'info', label: 'Thông tin cá nhân', icon: 'user' },
-        { id: 'favorites', label: 'Tin đã lưu', icon: 'heart' },
-        { id: 'commented_rooms', label: 'Phòng đã bình luận', icon: 'messages' },
-        { id: 'password', label: 'Đổi mật khẩu', icon: 'lock' },
-        { id: 'danger', label: 'Vùng nguy hiểm', icon: 'trash' },
+    const TAB_GROUPS = [
+        {
+            label: 'Cá nhân',
+            tabs: [
+                { id: 'info', label: 'Thông tin cá nhân', icon: 'user' },
+                { id: 'favorites', label: 'Tin đã lưu', icon: 'heart' },
+                { id: 'commented_rooms', label: 'Phòng đã bình luận', icon: 'messages' },
+            ]
+        },
+        {
+            label: 'Quản lý',
+            condition: (role) => role === 'landlord' || role === 'agent',
+            tabs: [
+                { id: 'post_room', label: 'Đăng tin', icon: 'plus' },
+            ]
+        },
+        {
+            label: 'Bảo mật',
+            tabs: [
+                { id: 'password', label: 'Đổi mật khẩu', icon: 'lock' },
+                { id: 'danger', label: 'Vùng nguy hiểm', icon: 'trash' },
+            ]
+        }
     ];
 
     useEffect(() => {
@@ -331,7 +348,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                     <p className="text-stone-500 text-sm mt-1">Quản lý thông tin cá nhân và cài đặt bảo mật của bạn.</p>
                 </div>
 
-                <div className="bg-white border border-stone-200 overflow-hidden">
+                <div className="bg-white border border-stone-200 rounded-xl overflow-hidden">
                     <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] items-stretch">
 
                         {/* Sidebar */}
@@ -371,21 +388,30 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                 <p className="text-sm text-stone-400 truncate px-2">{user?.email}</p>
                             </div>
 
-                            {/* Tab navigation - Full width, No margin */}
-                            <div className="flex flex-col">
-                                {TABS.map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setActiveTab(tab.id)}
-                                        className={`flex items-center gap-3 px-6 py-4 text-sm font-bold cursor-pointer transition-all duration-200 text-left border-none ${activeTab === tab.id
-                                            ? 'bg-white text-amber-600 border-r-4 border-r-amber-500 shadow-[inset_-1px_0_0_#fff]'
-                                            : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
-                                            }`}
-                                    >
-                                        <AppIcon name={tab.icon} size={18} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
-                                        {tab.label}
-                                    </button>
-                                ))}
+                            <div className="flex flex-col py-4">
+                                {TAB_GROUPS.map((group) => {
+                                    if (group.condition && !group.condition(formData.role)) return null;
+                                    return (
+                                        <div key={group.label} className="mb-6 last:mb-0">
+                                            <div className="px-6 py-2 text-[0.68rem] font-black text-stone-400 uppercase tracking-[0.15em] mb-1">
+                                                {group.label}
+                                            </div>
+                                            {group.tabs.map((tab) => (
+                                                <button
+                                                    key={tab.id}
+                                                    onClick={() => setActiveTab(tab.id)}
+                                                    className={`flex items-center gap-3 w-full px-6 py-3.5 text-[0.9rem] font-bold cursor-pointer transition-all duration-200 text-left border-none ${activeTab === tab.id
+                                                        ? 'bg-white text-amber-600 border-r-4 border-r-amber-500 shadow-[inset_-1px_0_0_#fff]'
+                                                        : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                                        }`}
+                                                >
+                                                    <AppIcon name={tab.icon} size={18} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                                                    {tab.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             <div className="mt-auto p-6 border-t border-stone-100">
@@ -425,12 +451,12 @@ export default function ProfilePage({ user, navigate, initialData }) {
 
                             {/* ---- TAB: INFO ---- */}
                             {activeTab === 'info' && (
-                                <div className="animate-fade-in max-w-3xl">
+                                <div className="animate-fade-in">
                                     <TabHeader icon="user" title="Thông tin cá nhân" />
 
                                     <form onSubmit={handleUpdateProfile} className="flex flex-col gap-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <Field label="Họ và tên">
+                                            <Field label="Tên người dùng">
                                                 <input
                                                     type="text"
                                                     className={inputCls}
@@ -586,9 +612,23 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                 </div>
                             )}
 
+                            {/* ---- TAB: POST ROOM ---- */}
+                            {activeTab === 'post_room' && (
+                                <div className="animate-fade-in">
+                                    <TabHeader icon="plus" title="Đăng tin mới" />
+                                    <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
+                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 text-stone-300">
+                                            <AppIcon name="plus" size={32} />
+                                        </div>
+                                        <h3 className="text-lg font-bold text-stone-900 mb-2">Chức năng đang phát triển</h3>
+                                        <p className="text-stone-500 text-sm max-w-sm px-6">Chúng tôi đang nỗ lực hoàn thiện chức năng đăng tin để mang lại trải nghiệm tốt nhất cho bạn.</p>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* ---- TAB: PASSWORD ---- */}
                             {activeTab === 'password' && (
-                                <div className="animate-fade-in max-w-2xl">
+                                <div className="animate-fade-in">
                                     <TabHeader icon="lock" title="Đổi mật khẩu" />
 
                                     <form onSubmit={handleChangePassword} className="flex flex-col gap-6">
@@ -639,7 +679,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
 
                             {/* ---- TAB: DANGER ---- */}
                             {activeTab === 'danger' && (
-                                <div className="animate-fade-in max-w-2xl">
+                                <div className="animate-fade-in">
                                     <TabHeader icon="trash" title="Vùng nguy hiểm" danger />
 
                                     <div className="p-6 bg-red-50 border border-red-100 rounded-2xl">

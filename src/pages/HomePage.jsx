@@ -2,7 +2,6 @@ import { useState } from 'react';
 import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
 import { useRoomFilter } from '../hooks/useRoomFilter.js';
-import { UNIVERSITIES } from '../data/universities.js';
 import AppIcon from '../components/common/AppIcon.jsx';
 import LocationWizardModal from '../components/search/LocationWizardModal.jsx';
 

@@ -107,10 +107,10 @@ export default function RoomDetailPage({ room, navigate, user }) {
                 </div>
 
 
-                <div className="bg-white border border-stone-200">
-                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] items-stretch">
+                <div>
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] items-start gap-6">
                         {/* ---- LEFT COLUMN ---- */}
-                        <div className="flex flex-col">
+                        <div className="flex flex-col bg-white border border-stone-200 rounded-xl overflow-hidden">
 
                             {/* Image Gallery */}
                             <div className="bg-white">
@@ -350,8 +350,8 @@ export default function RoomDetailPage({ room, navigate, user }) {
                         </div>
 
                         {/* ---- RIGHT COLUMN: Contact sidebar ---- */}
-                        <div className="flex flex-col lg:border-l border-stone-100 h-full relative">
-                            <div className="lg:sticky lg:top-[96px] z-10">
+                        <div className="flex flex-col h-full relative">
+                            <div className="lg:sticky lg:top-[96px] z-10 bg-white border border-stone-200 rounded-xl overflow-hidden">
                                 {/* Price Section */}
                                 <div className="p-6 border-b border-stone-100 bg-white">
                                     <div className="text-[1.8rem] text-amber-600! font-bold tracking-tight font-heading">
@@ -452,6 +452,16 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                             <p className="text-amber-700 text-[0.78rem] leading-relaxed">
                                                 Không chuyển tiền trước khi xem phòng trực tiếp. Kiểm tra kỹ hợp đồng thuê trọ.
                                             </p>
+                                            <button
+                                                onClick={() => showModal({
+                                                    title: 'Thông báo',
+                                                    message: 'Tính năng Báo cáo tin đăng đang được phát triển.',
+                                                    type: 'info'
+                                                })}
+                                                className="mt-2 text-[0.78rem] text-amber-600 font-bold hover:text-amber-700 underline cursor-pointer border-none bg-transparent p-0 block"
+                                            >
+                                                Báo cáo tin đăng
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
