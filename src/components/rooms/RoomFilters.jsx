@@ -14,7 +14,8 @@ export default function RoomFilters({
     resetFilters, 
     toggleAmenity, 
     activeFilterCount,
-    highlightedField 
+    highlightedField,
+    isMobileMode = false
 }) {
     const selectedProvince = PROVINCE.find(p => p.name === filters.city);
     const districts = selectedProvince ? selectedProvince.districts : [];
@@ -28,37 +29,39 @@ export default function RoomFilters({
     };
 
     return (
-        <aside
+        <div
             id="room-filters"
-            className="bg-white rounded-xl border border-stone-200 p-5 flex flex-col gap-5 h-fit"
+            className={`${isMobileMode ? 'flex flex-col gap-6' : 'bg-white rounded-xl border border-stone-200 p-5 flex flex-col gap-5 h-fit'}`}
         >
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                    </svg>
-                    <h2
-                        className="text-sm font-bold text-stone-900 m-0"
-                        style={{ fontFamily: 'var(--font-heading)' }}
-                    >
-                        Bộ lọc
-                    </h2>
+            {/* Header - hide in mobile mode as modal has its own header */}
+            {!isMobileMode && (
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                        </svg>
+                        <h2
+                            className="text-sm font-bold text-stone-900 m-0"
+                            style={{ fontFamily: 'var(--font-heading)' }}
+                        >
+                            Bộ lọc
+                        </h2>
+                        {activeFilterCount > 0 && (
+                            <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[0.65rem] font-bold">
+                                {activeFilterCount}
+                            </span>
+                        )}
+                    </div>
                     {activeFilterCount > 0 && (
-                        <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[0.65rem] font-bold">
-                            {activeFilterCount}
-                        </span>
+                        <button
+                            onClick={resetFilters}
+                            className="bg-transparent border-none text-amber-600 text-[0.8rem] font-semibold cursor-pointer hover:text-amber-700 transition-colors duration-200"
+                        >
+                            Xóa tất cả
+                        </button>
                     )}
                 </div>
-                {activeFilterCount > 0 && (
-                    <button
-                        onClick={resetFilters}
-                        className="bg-transparent border-none text-amber-600 text-[0.8rem] font-semibold cursor-pointer hover:text-amber-700 transition-colors duration-200"
-                    >
-                        Xóa tất cả
-                    </button>
-                )}
-            </div>
+            )}
             
             {/* University filter */}
             <FilterSection title="Gần trường đại học">
@@ -325,7 +328,7 @@ export default function RoomFilters({
                     )}
                 </label>
             </FilterSection>
-        </aside>
+        </div>
     );
 }
 

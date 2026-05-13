@@ -1,20 +1,44 @@
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import SearchTrigger from '../search/SearchTrigger.jsx';
 
-/* ============================================
-   Header Component
-   - Fixed navbar, flat design, amber palette
-   - Mobile: hidden (BottomNav handles mobile)
-   - Desktop: logo + nav links + auth
-   ============================================ */
-export default function Header({ currentPage, navigate, user }) {
-    const [isScrolled, setIsScrolled] = useState(false);
+export default function Header({
+    currentPage,
+    navigate,
+    user,
+    onSearchClick,
+    searchDisplayText,
+    isSearchFilled
+}) {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [showSearch, setShowSearch] = useState(false);
 
     useEffect(() => {
-        const handleScroll = () => setIsScrolled(window.scrollY > 10);
+        const handleScroll = () => {
+            const isHome = currentPage === 'home';
+            const isMobile = window.innerWidth < 768; // md breakpoint
+            const isExcludedPage = ['profile', 'room-detail'].includes(currentPage);
+
+            if (isExcludedPage) {
+                setShowSearch(false);
+            } else if (isMobile) {
+                // Trên mobile: Chỉ hiện ở trang chủ (luôn hiện)
+                setShowSearch(isHome);
+            } else {
+                // Trên PC: Cuộn > 400px ở trang chủ mới hiện, hoặc luôn hiện ở các trang khác (ngoại trừ trang đã loại trừ)
+                setShowSearch(!isHome || window.scrollY > 400);
+            }
+        };
+
+        handleScroll();
         window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        window.addEventListener('resize', handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', handleScroll);
+        };
+    }, [currentPage]);
 
     const navLinks = [
         { label: 'Tìm phòng', page: 'home' },
@@ -23,14 +47,9 @@ export default function Header({ currentPage, navigate, user }) {
 
     const handleNavLinkClick = (link) => {
         if (link.page === 'favorites') {
-            if (!user) {
-                navigate('login');
-            } else {
-                navigate('profile', { tab: 'favorites' });
-            }
-        } else {
-            navigate(link.page);
-        }
+            if (!user) navigate('login');
+            else navigate('profile', { tab: 'favorites' });
+        } else navigate(link.page);
     };
 
     const roleLabel = (role) => {
@@ -40,108 +59,120 @@ export default function Header({ currentPage, navigate, user }) {
     };
 
     return (
-        <header className="fixed z-100 top-0 left-0 right-0 hidden md:block">
+        <header className="fixed z-100 top-0 left-0 right-0 bg-white border-b border-stone-100 shadow-sm">
             {/* Main bar */}
-            <nav
-                className={`flex items-center justify-start h-16 px-6 border-b transition-colors duration-300 ${isScrolled
-                    ? 'bg-white border-stone-200'
-                    : 'bg-white/95 border-stone-100'
-                    }`}
-            >
-                {/* Logo */}
-                <button
-                    onClick={() => navigate('home')}
-                    className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0"
-                >
-                    <img
-                        src="/logo.png"
-                        alt="Trọ Tốt Logo"
-                        className="w-8 h-8 object-contain rounded-md"
-                    />
-                    <span className="flex items-baseline">
-                        <span
-                            className="font-semibold text-[1.35rem] text-stone-900 tracking-tight"
-                            style={{ fontFamily: 'var(--font-heading)' }}
-                        >
-                            Trọ
-                        </span>
-                        <span
-                            className="text-amber-500 text-[1.55rem] font-bold ml-0.5"
-                            style={{ fontFamily: 'var(--font-script)' }}
-                        >
-                            Tốt
-                        </span>
-                    </span>
-                </button>
+            <nav className="flex flex-col md:flex-row w-full max-w-7xl mx-auto">
+                {/* Top Row (Mobile) / Full Row (Desktop) */}
+                <div className="flex items-center justify-between w-full h-14 md:h-16 px-4 md:px-6">
 
-                {/* Desktop Nav Links */}
-                <div className="flex items-center gap-0.5 ml-8">
-                    {navLinks.map((link) => (
+                    {/* LEFT: Logo & Nav Links */}
+                    <div className="flex items-center justify-start gap-8">
+                        {/* Logo */}
                         <button
-                            key={link.page}
-                            onClick={() => handleNavLinkClick(link)}
-                            className={`border-none px-3.5 py-2 rounded-md cursor-pointer text-sm font-medium transition-colors duration-200 ${currentPage === link.page || (link.page === 'favorites' && currentPage === 'profile')
-                                ? 'bg-amber-100 text-amber-600 font-semibold'
-                                : 'bg-transparent text-stone-600 hover:bg-stone-100 hover:text-stone-900'
-                                }`}
+                            onClick={() => navigate('home')}
+                            className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0 shrink-0"
                         >
-                            {link.label}
+                            <img
+                                src="/logo.png"
+                                alt="Trọ Tốt Logo"
+                                className="w-8 h-8 object-contain rounded-md"
+                            />
+                            <span className="flex items-baseline">
+                                <span className="font-semibold text-[1.25rem] text-stone-900 tracking-tight font-heading">Trọ</span>
+                                <span className="text-amber-500 text-[1.45rem] font-bold ml-0.5 font-script">Tốt</span>
+                            </span>
                         </button>
-                    ))}
-                </div>
 
-                {/* Auth area */}
-                <div className="flex items-center gap-2 ml-auto">
-                    {user ? (
-                        <button
-                            onClick={() => navigate('profile')}
-                            className="flex items-center gap-3 bg-transparent border-none py-1.5 px-3 rounded-xl cursor-pointer transition-colors duration-200 hover:bg-stone-100"
-                        >
-                            <div className="text-right hidden md:block">
-                                <div className="text-sm font-semibold text-stone-900 leading-tight">
-                                    {user.user_metadata?.full_name || 'Người dùng'}
-                                </div>
-                                <div className="text-xs text-stone-500">
-                                    {roleLabel(user.user_metadata?.role)}
-                                </div>
-                            </div>
-                            {/* Avatar */}
-                            <div
-                                className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold overflow-hidden shrink-0 bg-amber-500"
-                                style={
-                                    user.user_metadata?.avatar_url
-                                        ? { backgroundImage: `url(${user.user_metadata.avatar_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                                        : {}
-                                }
+                        {/* Desktop Nav Links */}
+                        <div className="hidden lg:flex items-center gap-1">
+                            {navLinks.map((link) => (
+                                <button
+                                    key={link.page}
+                                    onClick={() => handleNavLinkClick(link)}
+                                    className={`border-none px-4 py-1.5 rounded-md cursor-pointer text-sm font-bold transition-colors ${currentPage === link.page ? 'text-amber-600' : 'text-stone-600 hover:text-stone-900'
+                                        }`}
+                                >
+                                    {link.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* RIGHT Area: Search (Conditional) + Auth */}
+                    <div className="flex items-center justify-end gap-4 shrink-0">
+                        {/* Desktop Search - Appears on scroll */}
+                        <AnimatePresence>
+                            {showSearch && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                    className="hidden md:block w-72 lg:w-80"
+                                >
+                                    <SearchTrigger
+                                        displayText={searchDisplayText}
+                                        onClick={onSearchClick}
+                                        isFilled={isSearchFilled}
+                                        isNavbar={true}
+                                        showButton={false}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <div className="h-6 w-px bg-stone-100 hidden md:block" />
+
+                        {user ? (
+                            <button
+                                onClick={() => navigate('profile')}
+                                className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1 px-1 md:py-1.5 md:px-3 rounded-full md:rounded-xl cursor-pointer hover:bg-stone-50 transition-colors"
                             >
-                                {!user.user_metadata?.avatar_url &&
-                                    (user.user_metadata?.full_name || 'U').charAt(0).toUpperCase()}
-                            </div>
-                        </button>
-                    ) : (
-                        <button
-                            onClick={() => navigate('login')}
-                            className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-6 py-2 rounded-full cursor-pointer border-none transition-colors duration-200"
-                        >
-                            Đăng nhập
-                        </button>
-                    )}
+                                <div className="text-right hidden md:block">
+                                    <div className="text-sm font-bold text-stone-900 leading-tight truncate max-w-[120px]">{user.user_metadata?.full_name || 'Người dùng'}</div>
+                                    <div className="text-[10px] uppercase tracking-tighter text-stone-500 font-bold">{roleLabel(user.user_metadata?.role)}</div>
+                                </div>
+                                <div
+                                    className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-white"
+                                    style={user.user_metadata?.avatar_url ? { backgroundImage: `url(${user.user_metadata.avatar_url})`, backgroundSize: 'cover' } : {}}
+                                >
+                                    {!user.user_metadata?.avatar_url && (user.user_metadata?.full_name || 'U').charAt(0).toUpperCase()}
+                                </div>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => navigate('login')}
+                                className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold h-10 px-6 rounded-full cursor-pointer border-none transition-colors"
+                            >
+                                Đăng nhập
+                            </button>
+                        )}
+                    </div>
 
-                    {/* Mobile hamburger (only visible on narrow viewports ≤ md) */}
-                    <button
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                        className="md:hidden bg-transparent border-none cursor-pointer p-1.5 text-stone-600 rounded-md hover:bg-stone-100 transition-colors"
-                        aria-label="Toggle menu"
-                        aria-expanded={mobileOpen}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            {mobileOpen
-                                ? <path d="M18 6 6 18M6 6l12 12" />
-                                : <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>
-                            }
-                        </svg>
-                    </button>
                 </div>
+
+                {/* Mobile Search Bar (Appears on scroll) */}
+                <AnimatePresence>
+                    {showSearch && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="md:hidden w-full px-4 overflow-hidden"
+                        >
+                            <div className="pb-3 pt-1">
+                                <SearchTrigger
+                                    displayText={searchDisplayText}
+                                    onClick={onSearchClick}
+                                    isFilled={isSearchFilled}
+                                    isNavbar={true}
+                                    showButton={false}
+                                />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </nav>
 
             {/* Mobile dropdown menu */}

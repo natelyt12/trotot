@@ -218,6 +218,15 @@ export const useRoomFilter = () => {
     fetchCities();
   }, []);
 
+  // Helper to get text for search bar
+  const getLocationDisplayText = useCallback(() => {
+    if (filters.university) return `Quanh ${filters.university}`;
+    if (filters.ward && filters.district && filters.city) return `${filters.ward}, ${filters.district}, ${filters.city}`;
+    if (filters.district && filters.city) return `${filters.district}, ${filters.city}`;
+    if (filters.city) return `Toàn ${filters.city}`;
+    return 'Tìm khu vực hoặc trường Đại học...';
+  }, [filters]);
+
   return {
     filters,
     filteredRooms: rooms,
@@ -234,6 +243,7 @@ export const useRoomFilter = () => {
     loadMore,
     error,
     highlightedField,
-    highlightField
+    highlightField,
+    getLocationDisplayText
   };
 };

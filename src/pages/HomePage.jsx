@@ -1,15 +1,16 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
 import { useRoomFilter } from '../hooks/useRoomFilter.js';
 import AppIcon from '../components/common/AppIcon.jsx';
-import LocationWizardModal from '../components/search/LocationWizardModal.jsx';
+import SearchTrigger from '../components/search/SearchTrigger.jsx';
 
 /* ============================================
    HomePage – Listing + search + filters
    Flat design, amber palette
    ============================================ */
-export default function HomePage({ navigate, user }) {
+export default function HomePage({ navigate, user, onSearchClick }) {
     const {
         filters,
         filteredRooms,
@@ -25,46 +26,11 @@ export default function HomePage({ navigate, user }) {
         loadMore,
         error,
         highlightedField,
-        highlightField
+        highlightField,
+        getLocationDisplayText
     } = useRoomFilter();
 
-    const [showMobileFilter, setShowMobileFilter] = useState(false);
-    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const cities = getAvailableCities();
-
-    // Derive display text for the fake input
-    const getLocationDisplayText = () => {
-        if (filters.university) return `Quanh ${filters.university}`;
-        if (filters.ward && filters.district && filters.city) return `${filters.ward}, ${filters.district}, ${filters.city}`;
-        if (filters.district && filters.city) return `${filters.district}, ${filters.city}`;
-        if (filters.city) return `Toàn ${filters.city}`;
-        return 'Tìm khu vực hoặc trường Đại học...';
-    };
-
-    const handleLocationComplete = (locationFilters) => {
-        updateFilter({
-            ...locationFilters,
-            search: ''
-        });
-
-        // Determine which field to focus/highlight
-        let targetField = '';
-        if (locationFilters.university) targetField = 'university';
-        else if (locationFilters.ward) targetField = 'ward';
-        else if (locationFilters.district) targetField = 'district';
-        else if (locationFilters.city) targetField = 'city';
-
-        // Auto-scroll and trigger highlight
-        setTimeout(() => {
-            scrollToListing();
-            if (targetField) highlightField(targetField);
-        }, 150);
-    };
-
-    const scrollToListing = () => {
-        const el = document.getElementById('listing-section');
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
 
 
     const handleRoomClick = (room) => navigate('room-detail', room);
@@ -84,27 +50,51 @@ export default function HomePage({ navigate, user }) {
         { value: '4.8★', label: 'Đánh giá trung bình' },
     ];
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
         <div className="min-h-screen bg-stone-50">
 
             {/* ---- HERO SECTION ---- */}
-            <section className="pt-24 md:pt-48 pb-28 relative overflow-hidden bg-stone-900">
+            <section className={`${user ? 'hidden md:block' : ''} pt-24 md:pt-48 pb-28 relative overflow-hidden bg-stone-900`}>
                 {/* Subtle amber tint blobs */}
                 <div className="absolute -top-20 -right-20 w-96 h-96 bg-amber-500/10 rounded-lg pointer-events-none blur-3xl" />
                 <div className="absolute bottom-0 -left-16 w-72 h-72 bg-amber-600/8 rounded-lg pointer-events-none blur-3xl" />
 
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="max-w-6xl mx-auto px-4 sm:px-6 relative"
+                >
                     <div className="max-w-2xl mx-auto text-center pb-16">
 
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/25 rounded-full px-3 py-1 mb-6">
+                        <motion.div
+                            variants={itemVariants}
+                            className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/25 rounded-full px-3 py-1 mb-6"
+                        >
                             <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
                             <span className="text-amber-300 text-xs font-semibold">
                                 Nền tảng tìm trọ #1 Việt Nam
                             </span>
-                        </div>
+                        </motion.div>
 
-                        <h1
+                        <motion.h1
+                            variants={itemVariants}
                             className="text-[clamp(2rem,6vw,3.25rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-tight"
                             style={{ fontFamily: 'var(--font-heading)' }}
                         >
@@ -116,41 +106,32 @@ export default function HomePage({ navigate, user }) {
                                 ưng ý
                             </span>{' '}
                             trong vài phút
-                        </h1>
+                        </motion.h1>
 
-                        <p className="text-stone-400 text-lg leading-relaxed max-w-xl mx-auto mb-10">
+                        <motion.p
+                            variants={itemVariants}
+                            className="text-stone-400 text-lg leading-relaxed max-w-xl mx-auto mb-10"
+                        >
                             Hàng nghìn phòng được xác minh tại Hà Nội, TP. Hồ Chí Minh và khắp cả nước.
                             Miễn phí tìm kiếm, không phí trung gian.
-                        </p>
+                        </motion.p>
 
-                        {/* Guided Search (Fake Input trigger) */}
-                        <div className="max-w-2xl mx-auto mt-6 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                            <button
-                                onClick={() => setIsLocationModalOpen(true)}
-                                className="w-full bg-stone-800/50 hover:bg-stone-800/70 border border-stone-700 p-2 pr-2 rounded-full flex items-center justify-between gap-4 transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-amber-500/10 group shadow-lg cursor-pointer"
-                            >
-                                <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className="w-10 h-10 bg-stone-700/50 text-stone-300 rounded-full flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 group-hover:text-amber-500 transition-colors">
-                                        <AppIcon name="search" size={18} />
-                                    </div>
-                                    <div className="flex flex-col items-start truncate">
-                                        <span className="text-[0.65rem] font-bold text-amber-500 uppercase tracking-wider mb-0.5">Khu vực tìm kiếm</span>
-                                        <span className={`text-sm font-semibold truncate ${(filters.university || filters.city) ? 'text-white' : 'text-stone-400'
-                                            }`}>
-                                            {getLocationDisplayText()}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="bg-amber-500 text-white px-8 py-3 rounded-full font-bold text-sm transition-all duration-200 shrink-0 group-hover:bg-amber-400">
-                                    Tìm ngay
-                                </div>
-                            </button>
-                        </div>
+                        {/* Guided Search - Hidden on mobile because Header search is now sticky */}
+                        <motion.div variants={itemVariants} className="hidden md:block max-w-2xl mx-auto mt-6">
+                            <SearchTrigger
+                                displayText={getLocationDisplayText()}
+                                onClick={onSearchClick}
+                                isFilled={filters.city || filters.university}
+                                isNavbar={false}
+                            />
+                        </motion.div>
 
                     </div>
                     {/* Stats bar */}
-                    <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] bg-stone-800 border border-stone-700 rounded-xl overflow-hidden max-w-3xl mx-auto">
+                    <motion.div
+                        variants={itemVariants}
+                        className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] bg-stone-800 border border-stone-700 rounded-xl overflow-hidden max-w-3xl mx-auto"
+                    >
                         {stats.map((stat, idx) => (
                             <div
                                 key={stat.label}
@@ -167,12 +148,19 @@ export default function HomePage({ navigate, user }) {
                                 </div>
                             </div>
                         ))}
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             </section>
 
             {/* ---- LISTING SECTION ---- */}
-            <section id="listing-section" className="max-w-6xl mx-auto px-4 sm:px-6 pt-10 pb-12 scroll-mt-14">
+            <motion.section
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                id="listing-section"
+                className={`max-w-6xl mx-auto px-4 sm:px-6 pb-12 scroll-mt-14 ${user ? 'pt-32 md:pt-10' : 'pt-10'
+                    }`}
+            >
 
                 {/* Section header + mobile filter toggle */}
                 <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
@@ -187,30 +175,14 @@ export default function HomePage({ navigate, user }) {
                         <p className="text-stone-500 text-sm font-medium mt-1">Khám phá không gian sống lý tưởng dành riêng cho bạn.</p>
                     </div>
 
-                    {/* Mobile filter button */}
-                    <button
-                        onClick={() => setShowMobileFilter(!showMobileFilter)}
-                        className="lg:hidden inline-flex items-center gap-2 bg-white border border-stone-200 text-stone-700 px-4 py-2 rounded-full text-sm font-semibold cursor-pointer hover:border-amber-500 hover:text-amber-600 transition-colors duration-200"
-                        aria-expanded={showMobileFilter}
-                        aria-controls="room-filters"
-                    >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-                        </svg>
-                        Bộ lọc
-                        {activeFilterCount > 0 && (
-                            <span className="bg-amber-500 text-white rounded-full w-4 h-4 inline-flex items-center justify-center text-[0.65rem] font-bold">
-                                {activeFilterCount}
-                            </span>
-                        )}
-                    </button>
+                    {/* Desktop only greeting - on mobile we focus on the FAB */}
                 </div>
 
                 {/* Layout: Grid (left) + Sidebar (right) */}
                 <div className="flex flex-col lg:flex-row-reverse gap-6 items-start">
 
-                    {/* Sidebar */}
-                    <div className={`w-full lg:w-[280px] lg:shrink-0 filter-sidebar-aside ${showMobileFilter ? 'block' : 'hidden lg:block'}`}>
+                    {/* Sidebar (Desktop only) */}
+                    <div className="hidden lg:block lg:w-[280px] lg:shrink-0 filter-sidebar-aside">
                         <RoomFilters
                             filters={filters}
                             updateFilter={updateFilter}
@@ -268,14 +240,8 @@ export default function HomePage({ navigate, user }) {
                         )}
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
-            {/* Guided Search Modal */}
-            <LocationWizardModal
-                isOpen={isLocationModalOpen}
-                onClose={() => setIsLocationModalOpen(false)}
-                onComplete={handleLocationComplete}
-            />
         </div>
     );
 }
