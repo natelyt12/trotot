@@ -49,17 +49,30 @@ export default function RoomDetailPage({ room, navigate, user }) {
 
         const incrementViews = async () => {
             try {
-                // Atomic increment using a direct update (Race conditions possible but simple)
-                // Better: use an RPC call if available on Supabase
-                const { data, error } = await supabase
-                    .from('rooms')
-                    .update({ total_views: (room.metadata?.total_views || 0) + 1 })
-                    .eq('id', room.id)
-                    .select('total_views')
-                    .maybeSingle();
+                // Better approach: Use RPC to bypass RLS for non-owners
+                // If you haven't created the RPC yet, this will fail and fall back to the update() method
+                const { error: rpcError } = await supabase.rpc('increment_room_views', { 
+                    room_id: room.id 
+                });
 
-                if (!error && data) {
-                    setViews(data.total_views);
+                if (rpcError) {
+                    console.warn('RPC failed, falling back to direct update (may fail for non-owners due to RLS):', rpcError);
+                    
+                    // Fallback to direct update (only works if RLS allows or user is owner)
+                    const { data, error: updateError } = await supabase
+                        .from('rooms')
+                        .update({ total_views: (room.metadata?.total_views || 0) + 1 })
+                        .eq('id', room.id)
+                        .select('total_views')
+                        .maybeSingle();
+
+                    if (!updateError && data) {
+                        setViews(data.total_views);
+                    }
+                } else {
+                    // If RPC succeeded, the view count on server is incremented
+                    // We can just increment the local state to show immediate feedback
+                    setViews(prev => prev + 1);
                 }
             } catch (err) {
                 console.error('Failed to increment views:', err);
@@ -67,7 +80,8 @@ export default function RoomDetailPage({ room, navigate, user }) {
         };
 
         incrementViews();
-    }, [room?.id, room.metadata?.total_views]);
+        // Only run once per room.id to prevent infinite loops and double increments
+    }, [room?.id]);
 
 
     if (!room) {
