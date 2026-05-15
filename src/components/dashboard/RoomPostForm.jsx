@@ -181,6 +181,13 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
     );
 
     // --- XỬ LÝ TIỆN ÍCH ---
+    const sanitizeFilename = (filename) => {
+        // Loại bỏ dấu tiếng Việt
+        const str = filename.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        // Thay thế ký tự không phải chữ cái/số bằng dấu gạch dưới, giữ lại dấu chấm cho định dạng file
+        return str.replace(/[^a-zA-Z0-9.]/g, '_').replace(/_+/g, '_');
+    };
+
     const toggleAmenity = (key) => {
         setFormData(prev => {
             const amenities = prev.room_features.amenities.includes(key)
@@ -269,7 +276,9 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                     fileToUpload = await compressImage(fileToUpload);
                 }
 
-                const fileName = `${Date.now()}_${i}_${fileToUpload.name.replace(/\s/g, '_')}`;
+                // Làm sạch tên file để tránh lỗi Invalid Key (tiếng Việt có dấu)
+                const safeName = sanitizeFilename(fileToUpload.name);
+                const fileName = `${Date.now()}_${i}_${safeName}`;
                 const filePath = `${uploadFolder}/${fileName}`;
 
                 const { data: uploadData, error: uploadError } = await supabase.storage
