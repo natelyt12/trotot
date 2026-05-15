@@ -91,6 +91,12 @@ export const UNIVERSITIES = [
     ward: "Phường Mộ Lao",
   },
   {
+    name: "Trường Đại học Công nghệ Đông Á",
+    city: "Thành phố Hà Nội",
+    district: "Quận Nam Từ Liêm",
+    ward: "Phường Xuân Phương",
+  },
+  {
     name: "Trường Đại học Kiến trúc Hà Nội",
     city: "Thành phố Hà Nội",
     district: "Quận Hà Đông",
