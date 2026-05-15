@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useModal } from '../context/ModalContext';
 import { supabase } from '../lib/supabase';
 import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from '../data/constants.js';
+import { UNIVERSITIES } from '../data/universities';
 import {
     formatPrice,
     formatArea,
@@ -238,12 +239,32 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         <AppIcon name="clock" size={16} />
                                         <span>Cập nhật: {formatDate(metadata.updated_at)}</span>
                                     </div>
-                                </div>
 
+                                    <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
+                                        <AppIcon name="calendar" size={16} />
+                                        <span>Hết hạn: {room.available_until ? formatDate(room.available_until) : 'Không xác định'}</span>
+                                    </div>
+                                </div>
                                 <div className="flex items-center gap-2 text-stone-500 text-[0.925rem] mb-6">
                                     <AppIcon name="location" size={16} className="text-stone-400" />
                                     <span>{basic_info.address}, {basic_info.district}, {basic_info.city}</span>
                                 </div>
+
+                                {/* Nearby Universities Mapping */}
+                                {(() => {
+                                    const nearby = UNIVERSITIES.filter(u => u.city === basic_info.city && u.district === basic_info.district);
+                                    if (nearby.length === 0) return null;
+                                    return (
+                                        <div className="flex flex-wrap gap-2 mb-6">
+                                            {nearby.map(u => (
+                                                <span key={u.name} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 text-[0.75rem] font-bold border border-blue-100">
+                                                    <AppIcon name="verified" size={12} />
+                                                    {u.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    );
+                                })()}
 
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-stone-50 rounded-lg border border-stone-100">
                                     <StatItem icon="price" label="Giá thuê" value={formatPrice(basic_info.price_monthly)} highlight />
@@ -261,7 +282,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                 </div>
 
                                 <div className="mt-3 text-[0.8rem] text-stone-400">
-                                    Đăng ngày: {formatDate(metadata.created_at)} • ID: {room.listing_id}
+                                    Đăng ngày: {formatDate(metadata.created_at)} • Hết hạn: {room.available_until ? formatDate(room.available_until) : 'Không xác định'} • ID: {room.listing_id}
                                 </div>
                             </div>
 
@@ -275,13 +296,14 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         <InfoRow label="Tiền điện" value={formatElectricity(monthly_costs.electricity)} />
                                         <InfoRow label="Tiền nước" value={formatWater(monthly_costs.water)} />
                                         <InfoRow label="Internet" value={
-                                            monthly_costs.internet > 0
+                                            Number(monthly_costs.internet) > 0
                                                 ? `${new Intl.NumberFormat('vi-VN').format(monthly_costs.internet)} đ/tháng`
-                                                : (room_features.amenities.includes('wifi') ? 'Miễn phí (Đã bao gồm)' : 'Không có')
+                                                : 'Miễn phí / Đã bao gồm'
                                         } />
                                         <InfoRow label="Gửi xe" value={
-                                            (monthly_costs.parking_fee === 0 || !monthly_costs.parking_fee) ? 'Miễn phí / Không có'
-                                                : `${new Intl.NumberFormat('vi-VN').format(monthly_costs.parking_fee)} đ/tháng`
+                                            Number(monthly_costs.parking_fee) > 0
+                                                ? `${new Intl.NumberFormat('vi-VN').format(monthly_costs.parking_fee)} đ/tháng`
+                                                : 'Miễn phí / Đã bao gồm'
                                         } />
 
                                         {monthly_costs.extra_services.length > 0 && (

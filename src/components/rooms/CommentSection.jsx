@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { formatDate } from '../../utils/formatters.js';
 import AppIcon from '../common/AppIcon.jsx';
-import { useModal } from '../../context/ModalContext.jsx';
+import { useModal } from '../../context/ModalContext';
 
 export default function CommentSection({ room, user, navigate, isGridMode = false }) {
     const { showModal } = useModal();

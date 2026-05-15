@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import VerificationForm from '../components/auth/VerificationForm.jsx';
-import { useModal } from '../context/ModalContext.jsx';
+import { useModal } from '../context/ModalContext';
 
 /* ============================================
    RegisterPage – Flat design, amber palette

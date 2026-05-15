@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import AppIcon from '../common/AppIcon.jsx';
+import BaseModal from '../common/BaseModal';
 import { UNIVERSITIES } from '../../data/universities.js';
 import { PROVINCE } from '../../data/province.js';
 
@@ -14,8 +15,6 @@ export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
 
     // Search query for lists
     const [searchQuery, setSearchQuery] = useState('');
-
-
 
     // Reset wizard when closed
     const handleClose = () => {
@@ -77,8 +76,6 @@ export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
     const filteredCities = PROVINCE.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
     const filteredDistricts = activeDistricts.filter(d => d.name.toLowerCase().includes(searchQuery.toLowerCase()));
     const filteredWards = activeWards.filter(w => w.name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    if (!isOpen) return null;
 
     const renderStepContent = () => {
         switch (step) {
@@ -171,11 +168,16 @@ export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
     };
 
     return (
-        <div className="fixed inset-0 z-100 flex items-end sm:items-center justify-center bg-stone-900/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white w-full sm:w-[500px] sm:rounded-2xl rounded-t-2xl h-[85vh] sm:h-[600px] flex flex-col overflow-hidden shadow-2xl transition-transform transform translate-y-0">
-
+        <BaseModal
+            isOpen={isOpen}
+            onClose={handleClose}
+            maxWidth="max-w-[500px]"
+            showClose={false}
+            fullHeightMobile={false}
+        >
+            <div className="flex flex-col max-h-[85vh] sm:max-h-[600px] overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-stone-100">
+                <div className="flex items-center justify-between p-4 border-b border-stone-100 shrink-0">
                     <div className="flex items-center gap-3">
                         {step !== 'uni' && (
                             <button
@@ -185,7 +187,7 @@ export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
                                     if (step === 'ward') setStep('district');
                                     setSearchQuery('');
                                 }}
-                                className="p-2 hover:bg-stone-100 rounded-full transition-colors"
+                                className="p-2 hover:bg-stone-100 rounded-full transition-colors cursor-pointer border-none"
                             >
                                 <AppIcon name="arrowLeft" size={20} className="text-stone-700" />
                             </button>
@@ -197,13 +199,13 @@ export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
                             {step === 'ward' && `Phường/Xã tại ${tempDistrict}`}
                         </h3>
                     </div>
-                    <button onClick={handleClose} className="p-2 hover:bg-stone-100 rounded-full transition-colors">
+                    <button onClick={handleClose} className="p-2 hover:bg-stone-100 rounded-full transition-colors cursor-pointer border-none">
                         <AppIcon name="close" size={20} className="text-stone-500" />
                     </button>
                 </div>
 
                 {/* Search Input */}
-                <div className="p-4 border-b border-stone-100">
+                <div className="p-4 border-b border-stone-100 shrink-0">
                     <div className="relative">
                         <AppIcon name="search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                         <input
@@ -225,7 +227,7 @@ export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
                     {renderStepContent()}
                 </div>
             </div>
-        </div>
+        </BaseModal>
     );
 }
 

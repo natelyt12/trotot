@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useModal } from '../context/ModalContext';
+import { useNotification } from '../context/NotificationContext';
 import { supabase } from '../lib/supabase';
 import AppIcon from '../components/common/AppIcon.jsx';
 import { useFavorites } from '../context/FavoritesContext.jsx';
@@ -13,10 +14,10 @@ import RoomGrid from '../components/rooms/RoomGrid.jsx';
    ============================================ */
 export default function ProfilePage({ user, navigate, initialData }) {
     const { showModal } = useModal();
+    const { addNotification } = useNotification();
     const { favorites } = useFavorites();
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [savedRooms, setSavedRooms] = useState([]);
     const [loadingSaved, setLoadingSaved] = useState(false);
 
@@ -79,9 +80,8 @@ export default function ProfilePage({ user, navigate, initialData }) {
     }, [user]);
 
     useEffect(() => {
-        if (initialData?.tab) {
-            setActiveTab(initialData.tab);
-        }
+        // Always sync activeTab with initialData, defaulting to 'info' if not specified
+        setActiveTab(initialData?.tab || 'info');
     }, [initialData]);
 
     const TAB_GROUPS = [
@@ -93,13 +93,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                 { id: 'commented_rooms', label: 'Phòng đã bình luận', icon: 'messages' },
             ]
         },
-        {
-            label: 'Quản lý',
-            condition: (role) => role === 'landlord' || role === 'agent',
-            tabs: [
-                { id: 'post_room', label: 'Đăng tin', icon: 'plus' },
-            ]
-        },
+
         {
             label: 'Bảo mật',
             tabs: [
@@ -190,7 +184,6 @@ export default function ProfilePage({ user, navigate, initialData }) {
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setMessage({ type: '', text: '' });
         try {
             const { error } = await supabase.auth.updateUser({
                 data: { full_name: formData.full_name, role: formData.role }
@@ -203,9 +196,9 @@ export default function ProfilePage({ user, navigate, initialData }) {
                 .eq('id', user.id);
             if (profileError) throw profileError;
 
-            setMessage({ type: 'success', text: 'Cập nhật thông tin thành công!' });
+            addNotification('Cập nhật thông tin thành công!', 'success');
         } catch (err) {
-            setMessage({ type: 'error', text: err.message });
+            addNotification(err.message, 'error');
         } finally {
             setLoading(false);
         }
@@ -215,7 +208,6 @@ export default function ProfilePage({ user, navigate, initialData }) {
         const file = e.target.files?.[0];
         if (!file) return;
         setUploading(true);
-        setMessage({ type: '', text: '' });
         try {
             const fileExt = file.name.split('.').pop();
             const filePath = `${user.id}/${Date.now()}.${fileExt}`;
@@ -241,9 +233,9 @@ export default function ProfilePage({ user, navigate, initialData }) {
             if (profileError) throw profileError;
 
             setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
-            setMessage({ type: 'success', text: 'Cập nhật ảnh đại diện thành công!' });
+            addNotification('Cập nhật ảnh đại diện thành công!', 'success');
         } catch (err) {
-            setMessage({ type: 'error', text: `Lỗi tải ảnh: ${err.message}` });
+            addNotification(`Lỗi tải ảnh: ${err.message}`, 'error');
         } finally {
             setUploading(false);
         }
@@ -251,13 +243,12 @@ export default function ProfilePage({ user, navigate, initialData }) {
 
     const handleChangePassword = async (e) => {
         e.preventDefault();
-        setMessage({ type: '', text: '' });
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setMessage({ type: 'error', text: 'Mật khẩu xác nhận không khớp.' });
+            addNotification('Mật khẩu xác nhận không khớp.', 'error');
             return;
         }
         if (passwordData.newPassword.length < 6) {
-            setMessage({ type: 'error', text: 'Mật khẩu mới phải có ít nhất 6 ký tự.' });
+            addNotification('Mật khẩu mới phải có ít nhất 6 ký tự.', 'error');
             return;
         }
         setPasswordLoading(true);
@@ -271,10 +262,10 @@ export default function ProfilePage({ user, navigate, initialData }) {
             const { error } = await supabase.auth.updateUser({ password: passwordData.newPassword });
             if (error) throw error;
 
-            setMessage({ type: 'success', text: 'Thay đổi mật khẩu thành công!' });
+            addNotification('Thay đổi mật khẩu thành công!', 'success');
             setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
         } catch (err) {
-            setMessage({ type: 'error', text: err.message });
+            addNotification(err.message, 'error');
         } finally {
             setPasswordLoading(false);
         }
@@ -309,7 +300,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                         onConfirm: () => navigate('home')
                     });
                 } catch (err) {
-                    setMessage({ type: 'error', text: `Lỗi: ${err.message}` });
+                    addNotification(`Lỗi: ${err.message}`, 'error');
                 } finally {
                     setLoading(false);
                 }
@@ -390,7 +381,9 @@ export default function ProfilePage({ user, navigate, initialData }) {
 
                             <div className="flex flex-col py-4">
                                 {TAB_GROUPS.map((group) => {
-                                    if (group.condition && !group.condition(formData.role)) return null;
+                                    // Use the actual role from user metadata, not the unsaved formData
+                                    const currentRole = user?.user_metadata?.role || 'tenant';
+                                    if (group.condition && !group.condition(currentRole)) return null;
                                     return (
                                         <div key={group.label} className="mb-6 last:mb-0">
                                             <div className="px-6 py-2 text-[0.68rem] font-black text-stone-400 uppercase tracking-[0.15em] mb-1">
@@ -433,21 +426,6 @@ export default function ProfilePage({ user, navigate, initialData }) {
                         {/* Content panel */}
                         <main className="p-6 md:p-10 min-h-[500px] bg-white">
 
-                            {/* Alert message */}
-                            {message.text && (
-                                <div
-                                    className={`p-4 rounded-lg mb-8 text-sm font-medium flex items-center gap-3 border ${message.type === 'success'
-                                        ? 'bg-green-50 text-green-800 border-green-200'
-                                        : 'bg-red-50 text-red-800 border-red-200'
-                                        }`}
-                                >
-                                    {message.type === 'success'
-                                        ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
-                                        : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                                    }
-                                    {message.text}
-                                </div>
-                            )}
 
                             {/* ---- TAB: INFO ---- */}
                             {activeTab === 'info' && (
@@ -612,19 +590,6 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                 </div>
                             )}
 
-                            {/* ---- TAB: POST ROOM ---- */}
-                            {activeTab === 'post_room' && (
-                                <div className="animate-fade-in">
-                                    <TabHeader icon="plus" title="Đăng tin mới" />
-                                    <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
-                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 text-stone-300">
-                                            <AppIcon name="plus" size={32} />
-                                        </div>
-                                        <h3 className="text-lg font-bold text-stone-900 mb-2">Chức năng đang phát triển</h3>
-                                        <p className="text-stone-500 text-sm max-w-sm px-6">Chúng tôi đang nỗ lực hoàn thiện chức năng đăng tin để mang lại trải nghiệm tốt nhất cho bạn.</p>
-                                    </div>
-                                </div>
-                            )}
 
                             {/* ---- TAB: PASSWORD ---- */}
                             {activeTab === 'password' && (

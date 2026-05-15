@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
-import { useRoomFilter } from '../hooks/useRoomFilter.js';
 import AppIcon from '../components/common/AppIcon.jsx';
 import SearchTrigger from '../components/search/SearchTrigger.jsx';
 
@@ -10,7 +9,7 @@ import SearchTrigger from '../components/search/SearchTrigger.jsx';
    HomePage – Listing + search + filters
    Flat design, amber palette
    ============================================ */
-export default function HomePage({ navigate, user, onSearchClick }) {
+export default function HomePage({ navigate, user, onSearchClick, filterState }) {
     const {
         filters,
         filteredRooms,
@@ -26,14 +25,23 @@ export default function HomePage({ navigate, user, onSearchClick }) {
         loadMore,
         error,
         highlightedField,
-        highlightField,
         getLocationDisplayText
-    } = useRoomFilter();
+    } = filterState;
 
     const cities = getAvailableCities();
 
 
     const handleRoomClick = (room) => navigate('room-detail', room);
+
+    // Scroll to results when filters change (so user sees the top of the new list)
+    useEffect(() => {
+        // Use a small delay to allow state to settle or ignore the very first mount if needed
+        // but generally scrolling to the greeting area is what the user asked for.
+        const section = document.getElementById('listing-section');
+        if (section && activeFilterCount > 0) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [filters, activeFilterCount]);
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -172,7 +180,9 @@ export default function HomePage({ navigate, user, onSearchClick }) {
                             <span className="text-amber-500 mr-2.5" style={{ fontFamily: 'var(--font-script)', fontSize: '1.25em' }}>{getGreeting()}</span>
                             <span>{user?.user_metadata?.full_name || ""}</span>
                         </h2>
-                        <p className="text-stone-500 text-sm font-medium mt-1">Khám phá không gian sống lý tưởng dành riêng cho bạn.</p>
+                        <p className="text-stone-500 text-sm font-medium mt-1">
+                            {activeFilterCount > 0 ? getLocationDisplayText() : "Khám phá không gian sống lý tưởng dành riêng cho bạn."}
+                        </p>
                     </div>
 
                     {/* Desktop only greeting - on mobile we focus on the FAB */}

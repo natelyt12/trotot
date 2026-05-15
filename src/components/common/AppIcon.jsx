@@ -46,7 +46,10 @@ import {
     TbPencil,
     TbBookmark,
     TbArrowLeft,
-    TbPlus
+    TbPlus,
+    TbMinus,
+    TbFileText,
+    TbCalendar
 } from 'react-icons/tb';
 import { PiWashingMachine } from "react-icons/pi";
 
@@ -113,6 +116,9 @@ const ICON_MAP = {
     bookmark: TbBookmark,
     arrowLeft: TbArrowLeft,
     plus: TbPlus,
+    minus: TbMinus,
+    'file-text': TbFileText,
+    calendar: TbCalendar,
 };
 
 export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 2, style, className, ...props }) {

@@ -33,11 +33,11 @@ export default function SearchTrigger({
                     <AppIcon name="search" size={iconSize} />
                 </div>
 
-                <div className="flex flex-col items-start truncate text-left">
+                <div className="flex flex-col items-start truncate text-left min-w-0 flex-1">
                     <span className={`${labelSize} font-bold text-stone-400 uppercase tracking-widest mb-0`}>
                         Khu vực tìm kiếm
                     </span>
-                    <span className={`${textSize} font-bold truncate ${isFilled ? 'text-stone-900' : 'text-stone-400'}`}>
+                    <span className={`${textSize} font-bold truncate w-full ${isFilled ? 'text-stone-900' : 'text-stone-400'}`}>
                         {displayText}
                     </span>
                 </div>

@@ -2,7 +2,7 @@ import { AMENITIES, ROOM_TYPES } from '../../data/constants.js';
 import { formatPriceShort, formatArea, formatAddressShort, truncate } from '../../utils/formatters.js';
 import AppIcon from '../common/AppIcon.jsx';
 import { useFavorites } from '../../context/FavoritesContext.jsx';
-import { useModal } from '../../context/ModalContext.jsx';
+import { useModal } from '../../context/ModalContext';
 
 /* ============================================
    RoomCard Component

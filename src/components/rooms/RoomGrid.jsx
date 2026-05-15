@@ -8,8 +8,8 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
     if (isLoading) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} style={{ animationDelay: `${i * 100}ms` }} className="animate-fade-in">
+                {Array.from({ length: 15 }).map((_, i) => (
+                    <div key={i} style={{ animationDelay: `${i * 60}ms` }} className="animate-fade-in">
                         <SkeletonCard />
                     </div>
                 ))}

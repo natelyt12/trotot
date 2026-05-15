@@ -17,7 +17,6 @@ export const ROOM_TYPES = {
     room: 'Phòng trọ',
     mini_apartment: 'Chung cư mini',
     whole_house: 'Nhà nguyên căn',
-    shared: 'Ở ghép',
     apartment: 'Căn hộ',
 };
 
@@ -29,7 +28,18 @@ export const BATHROOM_TYPES = {
 export const LAUNDRY_TYPES = {
     private: 'Máy giặt riêng',
     shared: 'Máy giặt chung',
-    none: 'Không có',
+};
+
+export const KITCHEN_TYPES = {
+    private: 'Bếp riêng',
+    shared: 'Bếp chung',
+    none: 'Không nấu ăn',
+};
+
+export const GENDER_PREFERENCES = {
+    all: 'Tất cả giới tính',
+    male: 'Chỉ nam',
+    female: 'Chỉ nữ',
 };
 
 export const CURFEW_LABELS = {

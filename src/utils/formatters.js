@@ -74,7 +74,7 @@ export const formatAddressShort = (address) => {
  */
 export const formatElectricity = (electricity) => {
   if (!electricity) return 'N/A';
-  if (electricity.unit === 'included') return 'Bao gồm';
+  if (electricity.unit === 'included' || Number(electricity.price) === 0) return 'Miễn phí / Đã bao gồm';
   return `${new Intl.NumberFormat('vi-VN').format(electricity.price)} đ/${electricity.unit}`;
 };
 
@@ -83,8 +83,7 @@ export const formatElectricity = (electricity) => {
  */
 export const formatWater = (water) => {
   if (!water) return 'N/A';
-  if (water.unit === 'included' || water.unit === 'free') return 'Bao gồm';
-  if (water.price === 0) return 'Miễn phí';
+  if (water.unit === 'included' || water.unit === 'free' || Number(water.price) === 0) return 'Miễn phí / Đã bao gồm';
   return `${new Intl.NumberFormat('vi-VN').format(water.price)} đ/${water.unit}`;
 };
 
