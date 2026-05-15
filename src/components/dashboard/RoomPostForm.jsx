@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useModal } from '../../context/ModalContext';
 import AppIcon from '../common/AppIcon';
-import { 
-    AMENITIES, 
-    ROOM_TYPES, 
-    BATHROOM_TYPES, 
-    LAUNDRY_TYPES, 
+import {
+    AMENITIES,
+    ROOM_TYPES,
+    BATHROOM_TYPES,
+    LAUNDRY_TYPES,
     CURFEW_LABELS,
     KITCHEN_TYPES,
     GENDER_PREFERENCES
@@ -22,7 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function RoomPostForm({ user, onClear, onSuccess }) {
     const { showModal } = useModal();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // --- STATE CHO FORM ---
     const [formData, setFormData] = useState({
         // Cơ bản
@@ -30,13 +30,13 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
         room_type: 'room',
         price_monthly: '',
         area_sqm: '',
-        
+
         // Vị trí
         city: 'Thành phố Hà Nội',
         district: '',
         ward: '',
         address: '',
-        
+
         // Chi phí (JSONB)
         monthly_costs: {
             deposit_amount: '',
@@ -46,7 +46,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
             parking_fee: 0,
             extra_services: []
         },
-        
+
         // Tiện ích & Số lượng (JSONB)
         room_features: {
             counts: {
@@ -59,7 +59,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
             kitchen_type: 'private',
             amenities: []
         },
-        
+
         // Nội quy & Ưu tiên (JSONB)
         rules_utilities: {
             is_shared_with_host: false,
@@ -68,7 +68,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
             is_pet_allowed: true,
             laundry_type: 'private'
         },
-        
+
         // Truyền thông (JSONB)
         media_contact: {
             images: [],
@@ -175,8 +175,8 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
     };
 
     // --- TỰ ĐỘNG MAP TRƯỜNG ĐẠI HỌC ---
-    const nearbyUniversities = UNIVERSITIES.filter(uni => 
-        uni.city === formData.city && 
+    const nearbyUniversities = UNIVERSITIES.filter(uni =>
+        uni.city === formData.city &&
         uni.district === formData.district
     );
 
@@ -233,7 +233,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
     // --- XỬ LÝ SUBMIT ---
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Validation nâng cao
         if (!formData.title || !formData.price_monthly || !formData.area_sqm || !formData.address || !formData.city || !formData.district || !formData.ward) {
             showModal({ title: 'Thiếu thông tin', message: 'Vui lòng điền đầy đủ các thông tin địa chỉ và giá thuê.', type: 'error' });
@@ -358,8 +358,8 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                     <p className="text-stone-500 text-sm">Điền đầy đủ thông tin để thu hút khách hàng tiềm năng.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button 
-                        type="button" 
+                    <button
+                        type="button"
                         onClick={() => {
                             if (window.confirm('Bạn có chắc muốn hủy các thay đổi?')) {
                                 onClear && onClear();
@@ -369,8 +369,8 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                     >
                         Hủy bỏ
                     </button>
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         disabled={isSubmitting}
                         className={`px-8 py-2.5 rounded-full bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 transition-all shadow-lg shadow-amber-500/20 cursor-pointer flex items-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
@@ -384,7 +384,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
             </div>
 
             <div className="max-w-3xl mx-auto space-y-6">
-                
+
                 {/* SECTION: HÌNH ẢNH (Minimalist) */}
                 <section className="bg-white border border-stone-200 rounded-xl overflow-hidden">
                     <div className="p-4 border-b border-stone-50 bg-stone-50/30 flex items-center justify-between">
@@ -395,7 +395,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                         <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-wider">{previewImages.length} / 10</span>
                     </div>
                     <div className="p-3 pt-1">
-                        <div 
+                        <div
                             onClick={() => fileInputRef.current.click()}
                             className="border border-dashed border-stone-200 rounded-lg p-5 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-stone-50 transition-all group"
                         >
@@ -411,7 +411,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
                                 <AnimatePresence>
                                     {previewImages.map((img, idx) => (
-                                        <motion.div 
+                                        <motion.div
                                             key={img.url}
                                             initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}
@@ -439,28 +439,28 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                         )}
                     </div>
                 </section>
-                
+
                 {/* SECTION 1: THÔNG TIN CƠ BẢN */}
                 <FormSection title="Thông tin cơ bản" icon="home">
                     <div className="space-y-4">
                         <div>
                             <label className="block text-[0.7rem] font-bold text-stone-400 uppercase mb-1.5 tracking-tight">Tiêu đề tin đăng *</label>
-                            <input 
+                            <input
                                 type="text"
                                 required
                                 placeholder="VD: Phòng trọ ban công, gần ĐH Bách Khoa..."
                                 className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 transition-all text-sm font-medium"
                                 value={formData.title}
-                                onChange={e => setFormData({...formData, title: e.target.value})}
+                                onChange={e => setFormData({ ...formData, title: e.target.value })}
                             />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-[0.7rem] font-bold text-stone-400 uppercase mb-1.5 tracking-tight">Loại hình</label>
-                                <select 
+                                <select
                                     className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 appearance-none text-sm font-medium"
                                     value={formData.room_type}
-                                    onChange={e => setFormData({...formData, room_type: e.target.value})}
+                                    onChange={e => setFormData({ ...formData, room_type: e.target.value })}
                                 >
                                     {Object.entries(ROOM_TYPES).map(([val, label]) => (
                                         <option key={val} value={val}>{label}</option>
@@ -470,7 +470,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="block text-[0.7rem] font-bold text-stone-400 uppercase mb-1.5 tracking-tight">Giá thuê (đ) *</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         required
                                         min="100000"
@@ -478,19 +478,19 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                                         placeholder="3500000"
                                         className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm font-bold text-amber-600"
                                         value={formData.price_monthly}
-                                        onChange={e => setFormData({...formData, price_monthly: e.target.value})}
+                                        onChange={e => setFormData({ ...formData, price_monthly: e.target.value })}
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-[0.7rem] font-bold text-stone-400 uppercase mb-1.5 tracking-tight">Diện tích (m²) *</label>
-                                    <input 
+                                    <input
                                         type="number"
                                         required
                                         min="1"
                                         placeholder="25"
                                         className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm font-bold"
                                         value={formData.area_sqm}
-                                        onChange={e => setFormData({...formData, area_sqm: e.target.value})}
+                                        onChange={e => setFormData({ ...formData, area_sqm: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -504,54 +504,54 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
-                                <input 
+                                <input
                                     required
                                     list="cities"
                                     placeholder="Tỉnh/Thành phố *"
                                     className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
                                     value={formData.city}
-                                    onChange={e => setFormData({...formData, city: e.target.value})}
+                                    onChange={e => setFormData({ ...formData, city: e.target.value })}
                                 />
                                 <datalist id="cities">
                                     {PROVINCE.map(p => <option key={p.name} value={p.name} />)}
                                 </datalist>
                             </div>
                             <div>
-                                <input 
+                                <input
                                     required
                                     list="districts"
                                     placeholder="Quận/Huyện *"
                                     className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
                                     value={formData.district}
-                                    onChange={e => setFormData({...formData, district: e.target.value})}
+                                    onChange={e => setFormData({ ...formData, district: e.target.value })}
                                 />
                                 <datalist id="districts">
                                     {districts.map(d => <option key={d.name} value={d.name} />)}
                                 </datalist>
                             </div>
                             <div>
-                                <input 
+                                <input
                                     required
                                     list="wards"
                                     placeholder="Phường/Xã *"
                                     className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
                                     value={formData.ward}
-                                    onChange={e => setFormData({...formData, ward: e.target.value})}
+                                    onChange={e => setFormData({ ...formData, ward: e.target.value })}
                                 />
                                 <datalist id="wards">
                                     {wards.map(w => <option key={w.name} value={w.name} />)}
                                 </datalist>
                             </div>
                         </div>
-                        <input 
+                        <input
                             type="text"
                             required
                             placeholder="Địa chỉ cụ thể (Số nhà, tên đường) *"
                             className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
                             value={formData.address}
-                            onChange={e => setFormData({...formData, address: e.target.value})}
+                            onChange={e => setFormData({ ...formData, address: e.target.value })}
                         />
-                        
+
                         {/* Tự động gợi ý trường đại học */}
                         {nearbyUniversities.length > 0 && (
                             <div className="mt-4 p-3 bg-blue-50/50 border border-blue-100 rounded-xl">
@@ -572,7 +572,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                 {/* SECTION 3: MÔ TẢ */}
                 <FormSection title="Mô tả chi tiết" icon="file-text">
                     <div className="space-y-2">
-                        <textarea 
+                        <textarea
                             required
                             rows={6}
                             placeholder="Mô tả đặc điểm phòng, tiện ích xung quanh, giờ giấc, an ninh... *"
@@ -592,101 +592,101 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                 {/* SECTION 4: CHI PHÍ & THÔNG SỐ (Minimal Grid) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-3">
-                         <div className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2 font-bold text-stone-800 text-sm">
-                                <AppIcon name="credit-card" color="#d97706" size={16} />
-                                <span>Chi phí hàng tháng (đ)</span>
-                            </div>
-                        </div>
-                        <p className="text-[0.65rem] text-stone-400 italic mb-4">
-                            Ghi chú: Nhập 0 sẽ hiển thị "Miễn phí / Đã bao gồm" với người xem
-                        </p>
-
-                        {/* Tiền cọc - Row riêng */}
-                        <div>
-                            <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền cọc * (Tối thiểu 500k)</label>
-                            <input 
-                                type="number" 
-                                required 
-                                min="500000" 
-                                max="500000000" 
-                                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-bold text-stone-700 focus:border-amber-500 outline-none transition-colors" 
-                                value={formData.monthly_costs.deposit_amount} 
-                                onChange={e => setFormData({...formData, monthly_costs: {...formData.monthly_costs, deposit_amount: e.target.value}})} 
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Phí gửi xe *</label>
-                                <input type="number" required min="0" max="1000000" className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs" value={formData.monthly_costs.parking_fee} onChange={e => setFormData({...formData, monthly_costs: {...formData.monthly_costs, parking_fee: e.target.value}})} />
-                            </div>
-                            <div>
-                                <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Internet *</label>
-                                <input type="number" required min="0" max="1000000" className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs" value={formData.monthly_costs.internet} onChange={e => setFormData({...formData, monthly_costs: {...formData.monthly_costs, internet: e.target.value}})} />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="flex gap-1.5 items-end">
-                                <div className="flex-1">
-                                    <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền điện *</label>
-                                    <input type="number" required min="0" max="1000000" className="w-full px-2 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium" value={formData.monthly_costs.electricity.price} onChange={e => setFormData({...formData, monthly_costs: {...formData.monthly_costs, electricity: {...formData.monthly_costs.electricity, price: e.target.value}}})} />
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2 font-bold text-stone-800 text-sm">
+                                    <AppIcon name="credit-card" color="#d97706" size={16} />
+                                    <span>Chi phí hàng tháng (đ)</span>
                                 </div>
-                                <select className="bg-stone-50 border border-stone-200 rounded-lg text-[0.6rem] h-[34px] px-1 font-bold text-stone-600 outline-none" value={formData.monthly_costs.electricity.unit} onChange={e => setFormData({...formData, monthly_costs: {...formData.monthly_costs, electricity: {...formData.monthly_costs.electricity, unit: e.target.value}}})}>
-                                    <option value="kWh">kWh</option>
-                                    <option value="người">người</option>
-                                </select>
                             </div>
-                            <div className="flex gap-1.5 items-end">
-                                <div className="flex-1">
-                                    <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền nước *</label>
-                                    <input type="number" required min="0" max="1000000" className="w-full px-2 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium" value={formData.monthly_costs.water.price} onChange={e => setFormData({...formData, monthly_costs: {...formData.monthly_costs, water: {...formData.monthly_costs.water, price: e.target.value}}})} />
-                                </div>
-                                <select className="bg-stone-50 border border-stone-200 rounded-lg text-[0.6rem] h-[34px] px-1 font-bold text-stone-600 outline-none" value={formData.monthly_costs.water.unit} onChange={e => setFormData({...formData, monthly_costs: {...formData.monthly_costs, water: {...formData.monthly_costs.water, unit: e.target.value}}})}>
-                                    <option value="m3">m3</option>
-                                    <option value="người">người</option>
-                                </select>
-                            </div>
-                        </div>
+                            <p className="text-[0.65rem] text-stone-400 italic mb-4">
+                                Ghi chú: Nhập 0 sẽ hiển thị "Miễn phí / Đã bao gồm" với người xem
+                            </p>
 
-                        {/* Extra Services UI */}
-                        <div className="pt-2">
-                            <label className="block text-[0.6rem] font-bold text-stone-400 mb-2 uppercase tracking-widest">Phí dịch vụ khác</label>
-                            <div className="space-y-2">
-                                {formData.monthly_costs.extra_services.map((service, idx) => (
-                                    <div key={idx} className="flex gap-2 items-center">
-                                        <input 
-                                            placeholder="Tên phí (VD: Vệ sinh)" 
-                                            className="flex-1 px-2 py-1.5 bg-stone-50 border border-stone-200 rounded text-[0.7rem]"
-                                            value={service.name}
-                                            onChange={e => updateExtraService(idx, 'name', e.target.value)}
-                                        />
-                                        <input 
-                                            type="number" 
-                                            min="0"
-                                            max="10000000"
-                                            placeholder="Giá" 
-                                            className="w-28 px-2 py-1.5 bg-stone-50 border border-stone-200 rounded text-[0.7rem]"
-                                            value={service.price}
-                                            onChange={e => updateExtraService(idx, 'price', e.target.value)}
-                                        />
-                                        <button type="button" onClick={() => removeExtraService(idx)} className="text-red-400 p-1 hover:bg-red-50 rounded">
-                                            <AppIcon name="trash" size={12} />
-                                        </button>
+                            {/* Tiền cọc - Row riêng */}
+                            <div>
+                                <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền cọc * (Tối thiểu 500k)</label>
+                                <input
+                                    type="number"
+                                    required
+                                    min="500000"
+                                    max="500000000"
+                                    className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-bold text-stone-700 focus:border-amber-500 outline-none transition-colors"
+                                    value={formData.monthly_costs.deposit_amount}
+                                    onChange={e => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, deposit_amount: e.target.value } })}
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Phí gửi xe *</label>
+                                    <input type="number" required min="0" max="1000000" className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs" value={formData.monthly_costs.parking_fee} onChange={e => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, parking_fee: e.target.value } })} />
+                                </div>
+                                <div>
+                                    <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Internet *</label>
+                                    <input type="number" required min="0" max="1000000" className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs" value={formData.monthly_costs.internet} onChange={e => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, internet: e.target.value } })} />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="flex gap-1.5 items-end">
+                                    <div className="flex-1">
+                                        <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền điện *</label>
+                                        <input type="number" required min="0" max="1000000" className="w-full px-2 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium" value={formData.monthly_costs.electricity.price} onChange={e => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, electricity: { ...formData.monthly_costs.electricity, price: e.target.value } } })} />
                                     </div>
-                                ))}
-                                <button 
-                                    type="button" 
-                                    onClick={addExtraService}
-                                    className="w-full py-1.5 border border-dashed border-stone-200 rounded text-[0.6rem] font-bold text-stone-400 hover:border-amber-300 hover:text-amber-500 transition-colors"
-                                >
-                                    + THÊM PHÍ DỊCH VỤ
-                                </button>
+                                    <select className="bg-stone-50 border border-stone-200 rounded-lg text-[0.6rem] h-[34px] px-1 font-bold text-stone-600 outline-none" value={formData.monthly_costs.electricity.unit} onChange={e => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, electricity: { ...formData.monthly_costs.electricity, unit: e.target.value } } })}>
+                                        <option value="kWh">kWh</option>
+                                        <option value="người">người</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-1.5 items-end">
+                                    <div className="flex-1">
+                                        <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền nước *</label>
+                                        <input type="number" required min="0" max="1000000" className="w-full px-2 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium" value={formData.monthly_costs.water.price} onChange={e => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, water: { ...formData.monthly_costs.water, price: e.target.value } } })} />
+                                    </div>
+                                    <select className="bg-stone-50 border border-stone-200 rounded-lg text-[0.6rem] h-[34px] px-1 font-bold text-stone-600 outline-none" value={formData.monthly_costs.water.unit} onChange={e => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, water: { ...formData.monthly_costs.water, unit: e.target.value } } })}>
+                                        <option value="m3">m3</option>
+                                        <option value="người">người</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Extra Services UI */}
+                            <div className="pt-2">
+                                <label className="block text-[0.6rem] font-bold text-stone-400 mb-2 uppercase tracking-widest">Phí dịch vụ khác</label>
+                                <div className="space-y-2">
+                                    {formData.monthly_costs.extra_services.map((service, idx) => (
+                                        <div key={idx} className="flex gap-2 items-center">
+                                            <input
+                                                placeholder="Tên phí (VD: Vệ sinh)"
+                                                className="flex-1 px-2 py-1.5 bg-stone-50 border border-stone-200 rounded text-[0.7rem]"
+                                                value={service.name}
+                                                onChange={e => updateExtraService(idx, 'name', e.target.value)}
+                                            />
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="10000000"
+                                                placeholder="Giá"
+                                                className="w-28 px-2 py-1.5 bg-stone-50 border border-stone-200 rounded text-[0.7rem]"
+                                                value={service.price}
+                                                onChange={e => updateExtraService(idx, 'price', e.target.value)}
+                                            />
+                                            <button type="button" onClick={() => removeExtraService(idx)} className="text-red-400 p-1 hover:bg-red-50 rounded">
+                                                <AppIcon name="trash" size={12} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={addExtraService}
+                                        className="w-full py-1.5 border border-dashed border-stone-200 rounded text-[0.6rem] font-bold text-stone-400 hover:border-amber-300 hover:text-amber-500 transition-colors"
+                                    >
+                                        + THÊM PHÍ DỊCH VỤ
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
                     <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-3">
                         <div className="flex items-center gap-2 font-bold text-stone-800 text-sm mb-2">
@@ -697,43 +697,43 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                             <div className="flex items-center justify-between">
                                 <span className="text-[0.8rem] text-stone-600 font-medium">Sức chứa (người)</span>
                                 <div className="flex items-center gap-2">
-                                    <CounterBtn onClick={() => setFormData({...formData, room_features: {...formData.room_features, counts: {...formData.room_features.counts, capacity: Math.max(1, formData.room_features.counts.capacity - 1)}}})} icon="minus" />
+                                    <CounterBtn onClick={() => setFormData({ ...formData, room_features: { ...formData.room_features, counts: { ...formData.room_features.counts, capacity: Math.max(1, formData.room_features.counts.capacity - 1) } } })} icon="minus" />
                                     <span className="w-4 text-center font-bold text-sm">{formData.room_features.counts.capacity}</span>
-                                    <CounterBtn onClick={() => setFormData({...formData, room_features: {...formData.room_features, counts: {...formData.room_features.counts, capacity: Math.min(6, formData.room_features.counts.capacity + 1)}}})} icon="plus" />
+                                    <CounterBtn onClick={() => setFormData({ ...formData, room_features: { ...formData.room_features, counts: { ...formData.room_features.counts, capacity: Math.min(6, formData.room_features.counts.capacity + 1) } } })} icon="plus" />
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-[0.8rem] text-stone-600 font-medium">Phòng ngủ</span>
                                 <div className="flex items-center gap-2">
-                                    <CounterBtn onClick={() => setFormData({...formData, room_features: {...formData.room_features, counts: {...formData.room_features.counts, bedrooms: Math.max(1, formData.room_features.counts.bedrooms - 1)}}})} icon="minus" />
+                                    <CounterBtn onClick={() => setFormData({ ...formData, room_features: { ...formData.room_features, counts: { ...formData.room_features.counts, bedrooms: Math.max(1, formData.room_features.counts.bedrooms - 1) } } })} icon="minus" />
                                     <span className="w-4 text-center font-bold text-sm">{formData.room_features.counts.bedrooms}</span>
-                                    <CounterBtn onClick={() => setFormData({...formData, room_features: {...formData.room_features, counts: {...formData.room_features.counts, bedrooms: Math.min(4, formData.room_features.counts.bedrooms + 1)}}})} icon="plus" />
+                                    <CounterBtn onClick={() => setFormData({ ...formData, room_features: { ...formData.room_features, counts: { ...formData.room_features.counts, bedrooms: Math.min(4, formData.room_features.counts.bedrooms + 1) } } })} icon="plus" />
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-[0.8rem] text-stone-600 font-medium">Số giường</span>
                                 <div className="flex items-center gap-2">
-                                    <CounterBtn onClick={() => setFormData({...formData, room_features: {...formData.room_features, counts: {...formData.room_features.counts, beds: Math.max(1, formData.room_features.counts.beds - 1)}}})} icon="minus" />
+                                    <CounterBtn onClick={() => setFormData({ ...formData, room_features: { ...formData.room_features, counts: { ...formData.room_features.counts, beds: Math.max(1, formData.room_features.counts.beds - 1) } } })} icon="minus" />
                                     <span className="w-4 text-center font-bold text-sm">{formData.room_features.counts.beds}</span>
-                                    <CounterBtn onClick={() => setFormData({...formData, room_features: {...formData.room_features, counts: {...formData.room_features.counts, beds: Math.min(4, formData.room_features.counts.beds + 1)}}})} icon="plus" />
+                                    <CounterBtn onClick={() => setFormData({ ...formData, room_features: { ...formData.room_features, counts: { ...formData.room_features.counts, beds: Math.min(4, formData.room_features.counts.beds + 1) } } })} icon="plus" />
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-[0.8rem] text-stone-600 font-medium">Nhà vệ sinh</span>
-                                <select 
+                                <select
                                     className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
                                     value={formData.room_features.bathroom_type}
-                                    onChange={e => setFormData({...formData, room_features: {...formData.room_features, bathroom_type: e.target.value}})}
+                                    onChange={e => setFormData({ ...formData, room_features: { ...formData.room_features, bathroom_type: e.target.value } })}
                                 >
                                     {Object.entries(BATHROOM_TYPES).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
                                 </select>
                             </div>
                             <div className="flex items-center justify-between">
                                 <span className="text-[0.8rem] text-stone-600 font-medium">Phòng bếp</span>
-                                <select 
+                                <select
                                     className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
                                     value={formData.room_features.kitchen_type}
-                                    onChange={e => setFormData({...formData, room_features: {...formData.room_features, kitchen_type: e.target.value}})}
+                                    onChange={e => setFormData({ ...formData, room_features: { ...formData.room_features, kitchen_type: e.target.value } })}
                                 >
                                     {Object.entries(KITCHEN_TYPES).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
                                 </select>
@@ -741,41 +741,41 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                             <div className="pt-2 border-t border-stone-50">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[0.8rem] text-stone-600 font-medium">Giờ giấc</span>
-                                    <select 
+                                    <select
                                         className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
                                         value={formData.rules_utilities.curfew}
-                                        onChange={e => setFormData({...formData, rules_utilities: {...formData.rules_utilities, curfew: e.target.value}})}
+                                        onChange={e => setFormData({ ...formData, rules_utilities: { ...formData.rules_utilities, curfew: e.target.value } })}
                                     >
                                         {Object.entries(CURFEW_LABELS).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
                                     </select>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[0.8rem] text-stone-600 font-medium">Ưu tiên giới tính</span>
-                                    <select 
+                                    <select
                                         className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
                                         value={formData.rules_utilities.gender_preference}
-                                        onChange={e => setFormData({...formData, rules_utilities: {...formData.rules_utilities, gender_preference: e.target.value}})}
+                                        onChange={e => setFormData({ ...formData, rules_utilities: { ...formData.rules_utilities, gender_preference: e.target.value } })}
                                     >
                                         {Object.entries(GENDER_PREFERENCES).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
                                     </select>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[0.8rem] text-stone-600 font-medium">Giặt giũ</span>
-                                    <select 
+                                    <select
                                         className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
                                         value={formData.rules_utilities.laundry_type}
-                                        onChange={e => setFormData({...formData, rules_utilities: {...formData.rules_utilities, laundry_type: e.target.value}})}
+                                        onChange={e => setFormData({ ...formData, rules_utilities: { ...formData.rules_utilities, laundry_type: e.target.value } })}
                                     >
                                         {Object.entries(LAUNDRY_TYPES).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
                                     </select>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[0.8rem] text-stone-600 font-medium">Cho nuôi thú cưng?</span>
-                                    <Toggle active={formData.rules_utilities.is_pet_allowed} onClick={() => setFormData({...formData, rules_utilities: {...formData.rules_utilities, is_pet_allowed: !formData.rules_utilities.is_pet_allowed}})} />
+                                    <Toggle active={formData.rules_utilities.is_pet_allowed} onClick={() => setFormData({ ...formData, rules_utilities: { ...formData.rules_utilities, is_pet_allowed: !formData.rules_utilities.is_pet_allowed } })} />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-[0.8rem] text-stone-600 font-medium">Chung chủ?</span>
-                                    <Toggle active={formData.rules_utilities.is_shared_with_host} onClick={() => setFormData({...formData, rules_utilities: {...formData.rules_utilities, is_shared_with_host: !formData.rules_utilities.is_shared_with_host}})} />
+                                    <Toggle active={formData.rules_utilities.is_shared_with_host} onClick={() => setFormData({ ...formData, rules_utilities: { ...formData.rules_utilities, is_shared_with_host: !formData.rules_utilities.is_shared_with_host } })} />
                                 </div>
                             </div>
                         </div>
@@ -805,8 +805,8 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
 
                 {/* SUBMIT AREA (Minimalist) */}
                 <div className="pt-6 border-t border-stone-100 flex flex-col items-center">
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         disabled={isSubmitting}
                         className={`w-full md:w-auto px-16 py-3 rounded-full bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
@@ -814,7 +814,7 @@ export default function RoomPostForm({ user, onClear, onSuccess }) {
                     </button>
                     <div className="mt-4 text-center max-w-sm">
                         <p className="text-[0.7rem] text-stone-400 leading-relaxed font-medium">
-                            Hãy kiểm tra kỹ lại thông tin trước khi đăng.<br/>
+                            Hãy kiểm tra kỹ lại thông tin trước khi đăng.<br />
                             Tin đăng của bạn sẽ được hệ thống kiểm duyệt trong vòng 24h.
                         </p>
                     </div>
@@ -843,7 +843,7 @@ function FormSection({ title, icon, children }) {
 
 function CounterBtn({ onClick, icon }) {
     return (
-        <button 
+        <button
             type="button"
             onClick={onClick}
             className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-600 transition-colors border-none cursor-pointer"
@@ -855,7 +855,7 @@ function CounterBtn({ onClick, icon }) {
 
 function Toggle({ active, onClick }) {
     return (
-        <button 
+        <button
             type="button"
             onClick={onClick}
             className={`relative w-11 h-6 rounded-full transition-colors duration-200 border-none cursor-pointer ${active ? 'bg-amber-500' : 'bg-stone-200'}`}

@@ -245,21 +245,34 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         <span>Hết hạn: {room.available_until ? formatDate(room.available_until) : 'Không xác định'}</span>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2 text-stone-500 text-[0.925rem] mb-6">
-                                    <AppIcon name="location" size={16} className="text-stone-400" />
-                                    <span>{basic_info.address}, {basic_info.district}, {basic_info.city}</span>
+                                <div className="flex items-start gap-2 text-stone-500 text-[0.925rem] mb-6">
+                                    <AppIcon name="location" size={18} className="text-stone-400 mt-1" />
+                                    <div className="flex flex-col">
+                                        <span className="text-stone-900 font-bold text-[1rem] leading-tight mb-1">
+                                            {basic_info.address}
+                                        </span>
+                                        <span className="text-stone-400 text-[0.85rem]">
+                                            {basic_info.ward && `${basic_info.ward}, `}{basic_info.district}, {basic_info.city}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 {/* Nearby Universities Mapping */}
                                 {(() => {
-                                    const nearby = UNIVERSITIES.filter(u => u.city === basic_info.city && u.district === basic_info.district);
+                                    // Bổ sung logic lọc theo Phường/Xã (ward)
+                                    const nearby = UNIVERSITIES.filter(u => 
+                                        u.city === basic_info.city && 
+                                        u.district === basic_info.district &&
+                                        (!basic_info.ward || u.ward === basic_info.ward)
+                                    );
+
                                     if (nearby.length === 0) return null;
                                     return (
                                         <div className="flex flex-wrap gap-2 mb-6">
                                             {nearby.map(u => (
-                                                <span key={u.name} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 text-[0.75rem] font-bold border border-blue-100">
+                                                <span key={u.name} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[0.75rem] font-bold border border-amber-100">
                                                     <AppIcon name="verified" size={12} />
-                                                    {u.name}
+                                                    Gần {u.name}
                                                 </span>
                                             ))}
                                         </div>
