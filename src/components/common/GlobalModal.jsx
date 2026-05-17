@@ -53,7 +53,7 @@ export default function GlobalModal({ config, onClose }) {
                     <h3 className="text-xl font-extrabold text-stone-900 mb-2 font-heading">
                         {title}
                     </h3>
-                    <p className="text-stone-500 text-[0.9rem] leading-relaxed mb-8 px-2 font-medium">
+                    <p className="text-stone-500 text-[0.9rem] leading-relaxed mb-8 px-2 font-medium whitespace-pre-wrap">
                         {message}
                     </p>
                 </div>

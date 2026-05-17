@@ -7,6 +7,8 @@ import { useFavorites } from '../context/FavoritesContext.jsx';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
 import { formatPrice } from '../utils/formatters.js';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
+import { compressImage } from '../utils/imageUtils';
+
 
 /* ============================================
    ProfilePage – Account Manager
@@ -40,6 +42,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
     const [deletePassword, setDeletePassword] = useState('');
 
     const [activeTab, setActiveTab] = useState(initialData?.tab || 'info');
+
 
     // Fetch latest profile from database
     const fetchProfile = async () => {
@@ -207,33 +210,65 @@ export default function ProfilePage({ user, navigate, initialData }) {
     const handleAvatarUpload = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        if (!user) {
+            addNotification('Bạn cần đăng nhập để thực hiện thao tác này.', 'error');
+            return;
+        }
         setUploading(true);
+        const oldAvatarUrl = formData.avatar_url;
+
         try {
-            const fileExt = file.name.split('.').pop();
+            // 1. Nén ảnh avatar trước khi upload (giới hạn 400px cho avatar nét)
+            const compressedFile = await compressImage(file, 400, 0.8);
+
+            const fileExt = compressedFile.name.split('.').pop();
             const filePath = `${user.id}/${Date.now()}.${fileExt}`;
 
+            // 2. Upload file đã nén
             const { error: uploadError } = await supabase.storage
                 .from('user_avatar')
-                .upload(filePath, file, { upsert: true });
+                .upload(filePath, compressedFile, { upsert: true });
             if (uploadError) throw uploadError;
 
+            // 3. Lấy Public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('user_avatar')
                 .getPublicUrl(filePath);
 
+            // 4. Cập nhật Auth metadata
             const { error: updateError } = await supabase.auth.updateUser({
                 data: { avatar_url: publicUrl }
             });
             if (updateError) throw updateError;
 
+            // 5. Cập nhật bảng profiles
             const { error: profileError } = await supabase
                 .from('profiles')
                 .update({ avatar_url: publicUrl })
                 .eq('id', user.id);
             if (profileError) throw profileError;
 
+            // 6. Cập nhật state
             setFormData(prev => ({ ...prev, avatar_url: publicUrl }));
             addNotification('Cập nhật ảnh đại diện thành công!', 'success');
+
+            // 7. Xóa ảnh cũ trên storage nếu có để tránh rác dữ liệu
+            // Chỉ xóa nếu ảnh cũ thuộc về bucket user_avatar và thuộc về user này
+            if (oldAvatarUrl) {
+                const urlParts = oldAvatarUrl.split('/user_avatar/');
+                if (urlParts.length > 1) {
+                    const oldPath = urlParts[1].split('?')[0];
+                    if (oldPath.startsWith(`${user.id}/`)) {
+                        const { error: removeError } = await supabase.storage
+                            .from('user_avatar')
+                            .remove([oldPath]);
+                        
+                        if (removeError) {
+                            console.error('Lỗi khi xóa ảnh cũ từ storage:', removeError);
+                        }
+                    }
+                }
+            }
         } catch (err) {
             addNotification(`Lỗi tải ảnh: ${err.message}`, 'error');
         } finally {
@@ -502,12 +537,13 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                 <div className="animate-fade-in">
                                     <TabHeader icon="heart" title="Tin đăng đã lưu" />
                                     <div className="mt-6">
-                                        <RoomGrid
-                                            rooms={savedRooms}
-                                            isLoading={loadingSaved}
-                                            onRoomClick={(room) => navigate('room-detail', { ...room, fromProfile: true })}
-                                        />
-                                        {!loadingSaved && savedRooms.length === 0 && (
+                                        {loadingSaved || savedRooms.length > 0 ? (
+                                            <RoomGrid
+                                                rooms={savedRooms}
+                                                isLoading={loadingSaved}
+                                                onRoomClick={(room) => navigate('room-detail', { ...room, fromProfile: true })}
+                                            />
+                                        ) : (
                                             <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl">
                                                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
                                                     <AppIcon name="heart" size={32} />

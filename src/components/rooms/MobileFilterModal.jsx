@@ -14,7 +14,8 @@ export default function MobileFilterModal({
     resetFilters,
     toggleAmenity,
     activeFilterCount,
-    highlightedField
+    highlightedField,
+    refetch
 }) {
     // Lock body scroll when modal is open
     useEffect(() => {
@@ -87,6 +88,7 @@ export default function MobileFilterModal({
                                 activeFilterCount={activeFilterCount}
                                 highlightedField={highlightedField}
                                 isMobileMode={true}
+                                refetch={refetch}
                             />
                         </div>
 

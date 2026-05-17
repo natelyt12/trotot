@@ -1,16 +1,17 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import GlobalModal from '../components/common/GlobalModal';
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useState, useCallback } from "react";
+import GlobalModal from "../components/common/GlobalModal";
 
 const ModalContext = createContext(null);
 
 export const ModalProvider = ({ children }) => {
     const [modalConfig, setModalConfig] = useState({
         isOpen: false,
-        title: '',
-        message: '',
-        type: 'info', // 'info', 'success', 'error', 'warning'
+        title: "",
+        message: "",
+        type: "info", // 'info', 'success', 'error', 'warning'
         onConfirm: null,
-        confirmText: 'Đóng',
+        confirmText: "Đóng",
         cancelText: null,
     });
 
@@ -21,17 +22,17 @@ export const ModalProvider = ({ children }) => {
     const showModal = useCallback((config) => {
         setModalConfig({
             isOpen: true,
-            title: config.title || 'Thông báo',
-            message: config.message || '',
-            type: config.type || 'info',
+            title: config.title || "Thông báo",
+            message: config.message || "",
+            type: config.type || "info",
             onConfirm: config.onConfirm || null,
-            confirmText: config.confirmText || 'Đóng',
+            confirmText: config.confirmText || "Đóng",
             cancelText: config.cancelText || null,
         });
     }, []);
 
     const closeModal = useCallback(() => {
-        setModalConfig(prev => ({ ...prev, isOpen: false }));
+        setModalConfig((prev) => ({ ...prev, isOpen: false }));
     }, []);
 
     return (
@@ -45,7 +46,7 @@ export const ModalProvider = ({ children }) => {
 export const useModal = () => {
     const context = useContext(ModalContext);
     if (!context) {
-        throw new Error('useModal must be used within a ModalProvider');
+        throw new Error("useModal must be used within a ModalProvider");
     }
     return context;
 };

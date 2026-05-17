@@ -9,7 +9,7 @@ import SearchTrigger from '../components/search/SearchTrigger.jsx';
    HomePage – Listing + search + filters
    Flat design, amber palette
    ============================================ */
-export default function HomePage({ navigate, user, onSearchClick, filterState }) {
+export default function HomePage({ navigate, user, onSearchClick, filterState, currentPage }) {
     const {
         filters,
         filteredRooms,
@@ -43,6 +43,7 @@ export default function HomePage({ navigate, user, onSearchClick, filterState })
         }
     }, [filters, activeFilterCount]);
 
+    // Auto-refetch removed as per user request
     const getGreeting = () => {
         const hour = new Date().getHours();
         if (hour >= 5 && hour < 11) return 'Chào buổi sáng';
@@ -200,6 +201,7 @@ export default function HomePage({ navigate, user, onSearchClick, filterState })
                             toggleAmenity={toggleAmenity}
                             activeFilterCount={activeFilterCount}
                             highlightedField={highlightedField}
+                            refetch={filterState.refetch}
                         />
                     </div>
 

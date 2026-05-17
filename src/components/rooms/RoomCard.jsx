@@ -75,11 +75,11 @@ export default function RoomCard({ room, onClick, style }) {
                     <span
                         className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full w-fit text-[0.7rem] font-semibold ${isAvailable
                             ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
+                            : metadata.status === 'expired' ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'
                             }`}
                     >
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isAvailable ? 'bg-green-600' : 'bg-red-600'}`} />
-                        {isAvailable ? 'Còn phòng' : 'Đã cho thuê'}
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isAvailable ? 'bg-green-600' : metadata.status === 'expired' ? 'bg-red-600' : 'bg-stone-600'}`} />
+                        {isAvailable ? 'Còn phòng' : metadata.status === 'expired' ? 'Đã hết hạn' : metadata.status}
                     </span>
 
                     {metadata.is_verified && (

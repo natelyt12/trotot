@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useModal } from '../context/ModalContext';
 import { supabase } from '../lib/supabase';
 import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from '../data/constants.js';
@@ -19,12 +19,13 @@ import CommentSection from '../components/rooms/CommentSection.jsx';
 /* ============================================
    RoomDetailPage – Full listing details
    ============================================ */
-export default function RoomDetailPage({ room, navigate, user }) {
+export default function RoomDetailPage({ room, navigate, user, onClose, previewMode }) {
     const { showModal } = useModal();
     const { isFavorite, toggleFavorite } = useFavorites();
     const [activeImage, setActiveImage] = useState(0);
     const [showPhone, setShowPhone] = useState(false);
     const [views, setViews] = useState(room?.metadata?.total_views || 0);
+    const lastIncrementedRoomId = useRef(null);
 
     const favorited = isFavorite(room?.id);
 
@@ -45,7 +46,9 @@ export default function RoomDetailPage({ room, navigate, user }) {
 
     // Increment views on mount
     useEffect(() => {
-        if (!room?.id) return;
+        if (!room?.id || previewMode || lastIncrementedRoomId.current === room.id) return;
+
+        lastIncrementedRoomId.current = room.id;
 
         const incrementViews = async () => {
             try {
@@ -81,7 +84,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
 
         incrementViews();
         // Only run once per room.id to prevent infinite loops and double increments
-    }, [room?.id]);
+    }, [room?.id, previewMode]);
 
 
     if (!room) {
@@ -105,13 +108,33 @@ export default function RoomDetailPage({ room, navigate, user }) {
     ];
     const isAvailable = metadata.status === 'available';
 
+    const formatPhone = (phone) => {
+        if (!phone || phone === 'Chưa cập nhật' || phone === 'Đang cập nhật') return phone;
+        const cleaned = phone.replace(/\D/g, '');
+        if (cleaned.length === 10) return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(7)}`;
+        return phone;
+    };
+
     return (
         <div className="min-h-screen bg-stone-50 pt-6 md:pt-20 pb-24 md:pb-0">
+            {previewMode && (
+                <div className="bg-amber-100 text-amber-800 text-center py-2 text-sm font-bold sticky top-0 z-50">
+                    Bạn đang ở chế độ xem trước (Có thể chỉnh sửa bình luận)
+                </div>
+            )}
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:pb-12">
                 {/* Action Bar / Back Button */}
                 <div className="flex items-center mb-6">
                     <button
-                        onClick={() => navigate(room?.fromProfile ? 'profile' : 'home')}
+                        onClick={() => {
+                            if (onClose) {
+                                onClose();
+                            } else if (room?.fromDashboard) {
+                                navigate('dashboard');
+                            } else {
+                                navigate(room?.fromProfile ? 'profile' : 'home');
+                            }
+                        }}
                         className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
                     >
                         <div className="w-7 h-7 rounded-full! bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
@@ -164,11 +187,11 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                         <span
                                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold ${isAvailable
                                                 ? 'bg-green-100 text-green-700'
-                                                : 'bg-red-100 text-red-700'
+                                                : metadata.status === 'expired' ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'
                                                 }`}
                                         >
-                                            <span className={`w-2 h-2 rounded-full shrink-0 ${isAvailable ? 'bg-green-600' : 'bg-red-600'}`} />
-                                            {isAvailable ? 'Còn phòng' : 'Đã cho thuê'}
+                                            <span className={`w-2 h-2 rounded-full shrink-0 ${isAvailable ? 'bg-green-600' : metadata.status === 'expired' ? 'bg-red-600' : 'bg-stone-600'}`} />
+                                            {isAvailable ? 'Còn phòng' : metadata.status === 'expired' ? 'Đã hết hạn' : metadata.status === 'draft' ? 'Bản nháp' : metadata.status}
                                         </span>
 
                                         {metadata.is_verified && (
@@ -227,19 +250,20 @@ export default function RoomDetailPage({ room, navigate, user }) {
 
                                 <div className="flex items-center gap-4 mb-5 flex-wrap">
                                     <button
-                                        onClick={handleToggleFavorite}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-full! font-bold text-sm transition-all border cursor-pointer ${favorited
+                                        onClick={previewMode ? undefined : handleToggleFavorite}
+                                        disabled={previewMode}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-full! font-bold text-sm transition-all border ${previewMode ? 'opacity-50 cursor-not-allowed bg-stone-100 border-stone-200 text-stone-400' : 'cursor-pointer'} ${!previewMode && favorited
                                             ? 'bg-red-50 border-red-200 text-red-600'
-                                            : 'bg-stone-100 border-stone-200 text-stone-600 hover:bg-stone-200'
+                                            : !previewMode ? 'bg-stone-100 border-stone-200 text-stone-600 hover:bg-stone-200' : ''
                                             }`}
                                     >
                                         <AppIcon
                                             name="heart"
                                             size={18}
-                                            fill={favorited ? 'currentColor' : 'none'}
-                                            className={favorited ? 'animate-pulse' : ''}
+                                            fill={favorited && !previewMode ? 'currentColor' : 'none'}
+                                            className={favorited && !previewMode ? 'animate-pulse' : ''}
                                         />
-                                        {favorited ? 'Đã lưu tin' : 'Lưu tin'}
+                                        {favorited && !previewMode ? 'Đã lưu tin' : 'Lưu tin'}
                                     </button>
 
                                     <div className="flex items-center gap-1.5 text-stone-500 text-sm font-medium">
@@ -395,7 +419,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                             </div>
 
                             {/* Comments */}
-                            <CommentSection room={room} user={user} navigate={navigate} isGridMode={true} />
+                            <CommentSection room={room} user={user} navigate={navigate} isGridMode={true} previewMode={previewMode} />
                         </div>
 
                         {/* ---- RIGHT COLUMN: Contact sidebar ---- */}
@@ -426,32 +450,33 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                     {/* Owner info inside price section */}
                                     <p className="text-[0.8rem] text-stone-400 mb-2 font-medium">Thông tin người đăng:</p>
                                     <div className="flex items-center gap-3 mb-6">
-                                        {media_contact.contact.avatar ? (
+                                        {(previewMode && user ? user.user_metadata?.avatar_url : media_contact.contact.avatar) ? (
                                             <img
-                                                src={media_contact.contact.avatar}
-                                                alt={media_contact.contact.name}
+                                                src={previewMode && user ? user.user_metadata?.avatar_url : media_contact.contact.avatar}
+                                                alt={previewMode && user ? user.user_metadata?.full_name : media_contact.contact.name}
                                                 className="w-10 h-10 rounded-full object-cover border border-stone-200"
                                             />
                                         ) : (
                                             <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center shrink-0">
                                                 <span className="text-white font-bold text-sm">
-                                                    {media_contact.contact.name?.charAt(0) || 'U'}
+                                                    {(previewMode && user ? user.user_metadata?.full_name : media_contact.contact.name)?.charAt(0) || 'U'}
                                                 </span>
                                             </div>
                                         )}
                                         <div className="flex-1">
                                             <p className="font-bold text-sm text-stone-900 leading-tight mb-1">
-                                                {media_contact.contact.name}
+                                                {previewMode && user ? user.user_metadata?.full_name : media_contact.contact.name}
                                             </p>
-                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold ${media_contact.contact.role === 'landlord' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
-                                                {media_contact.contact.role === 'landlord' ? 'Bên cho thuê' : 'Môi giới'}
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold ${(previewMode ? 'landlord' : media_contact.contact.role) === 'landlord' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
+                                                {(previewMode ? 'landlord' : media_contact.contact.role) === 'landlord' ? 'Bên cho thuê' : 'Môi giới'}
                                             </span>
                                         </div>
                                     </div>
 
                                     <div className="flex flex-col gap-2.5">
                                         <button
-                                            onClick={() => {
+                                            disabled={previewMode}
+                                            onClick={previewMode ? undefined : () => {
                                                 if (user) {
                                                     setShowPhone(true);
                                                 } else {
@@ -464,14 +489,15 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                                     });
                                                 }
                                             }}
-                                            className="flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none cursor-pointer transition-colors duration-200 bg-amber-500 hover:bg-amber-600 font-bold"
+                                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-bold ${previewMode ? 'bg-stone-300 cursor-not-allowed' : 'cursor-pointer bg-amber-500 hover:bg-amber-600'}`}
                                         >
                                             <AppIcon name="phone" size={20} strokeWidth={2.5} />
-                                            <span>{showPhone ? media_contact.contact.phone : 'Liên hệ ngay'}</span>
+                                            <span>{previewMode ? formatPhone(media_contact.contact.phone) : showPhone ? formatPhone(media_contact.contact.phone) : 'Liên hệ ngay'}</span>
                                         </button>
 
                                         <button
-                                            onClick={() => {
+                                            disabled={previewMode}
+                                            onClick={previewMode ? undefined : () => {
                                                 if (user) {
                                                     setShowPhone(true);
                                                 } else {
@@ -484,7 +510,7 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                                     });
                                                 }
                                             }}
-                                            className="flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white bg-[#0068ff] hover:bg-[#005ae0] transition-colors duration-200 cursor-pointer border-none font-bold"
+                                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white transition-colors duration-200 border-none font-bold ${previewMode ? 'bg-stone-300 cursor-not-allowed' : 'bg-[#0068ff] hover:bg-[#005ae0] cursor-pointer'}`}
                                         >
                                             <AppIcon name="messages" size={20} strokeWidth={2.5} />
                                             <span>Nhắn tin qua Zalo</span>
@@ -501,16 +527,18 @@ export default function RoomDetailPage({ room, navigate, user }) {
                                             <p className="text-amber-700 text-[0.78rem] leading-relaxed">
                                                 Không chuyển tiền trước khi xem phòng trực tiếp. Kiểm tra kỹ hợp đồng thuê trọ.
                                             </p>
-                                            <button
-                                                onClick={() => showModal({
-                                                    title: 'Thông báo',
-                                                    message: 'Tính năng Báo cáo tin đăng đang được phát triển.',
-                                                    type: 'info'
-                                                })}
-                                                className="mt-2 text-[0.78rem] text-amber-600 font-bold hover:text-amber-700 underline cursor-pointer border-none bg-transparent p-0 block"
-                                            >
-                                                Báo cáo tin đăng
-                                            </button>
+                                            {!previewMode && (
+                                                <button
+                                                    onClick={() => showModal({
+                                                        title: 'Thông báo',
+                                                        message: 'Tính năng Báo cáo tin đăng đang được phát triển.',
+                                                        type: 'info'
+                                                    })}
+                                                    className="mt-2 text-[0.78rem] text-amber-600 font-bold hover:text-amber-700 underline cursor-pointer border-none bg-transparent p-0 block"
+                                                >
+                                                    Báo cáo tin đăng
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>

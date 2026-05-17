@@ -40,6 +40,7 @@ import {
     TbFence,
     TbCopy,
     TbEye,
+    TbEyeOff,
     TbPlayerPlay,
     TbLock,
     TbTrash,
@@ -49,7 +50,8 @@ import {
     TbPlus,
     TbMinus,
     TbFileText,
-    TbCalendar
+    TbCalendar,
+    TbRefresh
 } from 'react-icons/tb';
 import { PiWashingMachine } from "react-icons/pi";
 
@@ -108,6 +110,7 @@ const ICON_MAP = {
     'shield': TbShieldCheck,
     'message-circle': TbMessageCircle,
     eye: TbEye,
+    'eye-off': TbEyeOff,
     play: TbPlayerPlay,
     lock: TbLock,
     trash: TbTrash,
@@ -119,6 +122,7 @@ const ICON_MAP = {
     minus: TbMinus,
     'file-text': TbFileText,
     calendar: TbCalendar,
+    reload: TbRefresh,
 };
 
 export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 2, style, className, ...props }) {

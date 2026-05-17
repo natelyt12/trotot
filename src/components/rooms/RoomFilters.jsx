@@ -15,7 +15,8 @@ export default function RoomFilters({
     toggleAmenity, 
     activeFilterCount,
     highlightedField,
-    isMobileMode = false
+    isMobileMode = false,
+    refetch
 }) {
     const selectedProvince = PROVINCE.find(p => p.name === filters.city);
     const districts = selectedProvince ? selectedProvince.districts : [];
@@ -63,6 +64,15 @@ export default function RoomFilters({
                 </div>
             )}
             
+            {/* Reload Data Button */}
+            <button
+                onClick={() => refetch && refetch()}
+                className="flex items-center justify-center gap-2 w-full py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-bold transition-colors cursor-pointer border border-amber-200/50 mb-2"
+            >
+                <AppIcon name="reload" size={14} />
+                Làm mới dữ liệu
+            </button>
+
             {/* University filter */}
             <FilterSection title="Gần trường đại học">
                 <div className="relative">

@@ -12,7 +12,6 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import { mapSupabaseRoom } from './utils/roomMapper.js';
 import { FavoritesProvider } from './context/FavoritesContext';
-import { ModalProvider } from './context/ModalContext';
 import { NotificationProvider } from './context/NotificationContext';
 import ToastContainer from './components/common/ToastContainer.jsx';
 import { useRoomFilter } from './hooks/useRoomFilter.js';
@@ -190,8 +189,7 @@ export default function App() {
 
     return (
         <NotificationProvider>
-            <ModalProvider>
-                <FavoritesProvider user={user}>
+            <FavoritesProvider user={user}>
                     {showLayout && (
                         <Header
                             currentPage={currentPage}
@@ -222,6 +220,7 @@ export default function App() {
                                 user={user}
                                 onSearchClick={() => setIsLocationModalOpen(true)}
                                 filterState={filterState}
+                                currentPage={currentPage}
                             />
                         </div>
 
@@ -268,6 +267,7 @@ export default function App() {
                         toggleAmenity={toggleAmenity}
                         activeFilterCount={activeFilterCount}
                         highlightedField={highlightedField}
+                        refetch={filterState.refetch}
                     />
 
                     {/* Scroll lock handler */}
@@ -276,7 +276,6 @@ export default function App() {
                     {/* Global Toast Container */}
                     <ToastContainer />
                 </FavoritesProvider>
-            </ModalProvider>
         </NotificationProvider>
     );
 }

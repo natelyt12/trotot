@@ -46,7 +46,8 @@ export const useRoomFilter = () => {
 
       let query = supabase
         .from('rooms')
-        .select('*, profiles(*)', { count: 'exact' });
+        .select('*, profiles(*)', { count: 'exact' })
+        .eq('status', 'available');
 
       // Apply Filters
       if (filters.city) query = query.eq('city', filters.city);
@@ -235,7 +236,7 @@ export const useRoomFilter = () => {
     toggleAmenity,
     activeFilterCount,
     totalCount,
-    filteredCount: rooms.length, // This is count of currently loaded
+    filteredCount: rooms.length,
     getAvailableCities: () => availableCities,
     loading,
     loadingMore,
@@ -244,6 +245,7 @@ export const useRoomFilter = () => {
     error,
     highlightedField,
     highlightField,
-    getLocationDisplayText
+    getLocationDisplayText,
+    refetch: () => fetchRooms(0, false)
   };
 };
