@@ -175,6 +175,33 @@ export default function DashboardPage({ user, navigate, initialData }) {
                         return;
                     }
 
+                    // Xóa ảnh trên storage nếu có
+                    const images = room.media_contact?.images;
+                    if (images && images.length > 0) {
+                        const pathsToDelete = [];
+                        images.forEach(img => {
+                            if (img.url) {
+                                const parts = img.url.split('/room_media/');
+                                if (parts.length > 1) {
+                                    const path = parts[1].split('?')[0];
+                                    if (path.startsWith(`${user.id}/`)) {
+                                        pathsToDelete.push(path);
+                                    }
+                                }
+                            }
+                        });
+
+                        if (pathsToDelete.length > 0) {
+                            const { error: storageError } = await supabase.storage
+                                .from('room_media')
+                                .remove(pathsToDelete);
+                            
+                            if (storageError) {
+                                console.error('Lỗi khi xóa ảnh từ storage:', storageError);
+                            }
+                        }
+                    }
+
                     setRooms(rooms.filter(r => r.id !== room.id));
 
                     addNotification('Xóa tin đăng thành công!', 'success');

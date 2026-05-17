@@ -377,6 +377,35 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 const { error } = result;
                 if (error) throw error;
 
+                // Xử lý xóa ảnh thừa trên storage khi sửa tin
+                if (roomToEdit && roomToEdit.media_contact?.images) {
+                    const oldImages = roomToEdit.media_contact.images;
+                    const newUrls = finalImages.map(img => img.url);
+                    
+                    const pathsToDelete = [];
+                    oldImages.forEach(oldImg => {
+                        if (!newUrls.includes(oldImg.url)) {
+                            const parts = oldImg.url.split('/room_media/');
+                            if (parts.length > 1) {
+                                const path = parts[1].split('?')[0];
+                                if (path.startsWith(`${user.id}/`)) {
+                                    pathsToDelete.push(path);
+                                }
+                            }
+                        }
+                    });
+
+                    if (pathsToDelete.length > 0) {
+                        const { error: storageError } = await supabase.storage
+                            .from('room_media')
+                            .remove(pathsToDelete);
+                        
+                        if (storageError) {
+                            console.error('Lỗi khi xóa ảnh thừa từ storage:', storageError);
+                        }
+                    }
+                }
+
                 const successMessage = roomToEdit 
                     ? "Cập nhật tin đăng thành công!" 
                     : (isDraft ? "Đã lưu bản nháp thành công!" : "Tin đăng của bạn đã được gửi và đang chờ duyệt!");
