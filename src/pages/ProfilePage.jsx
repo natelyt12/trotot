@@ -8,6 +8,7 @@ import { mapSupabaseRoom } from '../utils/roomMapper.js';
 import { formatPrice } from '../utils/formatters.js';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
 import { compressImage } from '../utils/imageUtils';
+import { draftAllUserRooms } from '../utils/roomUtils.js';
 
 
 /* ============================================
@@ -186,25 +187,52 @@ export default function ProfilePage({ user, navigate, initialData }) {
 
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        try {
-            const { error } = await supabase.auth.updateUser({
-                data: { full_name: formData.full_name, role: formData.role }
+        
+        const oldRole = user?.user_metadata?.role || 'tenant';
+        const newRole = formData.role;
+        
+        const performUpdate = async (shouldDraftRooms) => {
+            setLoading(true);
+            try {
+                const { error } = await supabase.auth.updateUser({
+                    data: { full_name: formData.full_name, role: formData.role }
+                });
+                if (error) throw error;
+
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .update({ full_name: formData.full_name, phone: formData.phone, role: formData.role })
+                    .eq('id', user.id);
+                if (profileError) throw profileError;
+
+                if (shouldDraftRooms) {
+                    const { error: roomsError } = await draftAllUserRooms(user.id);
+                    
+                    if (roomsError) throw roomsError;
+                    addNotification('Đã chuyển vai trò và chuyển tất cả tin đăng về bản nháp (đã hủy kiểm duyệt)!', 'success');
+                } else {
+                    addNotification('Cập nhật thông tin thành công!', 'success');
+                }
+            } catch (err) {
+                addNotification(err.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (newRole === 'tenant' && (oldRole === 'landlord' || oldRole === 'agent')) {
+            showModal({
+                title: 'Xác nhận chuyển vai trò',
+                message: 'Nếu bạn chuyển về Người thuê, tất cả tin đăng hiện tại của bạn sẽ bị tạm ẩn (chuyển về trạng thái Nháp). Bạn có chắc chắn muốn tiếp tục?',
+                type: 'warning',
+                confirmText: 'Xác nhận',
+                cancelText: 'Hủy',
+                onConfirm: () => performUpdate(true)
             });
-            if (error) throw error;
-
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .update({ full_name: formData.full_name, phone: formData.phone, role: formData.role })
-                .eq('id', user.id);
-            if (profileError) throw profileError;
-
-            addNotification('Cập nhật thông tin thành công!', 'success');
-        } catch (err) {
-            addNotification(err.message, 'error');
-        } finally {
-            setLoading(false);
+            return;
         }
+
+        performUpdate(false);
     };
 
     const handleAvatarUpload = async (e) => {

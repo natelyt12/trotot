@@ -6,6 +6,7 @@ import RoomPostForm from '../components/dashboard/RoomPostForm.jsx';
 import { supabase } from '../lib/supabase';
 import { formatPrice } from '../utils/formatters.js';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
+import { moveRoomToDraft } from '../utils/roomUtils.js';
 import RoomDetailPage from './RoomDetailPage.jsx';
 
 /* ============================================
@@ -90,10 +91,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
             cancelText: 'Hủy',
             onConfirm: async () => {
                 try {
-                    const { error } = await supabase
-                        .from('rooms')
-                        .update({ status: 'draft', is_verified: false })
-                        .eq('id', room.id);
+                    const { error } = await moveRoomToDraft(room.id);
 
                     if (error) throw error;
 
@@ -311,22 +309,22 @@ export default function DashboardPage({ user, navigate, initialData }) {
                                         </h2>
                                     </div>
                                     {/* Horizontal Tab Bar */}
-                                    <div className="flex border-b border-stone-200 mb-6">
+                                    <div className="flex border-b border-stone-200 mb-6 overflow-x-auto whitespace-nowrap">
                                         <button
                                             onClick={() => { setSubTab('verified'); setCurrentPage(1); }}
-                                            className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'verified' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
+                                            className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'verified' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
                                         >
                                             Tin đã kiểm duyệt
                                         </button>
                                         <button
                                             onClick={() => { setSubTab('published'); setCurrentPage(1); }}
-                                            className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'published' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
+                                            className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'published' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
                                         >
                                             Tin đã công khai
                                         </button>
                                         <button
                                             onClick={() => { setSubTab('draft'); setCurrentPage(1); }}
-                                            className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'draft' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
+                                            className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'draft' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
                                         >
                                             Tin nháp
                                         </button>

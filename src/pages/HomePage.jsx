@@ -78,7 +78,7 @@ export default function HomePage({ navigate, user, onSearchClick, filterState, c
         <div className="min-h-screen bg-stone-50">
 
             {/* ---- HERO SECTION ---- */}
-            <section className={`${user ? 'hidden md:block' : ''} pt-24 md:pt-48 pb-28 relative overflow-hidden bg-stone-900`}>
+            <section className={`${user ? 'hidden md:block' : ''} pt-30 md:pt-48 pb-28 relative overflow-hidden bg-stone-900`}>
                 {/* Subtle amber tint blobs */}
                 <div className="absolute -top-20 -right-20 w-96 h-96 bg-amber-500/10 rounded-lg pointer-events-none blur-3xl" />
                 <div className="absolute bottom-0 -left-16 w-72 h-72 bg-amber-600/8 rounded-lg pointer-events-none blur-3xl" />
@@ -89,7 +89,7 @@ export default function HomePage({ navigate, user, onSearchClick, filterState, c
                     animate="visible"
                     className="max-w-6xl mx-auto px-4 sm:px-6 relative"
                 >
-                    <div className="max-w-2xl mx-auto text-center pb-16">
+                    <div className="max-w-2xl mx-auto text-center pb-8 md:pb-16">
 
                         {/* Badge */}
                         <motion.div
@@ -104,7 +104,7 @@ export default function HomePage({ navigate, user, onSearchClick, filterState, c
 
                         <motion.h1
                             variants={itemVariants}
-                            className="text-[clamp(2rem,6vw,3.25rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-tight"
+                            className="text-[clamp(2.35rem,7vw,3.25rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-tight"
                             style={{ fontFamily: 'var(--font-heading)' }}
                         >
                             Tìm phòng{' '}
@@ -119,14 +119,14 @@ export default function HomePage({ navigate, user, onSearchClick, filterState, c
 
                         <motion.p
                             variants={itemVariants}
-                            className="text-stone-400 text-lg leading-relaxed max-w-xl mx-auto mb-10"
+                            className="text-stone-400 text-base leading-relaxed max-w-xl mx-auto mb-6 md:mb-10"
                         >
                             Hàng nghìn phòng được xác minh tại Hà Nội, TP. Hồ Chí Minh và khắp cả nước.
                             Miễn phí tìm kiếm, không phí trung gian.
                         </motion.p>
 
-                        {/* Guided Search - Hidden on mobile because Header search is now sticky */}
-                        <motion.div variants={itemVariants} className="hidden md:block max-w-2xl mx-auto mt-6">
+                        {/* Guided Search - Visible on all devices */}
+                        <motion.div variants={itemVariants} className="block max-w-2xl mx-auto mt-6">
                             <SearchTrigger
                                 displayText={getLocationDisplayText()}
                                 onClick={onSearchClick}
@@ -139,12 +139,15 @@ export default function HomePage({ navigate, user, onSearchClick, filterState, c
                     {/* Stats bar */}
                     <motion.div
                         variants={itemVariants}
-                        className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] bg-stone-800 border border-stone-700 rounded-xl overflow-hidden max-w-3xl mx-auto"
+                        className="grid grid-cols-2 md:grid-cols-4 bg-stone-800 border border-stone-700 rounded-xl overflow-hidden max-w-3xl mx-auto"
                     >
                         {stats.map((stat, idx) => (
                             <div
                                 key={stat.label}
-                                className={`p-5 text-center ${idx < stats.length - 1 ? 'border-r border-stone-700' : ''}`}
+                                className={`p-5 text-center border-stone-700 
+                                    ${idx % 2 === 0 ? 'border-r' : ''} 
+                                    ${idx < 2 ? 'border-b' : ''} 
+                                    md:border-b-0 md:border-r md:last:border-r-0`}
                             >
                                 <div
                                     className="font-extrabold text-[1.6rem] text-amber-400 leading-none"
@@ -167,7 +170,7 @@ export default function HomePage({ navigate, user, onSearchClick, filterState, c
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
                 id="listing-section"
-                className={`max-w-6xl mx-auto px-4 sm:px-6 pb-12 scroll-mt-14 ${user ? 'pt-32 md:pt-10' : 'pt-10'
+                className={`max-w-6xl mx-auto px-4 sm:px-6 pb-12 scroll-mt-14 ${user ? 'pt-18 md:pt-10' : 'pt-10'
                     }`}
             >
 
@@ -206,7 +209,7 @@ export default function HomePage({ navigate, user, onSearchClick, filterState, c
                     </div>
 
                     {/* Main content */}
-                    <div className="flex-1 min-w-0 min-h-[70vh]">
+                    <div className="flex-1 min-w-0 min-h-[70vh] w-full">
                         {loading ? (
                             <RoomGrid rooms={[]} isLoading={true} />
                         ) : error ? (

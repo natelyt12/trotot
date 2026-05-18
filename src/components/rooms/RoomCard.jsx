@@ -55,7 +55,7 @@ export default function RoomCard({ room, onClick, style }) {
                 {/* Favorite Button */}
                 <button
                     onClick={handleToggleFavorite}
-                    className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-5 border-none cursor-pointer shadow-sm ${
+                    className={`absolute bottom-2 left-2 sm:top-2 sm:right-2 sm:bottom-auto sm:left-auto w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-5 border-none cursor-pointer shadow-sm ${
                         favorited 
                         ? 'bg-red-500 text-white' 
                         : 'bg-white/80 text-stone-600 hover:bg-white hover:text-red-500'

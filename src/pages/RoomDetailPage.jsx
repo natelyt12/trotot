@@ -116,7 +116,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
     };
 
     return (
-        <div className="min-h-screen bg-stone-50 pt-6 md:pt-20 pb-24 md:pb-0">
+        <div className="min-h-screen bg-stone-50 pt-16 md:pt-20 pb-24 md:pb-0">
             {previewMode && (
                 <div className="bg-amber-100 text-amber-800 text-center py-2 text-sm font-bold sticky top-0 z-50">
                     Bạn đang ở chế độ xem trước (Có thể chỉnh sửa bình luận)
@@ -317,7 +317,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                     );
                                 })()}
 
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-stone-50 rounded-lg border border-stone-100">
+                                <div className="grid grid-cols-2 gap-4 p-5 bg-stone-50 rounded-lg border border-stone-100">
                                     <StatItem icon="price" label="Giá thuê" value={formatPrice(basic_info.price_monthly)} highlight />
                                     <StatItem icon="area" label="Diện tích" value={formatArea(basic_info.area_sqm)} />
                                     <StatItem icon="occupants" label="Tối đa" value={`${room_features.counts.capacity} người`} />
@@ -563,14 +563,16 @@ function SectionTitle({ icon, children }) {
 
 function StatItem({ icon, label, value, highlight }) {
     return (
-        <div className="text-center flex flex-col items-center">
-            <div className="text-amber-600 mb-1">
+        <div className="flex items-center gap-3">
+            <div className="text-amber-600 shrink-0">
                 <AppIcon name={icon} size={26} />
             </div>
-            <p className="text-[0.72rem] text-stone-400 font-medium uppercase tracking-wider mb-0.5">{label}</p>
-            <p className={`text-[0.9rem] font-bold ${highlight ? 'text-amber-600' : 'text-stone-900'} font-heading`}>
-                {value}
-            </p>
+            <div className="flex flex-col">
+                <p className="text-[0.72rem] text-stone-400 font-medium uppercase tracking-wider mb-0.5">{label}</p>
+                <p className={`text-[0.9rem] font-bold ${highlight ? 'text-amber-600' : 'text-stone-900'} font-heading`}>
+                    {value}
+                </p>
+            </div>
         </div>
     );
 }

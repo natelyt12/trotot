@@ -15,8 +15,8 @@ export default function Header({ currentPage, navigate, user, onSearchClick, sea
             if (isExcludedPage) {
                 setShowSearch(false);
             } else if (isMobile) {
-                // Trên mobile: Chỉ hiện ở trang chủ (luôn hiện)
-                setShowSearch(isHome);
+                // Trên mobile: Ẩn hoàn toàn thanh tìm kiếm ở trang chủ vì đã có nút lọc ở bottom nav
+                setShowSearch(false);
             } else {
                 // Trên PC: Cuộn > 400px ở trang chủ mới hiện, hoặc luôn hiện ở các trang khác (ngoại trừ trang đã loại trừ)
                 setShowSearch(!isHome || window.scrollY > 400);
@@ -35,10 +35,15 @@ export default function Header({ currentPage, navigate, user, onSearchClick, sea
 
     const navLinks = [
         { label: "Tìm phòng", page: "home" },
+        { label: "Tìm bạn", page: "find-friends" },
         { label: "Tin đã lưu", page: "favorites" },
     ];
 
     const handleNavLinkClick = (link) => {
+        if (link.page === "find-friends") {
+            // Feature in development, do nothing
+            return;
+        }
         if (link.page === "favorites") {
             if (!user) navigate("login");
             else navigate("profile", { tab: "favorites" });
@@ -84,7 +89,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick, sea
                     </div>
 
                     {/* RIGHT Area: Search (Conditional) + Auth */}
-                    <div className="flex items-center justify-end gap-4 shrink-0">
+                    <div className="flex items-center justify-end md:gap-4 shrink-0">
                         {/* Desktop Search - Appears on scroll */}
                         <AnimatePresence>
                             {showSearch && (
@@ -141,9 +146,9 @@ export default function Header({ currentPage, navigate, user, onSearchClick, sea
                                 )}
                                 <button
                                     onClick={() => navigate("profile")}
-                                    className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1 px-1 md:py-1.5 md:px-3 rounded-full md:rounded-xl cursor-pointer hover:bg-stone-50 transition-colors"
+                                    className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1.5 px-3 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors"
                                 >
-                                    <div className="text-right hidden md:block">
+                                    <div className="text-right">
                                         <div className="text-sm font-bold text-stone-900 leading-tight truncate max-w-[120px]">
                                             {user.user_metadata?.full_name || "Người dùng"}
                                         </div>
@@ -171,31 +176,32 @@ export default function Header({ currentPage, navigate, user, onSearchClick, sea
                                 Đăng nhập
                             </button>
                         )}
+
+                        {/* Hamburger Button (Mobile) */}
+                        <button
+                            onClick={() => setMobileOpen(!mobileOpen)}
+                            className="p-2 hover:bg-stone-100 rounded-full transition-colors cursor-pointer border-none bg-transparent md:hidden text-stone-700 flex items-center justify-center"
+                            aria-label="Toggle menu"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                {mobileOpen ? (
+                                    <>
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </>
+                                ) : (
+                                    <>
+                                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                                    </>
+                                )}
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
-                {/* Mobile Search Bar (Appears on scroll) */}
-                <AnimatePresence>
-                    {showSearch && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                            className="md:hidden w-full px-4 overflow-hidden"
-                        >
-                            <div className="pb-3 pt-1">
-                                <SearchTrigger
-                                    displayText={searchDisplayText}
-                                    onClick={onSearchClick}
-                                    isFilled={isSearchFilled}
-                                    isNavbar={true}
-                                    showButton={false}
-                                />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                {/* Mobile Search Bar removed to clean up mobile UI and rely on bottom nav filter */}
             </nav>
 
             {/* Mobile dropdown menu */}

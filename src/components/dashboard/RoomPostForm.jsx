@@ -582,10 +582,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
+                                <label className="block text-xs font-bold text-stone-500 mb-1">Tỉnh/Thành phố *</label>
                                 <input
                                     required
                                     list="cities"
-                                    placeholder="Tỉnh/Thành phố *"
+                                    placeholder="Chọn Tỉnh/Thành phố"
                                     className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
                                     value={formData.city}
                                     onChange={(e) => {
@@ -608,10 +609,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 </datalist>
                             </div>
                             <div>
+                                <label className="block text-xs font-bold text-stone-500 mb-1">Quận/Huyện *</label>
                                 <input
                                     required
                                     list="districts"
-                                    placeholder="Quận/Huyện *"
+                                    placeholder="Chọn Quận/Huyện"
                                     className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
                                     value={formData.district}
                                     onChange={(e) => {
@@ -628,10 +630,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 </datalist>
                             </div>
                             <div>
+                                <label className="block text-xs font-bold text-stone-500 mb-1">Phường/Xã *</label>
                                 <input
                                     required
                                     list="wards"
-                                    placeholder="Phường/Xã *"
+                                    placeholder="Chọn Phường/Xã"
                                     className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
                                     value={formData.ward}
                                     onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
@@ -643,14 +646,17 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 </datalist>
                             </div>
                         </div>
-                        <input
-                            type="text"
-                            required
-                            placeholder="Địa chỉ cụ thể (Số nhà, tên đường) *"
-                            className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
-                            value={formData.address}
-                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        />
+                        <div>
+                            <label className="block text-xs font-bold text-stone-500 mb-1">Địa chỉ cụ thể *</label>
+                            <input
+                                type="text"
+                                required
+                                placeholder="Số nhà, tên đường..."
+                                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
+                                value={formData.address}
+                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                            />
+                        </div>
 
                         {/* Tự động gợi ý trường đại học */}
                         {formData.city && formData.district && formData.ward && nearbyUniversities.length > 0 && (
@@ -1080,7 +1086,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                 {/* SECTION 5: TIỆN NGHI (Minimal) */}
                 <FormSection title="Tiện nghi phòng" icon="check-square">
-                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                         {Object.entries(AMENITIES).map(([key, item]) => {
                             const isSelected = formData.room_features.amenities.includes(key);
                             return (

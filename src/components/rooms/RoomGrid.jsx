@@ -7,7 +7,7 @@ import RoomCard from './RoomCard.jsx';
 export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
     if (isLoading) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 justify-center sm:max-w-[720px] sm:mx-auto lg:max-w-none">
                 {Array.from({ length: 15 }).map((_, i) => (
                     <div key={i} style={{ animationDelay: `${i * 60}ms` }} className="animate-fade-in">
                         <SkeletonCard />
@@ -41,7 +41,7 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 justify-center sm:max-w-[720px] sm:mx-auto lg:max-w-none">
             {rooms.map((room, idx) => (
                 <div
                     key={room.listing_id}
