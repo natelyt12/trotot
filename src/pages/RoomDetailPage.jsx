@@ -17,6 +17,46 @@ import CommentSection from '../components/rooms/CommentSection.jsx';
 
 
 /* ============================================
+   Helper to parse and extract embeddable video URL for YouTube & TikTok
+   ============================================ */
+const getEmbedUrl = (url) => {
+    if (!url) return null;
+    const trimmed = url.trim();
+    
+    // 1. YouTube Standard, Mobile, and Shorts
+    if (trimmed.includes('youtube.com') || trimmed.includes('youtu.be')) {
+        let videoId = '';
+        if (trimmed.includes('watch?v=')) {
+            const parts = trimmed.split('watch?v=')[1];
+            videoId = parts.split('&')[0];
+        } else if (trimmed.includes('youtu.be/')) {
+            const parts = trimmed.split('youtu.be/')[1];
+            videoId = parts.split('?')[0];
+        } else if (trimmed.includes('shorts/')) {
+            const parts = trimmed.split('shorts/')[1];
+            videoId = parts.split('?')[0];
+        } else if (trimmed.includes('youtube.com/embed/')) {
+            return trimmed;
+        }
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    }
+    
+    // 2. TikTok Videos
+    if (trimmed.includes('tiktok.com')) {
+        if (trimmed.includes('/video/')) {
+            const parts = trimmed.split('/video/')[1];
+            const videoId = parts.split('?')[0].split('/')[0];
+            return `https://www.tiktok.com/embed/v2/${videoId}`;
+        }
+        if (trimmed.includes('tiktok.com/embed/')) {
+            return trimmed;
+        }
+    }
+    
+    return null;
+};
+
+/* ============================================
    RoomDetailPage – Full listing details
    ============================================ */
 export default function RoomDetailPage({ room, navigate, user, onClose, previewMode }) {
@@ -155,24 +195,31 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                 {/* Main image / video */}
                                 <div className="relative h-[300px] md:h-[450px] bg-stone-100 flex items-center justify-center">
                                     {mediaItems[activeImage].type === 'video' ? (
-                                        mediaItems[activeImage].url.includes('watch?v=') || mediaItems[activeImage].url.includes('embed') ? (
-                                            <iframe
-                                                className="w-full h-full"
-                                                src={mediaItems[activeImage].url.replace('watch?v=', 'embed/')}
-                                                title={`${basic_info.title} - video`}
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                            ></iframe>
-                                        ) : (
-                                            <video
-                                                controls
-                                                className="w-full h-full object-contain bg-black"
-                                                key={mediaItems[activeImage].url}
-                                            >
-                                                <source src={mediaItems[activeImage].url} type="video/mp4" />
-                                                Trình duyệt của bạn không hỗ trợ xem video.
-                                            </video>
-                                        )
+                                        (() => {
+                                            const embedUrl = getEmbedUrl(mediaItems[activeImage].url);
+                                            if (embedUrl) {
+                                                return (
+                                                    <iframe
+                                                        className="w-full h-full"
+                                                        src={embedUrl}
+                                                        title={`${basic_info.title} - video`}
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                        allowFullScreen
+                                                    ></iframe>
+                                                );
+                                            } else {
+                                                return (
+                                                    <video
+                                                        controls
+                                                        className="w-full h-full object-contain bg-black"
+                                                        key={mediaItems[activeImage].url}
+                                                    >
+                                                        <source src={mediaItems[activeImage].url} type="video/mp4" />
+                                                        Trình duyệt của bạn không hỗ trợ xem video.
+                                                    </video>
+                                                );
+                                            }
+                                        })()
                                     ) : (
                                         <img
                                             key={activeImage}

@@ -7,7 +7,7 @@ import { useFavorites } from '../context/FavoritesContext.jsx';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
 import { formatPrice } from '../utils/formatters.js';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
-import { compressImage } from '../utils/imageUtils';
+import { compressImage, deleteFromCloudinary, cropImageToSquare } from '../utils/imageUtils';
 import { draftAllUserRooms } from '../utils/roomUtils.js';
 
 
@@ -188,6 +188,20 @@ export default function ProfilePage({ user, navigate, initialData }) {
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
         
+        if (!formData.full_name?.trim()) {
+            addNotification('Vui lòng nhập họ tên của bạn.', 'error');
+            return;
+        }
+        if (!formData.phone?.trim()) {
+            addNotification('Vui lòng nhập số điện thoại.', 'error');
+            return;
+        }
+        const cleanPhone = formData.phone.replace(/[\s.-]/g, '');
+        if (!/^[0-9]{10,11}$/.test(cleanPhone)) {
+            addNotification('Số điện thoại không hợp lệ (yêu cầu từ 10 đến 11 chữ số).', 'error');
+            return;
+        }
+
         const oldRole = user?.user_metadata?.role || 'tenant';
         const newRole = formData.role;
         
@@ -238,6 +252,10 @@ export default function ProfilePage({ user, navigate, initialData }) {
     const handleAvatarUpload = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        if (!file.type.startsWith("image/")) {
+            addNotification('Vui lòng chỉ chọn tệp tin hình ảnh (PNG, JPG, JPEG, WEBP, GIF, v.v.).', 'error');
+            return;
+        }
         if (!user) {
             addNotification('Bạn cần đăng nhập để thực hiện thao tác này.', 'error');
             return;
@@ -246,22 +264,51 @@ export default function ProfilePage({ user, navigate, initialData }) {
         const oldAvatarUrl = formData.avatar_url;
 
         try {
-            // 1. Nén ảnh avatar trước khi upload (giới hạn 400px cho avatar nét)
-            const compressedFile = await compressImage(file, 400, 0.8);
+            // 1. Cắt vuông chính giữa và nén ảnh avatar trước khi upload (giới hạn 400px cho avatar nét)
+            const compressedFile = await cropImageToSquare(file, 400, 0.8);
 
-            const fileExt = compressedFile.name.split('.').pop();
-            const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+            let publicUrl = "";
+            const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+            const cloudinaryUploadPreset = import.meta.env.VITE_CLOUDINARY_AVATAR_UPLOAD_PRESET || import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-            // 2. Upload file đã nén
-            const { error: uploadError } = await supabase.storage
-                .from('user_avatar')
-                .upload(filePath, compressedFile, { upsert: true });
-            if (uploadError) throw uploadError;
+            if (cloudinaryCloudName && cloudinaryUploadPreset) {
+                // Tải lên Cloudinary
+                const formDataCloudinary = new FormData();
+                formDataCloudinary.append("file", compressedFile);
+                formDataCloudinary.append("upload_preset", cloudinaryUploadPreset);
 
-            // 3. Lấy Public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('user_avatar')
-                .getPublicUrl(filePath);
+                const response = await fetch(
+                    `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,
+                    {
+                        method: "POST",
+                        body: formDataCloudinary,
+                    }
+                );
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || "Tải ảnh đại diện lên Cloudinary thất bại");
+                }
+
+                const data = await response.json();
+                publicUrl = data.secure_url;
+            } else {
+                const fileExt = compressedFile.name.split('.').pop();
+                const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+
+                // 2. Upload file đã nén lên Supabase
+                const { error: uploadError } = await supabase.storage
+                    .from('user_avatar')
+                    .upload(filePath, compressedFile, { upsert: true });
+                if (uploadError) throw uploadError;
+
+                // 3. Lấy Public URL từ Supabase
+                const { data: { publicUrl: supabaseUrl } } = supabase.storage
+                    .from('user_avatar')
+                    .getPublicUrl(filePath);
+
+                publicUrl = supabaseUrl;
+            }
 
             // 4. Cập nhật Auth metadata
             const { error: updateError } = await supabase.auth.updateUser({
@@ -281,18 +328,21 @@ export default function ProfilePage({ user, navigate, initialData }) {
             addNotification('Cập nhật ảnh đại diện thành công!', 'success');
 
             // 7. Xóa ảnh cũ trên storage nếu có để tránh rác dữ liệu
-            // Chỉ xóa nếu ảnh cũ thuộc về bucket user_avatar và thuộc về user này
             if (oldAvatarUrl) {
-                const urlParts = oldAvatarUrl.split('/user_avatar/');
-                if (urlParts.length > 1) {
-                    const oldPath = urlParts[1].split('?')[0];
-                    if (oldPath.startsWith(`${user.id}/`)) {
-                        const { error: removeError } = await supabase.storage
-                            .from('user_avatar')
-                            .remove([oldPath]);
-                        
-                        if (removeError) {
-                            console.error('Lỗi khi xóa ảnh cũ từ storage:', removeError);
+                if (oldAvatarUrl.includes("res.cloudinary.com")) {
+                    await deleteFromCloudinary(oldAvatarUrl);
+                } else {
+                    const urlParts = oldAvatarUrl.split('/user_avatar/');
+                    if (urlParts.length > 1) {
+                        const oldPath = urlParts[1].split('?')[0];
+                        if (oldPath.startsWith(`${user.id}/`)) {
+                            const { error: removeError } = await supabase.storage
+                                .from('user_avatar')
+                                .remove([oldPath]);
+                            
+                            if (removeError) {
+                                console.error('Lỗi khi xóa ảnh cũ từ storage:', removeError);
+                            }
                         }
                     }
                 }
@@ -497,13 +547,14 @@ export default function ProfilePage({ user, navigate, initialData }) {
 
                                     <form onSubmit={handleUpdateProfile} className="flex flex-col gap-6">
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <Field label="Tên người dùng">
+                                            <Field label="Tên người dùng" required>
                                                 <input
                                                     type="text"
                                                     className={inputCls}
                                                     value={formData.full_name}
                                                     onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                                                     placeholder="Nhập họ tên của bạn"
+                                                    required
                                                 />
                                             </Field>
                                             <Field label="Email (Cố định)">
@@ -514,13 +565,14 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                                     disabled
                                                 />
                                             </Field>
-                                            <Field label="Số điện thoại">
+                                            <Field label="Số điện thoại" required>
                                                 <input
                                                     type="tel"
                                                     className={inputCls}
                                                     value={formData.phone}
                                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                     placeholder="09xx xxx xxx"
+                                                    required
                                                 />
                                             </Field>
                                         </div>
@@ -661,7 +713,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                     <TabHeader icon="lock" title="Đổi mật khẩu" />
 
                                     <form onSubmit={handleChangePassword} className="flex flex-col gap-6">
-                                        <Field label="Mật khẩu cũ">
+                                        <Field label="Mật khẩu cũ" required>
                                             <input
                                                 type="password"
                                                 className={inputCls}
@@ -672,7 +724,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                             />
                                         </Field>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <Field label="Mật khẩu mới">
+                                            <Field label="Mật khẩu mới" required>
                                                 <input
                                                     type="password"
                                                     className={inputCls}
@@ -682,7 +734,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                                     required
                                                 />
                                             </Field>
-                                            <Field label="Xác nhận mật khẩu mới">
+                                            <Field label="Xác nhận mật khẩu mới" required>
                                                 <input
                                                     type="password"
                                                     className={inputCls}
@@ -722,13 +774,14 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                             Khi bạn xóa tài khoản, mọi dữ liệu liên quan bao gồm các tin đăng phòng, tin nhắn và lịch sử giao dịch sẽ bị xóa vĩnh viễn. Thao tác này <b>không thể hoàn tác</b>.
                                         </p>
 
-                                        <Field label="Nhập mật khẩu của bạn để xác nhận">
+                                        <Field label="Nhập mật khẩu của bạn để xác nhận" required>
                                             <input
                                                 type="password"
                                                 className={`${inputCls} border-red-200 focus:border-red-400`}
                                                 value={deletePassword}
                                                 onChange={(e) => setDeletePassword(e.target.value)}
                                                 placeholder="Mật khẩu của bạn"
+                                                required
                                             />
                                         </Field>
 
@@ -767,10 +820,13 @@ function TabHeader({ icon, title, danger = false }) {
     );
 }
 
-function Field({ label, children }) {
+function Field({ label, children, required = false }) {
     return (
         <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold text-stone-700">{label}</label>
+            <label className="text-sm font-semibold text-stone-700">
+                {label}
+                {required && <span className="text-red-500 ml-1">*</span>}
+            </label>
             {children}
         </div>
     );

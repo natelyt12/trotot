@@ -8,6 +8,7 @@ import { formatPrice } from '../utils/formatters.js';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
 import { moveRoomToDraft } from '../utils/roomUtils.js';
 import RoomDetailPage from './RoomDetailPage.jsx';
+import { deleteFromCloudinary } from '../utils/imageUtils.js';
 
 /* ============================================
    DashboardPage – Property Manager
@@ -34,6 +35,23 @@ export default function DashboardPage({ user, navigate, initialData }) {
         if (!room.monthly_costs?.deposit_amount || room.monthly_costs.deposit_amount < 500000) errors.push("Tiền cọc phải từ 500.000đ trở lên");
         if (!room.media_contact?.images || room.media_contact.images.length === 0) errors.push("Chưa tải lên hình ảnh thực tế nào");
         if (!room.media_contact?.description || room.media_contact.description.length < 20) errors.push("Mô tả chi tiết quá ngắn (tối thiểu 20 ký tự)");
+        
+        // Cảnh báo link video YouTube/TikTok (chỉ bắt buộc khi đã bấm thêm ô link)
+        const videoUrls = room.media_contact?.video_urls || [];
+        if (videoUrls.length > 0) {
+            const hasEmptyUrl = videoUrls.some(url => !url || !url.trim());
+            if (hasEmptyUrl) {
+                errors.push("Bạn có ô liên kết video chưa điền");
+            } else {
+                const hasInvalidUrl = videoUrls.some(url => {
+                    const lower = url.toLowerCase().trim();
+                    return !(lower.includes("youtube.com") || lower.includes("youtu.be") || lower.includes("tiktok.com"));
+                });
+                if (hasInvalidUrl) {
+                    errors.push("Liên kết video phải là link YouTube hoặc TikTok hợp lệ");
+                }
+            }
+        }
         return errors;
     };
 
@@ -173,21 +191,25 @@ export default function DashboardPage({ user, navigate, initialData }) {
                         return;
                     }
 
-                    // Xóa ảnh trên storage nếu có
+                    // Xóa ảnh trên Cloudinary hoặc Supabase storage nếu có
                     const images = room.media_contact?.images;
                     if (images && images.length > 0) {
                         const pathsToDelete = [];
-                        images.forEach(img => {
+                        for (const img of images) {
                             if (img.url) {
-                                const parts = img.url.split('/room_media/');
-                                if (parts.length > 1) {
-                                    const path = parts[1].split('?')[0];
-                                    if (path.startsWith(`${user.id}/`)) {
-                                        pathsToDelete.push(path);
+                                if (img.url.includes("res.cloudinary.com")) {
+                                    await deleteFromCloudinary(img.url);
+                                } else {
+                                    const parts = img.url.split('/room_media/');
+                                    if (parts.length > 1) {
+                                        const path = parts[1].split('?')[0];
+                                        if (path.startsWith(`${user.id}/`)) {
+                                            pathsToDelete.push(path);
+                                        }
                                     }
                                 }
                             }
-                        });
+                        }
 
                         if (pathsToDelete.length > 0) {
                             const { error: storageError } = await supabase.storage
@@ -359,7 +381,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
                                                             subTab === 'verified' ? 'Tin đăng của bạn sau khi được kiểm duyệt sẽ xuất hiện ở đây.' :
                                                                 'Bắt đầu tiếp cận khách hàng tiềm năng bằng cách đăng tin cho thuê phòng của bạn.'}
                                                     </p>
-                                                    {subTab === 'published' && (
+                                                    {subTab === 'draft' && (
                                                         <button
                                                             onClick={() => {
                                                                 setIsCreating(true);

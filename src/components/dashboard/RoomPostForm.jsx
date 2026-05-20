@@ -7,7 +7,7 @@ import { AMENITIES, ROOM_TYPES, BATHROOM_TYPES, LAUNDRY_TYPES, CURFEW_LABELS, KI
 import { PROVINCE } from "../../data/province";
 import { UNIVERSITIES } from "../../data/universities";
 import { motion, AnimatePresence } from "framer-motion";
-import { compressImage } from "../../utils/imageUtils";
+import { compressImage, deleteFromCloudinary } from "../../utils/imageUtils";
 
 /**
  * RoomPostForm - Chức năng đăng tin mới (Single Form)
@@ -17,6 +17,13 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     const { showModal } = useModal();
     const { addNotification } = useNotification();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [initialFormState, setInitialFormState] = useState(null);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({
+        active: false,
+        percent: 0,
+        message: ""
+    });
 
     // --- STATE CHO FORM ---
     const [formData, setFormData] = useState({
@@ -87,8 +94,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
             return;
         }
 
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setFormData({
+        const initialForm = {
             title: roomToEdit.title || "",
             status: roomToEdit.status || "available",
             room_type: roomToEdit.room_type || "room",
@@ -119,23 +125,81 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 is_pet_allowed: true,
                 laundry_type: "private",
             },
-            media_contact: roomToEdit.media_contact || {
-                images: [],
-                video_urls: [],
-                description: "",
+            media_contact: {
+                images: roomToEdit.media_contact?.images || [],
+                video_urls: roomToEdit.media_contact?.video_urls || [],
+                description: roomToEdit.media_contact?.description || "",
             },
-        });
+        };
+
+        const initialImgs = roomToEdit.media_contact?.images
+            ? roomToEdit.media_contact.images.map((img) => ({
+                  url: img.url,
+                  file: null,
+                  is_cover: img.is_cover,
+              }))
+            : [];
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setFormData(initialForm);
 
         if (roomToEdit.media_contact?.images) {
-            setPreviewImages(
-                roomToEdit.media_contact.images.map((img) => ({
-                    url: img.url,
-                    file: null,
-                    is_cover: img.is_cover,
-                })),
-            );
+            setPreviewImages(initialImgs);
         }
+
+        setInitialFormState({
+            form: JSON.stringify(initialForm),
+            images: JSON.stringify(initialImgs.map(img => img.url))
+        });
     }, [roomToEdit]);
+
+    useEffect(() => {
+        if (!roomToEdit && !initialFormState) {
+            setInitialFormState({
+                form: JSON.stringify(formData),
+                images: JSON.stringify([])
+            });
+        }
+    }, [roomToEdit, initialFormState]);
+
+    const isDirty = (() => {
+        if (!initialFormState) return false;
+        const currentForm = JSON.stringify(formData);
+        const currentImages = JSON.stringify(previewImages.map(img => img.url));
+        return initialFormState.form !== currentForm || initialFormState.images !== currentImages;
+    })();
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (isDirty && !isSubmitted) {
+                e.preventDefault();
+                e.returnValue = "Bạn có chắc chắn muốn rời đi? Các thay đổi chưa lưu sẽ bị mất.";
+                return e.returnValue;
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [isDirty, isSubmitted]);
+
+    const handleClear = () => {
+        if (isDirty) {
+            showModal({
+                title: "Xác nhận hủy",
+                message: "Bạn có chắc chắn muốn hủy bỏ? Mọi thay đổi chưa lưu sẽ bị mất.",
+                type: "warning",
+                confirmText: "Hủy bỏ và rời đi",
+                cancelText: "Ở lại tiếp tục",
+                onConfirm: () => {
+                    onClear();
+                },
+            });
+        } else {
+            onClear();
+        }
+    };
 
     // --- XỬ LÝ ẢNH ---
     const fileInputRef = useRef(null);
@@ -143,6 +207,27 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
+
+        // Giới hạn tối đa 6 ảnh
+        if (previewImages.length + files.length > 6) {
+            showModal({
+                title: "Quá số lượng ảnh",
+                message: `Bạn chỉ được đăng tối đa 6 ảnh cho mỗi phòng trọ. Hiện tại đã có ${previewImages.length} ảnh, bạn không thể thêm ${files.length} ảnh nữa.`,
+                type: "warning",
+            });
+            return;
+        }
+
+        // Kiểm tra định dạng file (Chỉ chấp nhận ảnh)
+        const invalidFiles = files.filter((file) => !file.type.startsWith("image/"));
+        if (invalidFiles.length > 0) {
+            showModal({
+                title: "Định dạng không hợp lệ",
+                message: `Có ${invalidFiles.length} tệp không phải là hình ảnh. Vui lòng chỉ chọn các tệp hình ảnh (PNG, JPG, JPEG, WEBP, GIF, v.v.).`,
+                type: "error",
+            });
+            return;
+        }
 
         // Giới hạn dung lượng file (VD: 10MB)
         const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -157,10 +242,10 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
             return;
         }
 
-        const newPreviews = files.map((file) => ({
+        const newPreviews = files.map((file, idx) => ({
             url: URL.createObjectURL(file),
             file,
-            is_cover: previewImages.length === 0, // Ảnh đầu tiên mặc định làm bìa
+            is_cover: previewImages.length === 0 && idx === 0, // Chỉ ảnh đầu tiên của loạt đầu tiên mặc định làm bìa
         }));
 
         setPreviewImages((prev) => [...prev, ...newPreviews]);
@@ -243,6 +328,44 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
         }));
     };
 
+    const addVideoUrl = () => {
+        const currentUrls = formData.media_contact?.video_urls || [];
+        if (currentUrls.length >= 3) {
+            addNotification('Tối đa chỉ được nhập 3 đường dẫn video.', 'warning');
+            return;
+        }
+        setFormData(prev => ({
+            ...prev,
+            media_contact: {
+                ...prev.media_contact,
+                video_urls: [...currentUrls, '']
+            }
+        }));
+    };
+
+    const updateVideoUrl = (index, value) => {
+        const currentUrls = [...(formData.media_contact?.video_urls || [])];
+        currentUrls[index] = value;
+        setFormData(prev => ({
+            ...prev,
+            media_contact: {
+                ...prev.media_contact,
+                video_urls: currentUrls
+            }
+        }));
+    };
+
+    const removeVideoUrl = (index) => {
+        const currentUrls = (formData.media_contact?.video_urls || []).filter((_, i) => i !== index);
+        setFormData(prev => ({
+            ...prev,
+            media_contact: {
+                ...prev.media_contact,
+                video_urls: currentUrls
+            }
+        }));
+    };
+
     // --- XỬ LÝ SUBMIT ---
     const handleSubmit = async (e, forcedStatus = null) => {
         if (e) e.preventDefault();
@@ -292,10 +415,39 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 showModal({ title: "Mô tả quá ngắn", message: "Vui lòng nhập mô tả chi tiết ít nhất 20 ký tự.", type: "error" });
                 return;
             }
+
+            const videoUrls = formData.media_contact?.video_urls || [];
+            if (videoUrls.length > 0) {
+                if (videoUrls.some((url) => !url || !url.trim())) {
+                    showModal({ title: "Thiếu liên kết video", message: "Vui lòng điền đầy đủ hoặc xóa bớt các ô liên kết video trống.", type: "error" });
+                    return;
+                }
+
+                const hasInvalidUrl = videoUrls.some((url) => {
+                    const lower = url.toLowerCase().trim();
+                    return !(lower.includes("youtube.com") || lower.includes("youtu.be") || lower.includes("tiktok.com"));
+                });
+                if (hasInvalidUrl) {
+                    showModal({ title: "Liên kết video không hợp lệ", message: "Vui lòng nhập liên kết YouTube hoặc TikTok hợp lệ cho tất cả video.", type: "error" });
+                    return;
+                }
+            }
         }
 
         const executeSubmit = async () => {
             setIsSubmitting(true);
+            
+            // Tính toán tổng số bước xử lý
+            const newImages = previewImages.filter(img => img.file);
+            const totalSteps = newImages.length * 2 + 1; // 1 bước nén + 1 bước tải lên cho mỗi ảnh mới, + 1 bước lưu DB
+            let currentStep = 0;
+
+            setUploadProgress({
+                active: true,
+                percent: 0,
+                message: "Bắt đầu chuẩn bị dữ liệu..."
+            });
+
             try {
                 const uploadFolder = `${user.id}/${Date.now()}`;
                 const finalImages = [];
@@ -313,32 +465,86 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         continue;
                     }
 
+                    // Bước A: Nén ảnh
+                    setUploadProgress({
+                        active: true,
+                        percent: Math.round((currentStep / totalSteps) * 100),
+                        message: `Đang tối ưu dung lượng ảnh ${i + 1}/${previewImages.length}...`
+                    });
+
                     let fileToUpload = item.file;
 
                     // Nếu là ảnh mới, thực hiện nén
                     if (fileToUpload.type.startsWith("image/")) {
                         fileToUpload = await compressImage(fileToUpload);
                     }
+                    currentStep += 1;
 
-                    // Làm sạch tên file để tránh lỗi Invalid Key (tiếng Việt có dấu)
-                    const safeName = sanitizeFilename(fileToUpload.name);
-                    const fileName = `${Date.now()}_${i}_${safeName}`;
-                    const filePath = `${uploadFolder}/${fileName}`;
+                    // Bước B: Tải ảnh lên
+                    setUploadProgress({
+                        active: true,
+                        percent: Math.round((currentStep / totalSteps) * 100),
+                        message: `Đang tải ảnh ${i + 1}/${previewImages.length} lên máy chủ...`
+                    });
 
-                    const { data: _uploadData, error: uploadError } = await supabase.storage.from("room_media").upload(filePath, fileToUpload);
+                    let publicUrl = "";
+                    const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+                    const cloudinaryUploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
-                    if (uploadError) throw uploadError;
+                    if (cloudinaryCloudName && cloudinaryUploadPreset) {
+                        // Tải lên Cloudinary
+                        const formDataCloudinary = new FormData();
+                        formDataCloudinary.append("file", fileToUpload);
+                        formDataCloudinary.append("upload_preset", cloudinaryUploadPreset);
 
-                    // Lấy Public URL
-                    const {
-                        data: { publicUrl },
-                    } = supabase.storage.from("room_media").getPublicUrl(filePath);
+                        const response = await fetch(
+                            `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,
+                            {
+                                method: "POST",
+                                body: formDataCloudinary,
+                            }
+                        );
+
+                        if (!response.ok) {
+                            const errData = await response.json().catch(() => ({}));
+                            throw new Error(errData.error?.message || "Tải ảnh lên Cloudinary thất bại");
+                        }
+
+                        const data = await response.json();
+                        publicUrl = data.secure_url;
+                    } else {
+                        // Làm sạch tên file để tránh lỗi Invalid Key (tiếng Việt có dấu)
+                        const safeName = sanitizeFilename(fileToUpload.name);
+                        const fileName = `${Date.now()}_${i}_${safeName}`;
+                        const filePath = `${uploadFolder}/${fileName}`;
+
+                        const { data: _uploadData, error: uploadError } = await supabase.storage
+                            .from("room_media")
+                            .upload(filePath, fileToUpload);
+
+                        if (uploadError) throw uploadError;
+
+                        // Lấy Public URL
+                        const {
+                            data: { publicUrl: supabaseUrl },
+                        } = supabase.storage.from("room_media").getPublicUrl(filePath);
+
+                        publicUrl = supabaseUrl;
+                    }
 
                     finalImages.push({
                         url: publicUrl,
                         is_cover: item.is_cover,
                     });
+                    currentStep += 1;
                 }
+
+                // Bước C: Lưu thông tin vào Database
+                setUploadProgress({
+                    active: true,
+                    percent: Math.round((currentStep / totalSteps) * 100),
+                    message: "Đang ghi nhận thông tin phòng trọ vào hệ thống..."
+                });
 
                 const availableUntil = new Date();
                 availableUntil.setDate(availableUntil.getDate() + 7);
@@ -359,6 +565,9 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     media_contact: {
                         ...normalizedFormData.media_contact,
                         images: finalImages,
+                        video_urls: (normalizedFormData.media_contact?.video_urls || [])
+                            .map(url => url.trim())
+                            .filter(url => url.length > 0),
                     },
                     available_until: availableUntil.toISOString(),
                     status: forcedStatus || normalizedFormData.status || "available",
@@ -377,23 +586,27 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 const { error } = result;
                 if (error) throw error;
 
-                // Xử lý xóa ảnh thừa trên storage khi sửa tin
+                // Xử lý xóa ảnh thừa trên Cloudinary hoặc Supabase storage khi sửa tin
                 if (roomToEdit && roomToEdit.media_contact?.images) {
                     const oldImages = roomToEdit.media_contact.images;
                     const newUrls = finalImages.map(img => img.url);
                     
                     const pathsToDelete = [];
-                    oldImages.forEach(oldImg => {
+                    for (const oldImg of oldImages) {
                         if (!newUrls.includes(oldImg.url)) {
-                            const parts = oldImg.url.split('/room_media/');
-                            if (parts.length > 1) {
-                                const path = parts[1].split('?')[0];
-                                if (path.startsWith(`${user.id}/`)) {
-                                    pathsToDelete.push(path);
+                            if (oldImg.url.includes("res.cloudinary.com")) {
+                                await deleteFromCloudinary(oldImg.url);
+                            } else {
+                                const parts = oldImg.url.split('/room_media/');
+                                if (parts.length > 1) {
+                                    const path = parts[1].split('?')[0];
+                                    if (path.startsWith(`${user.id}/`)) {
+                                        pathsToDelete.push(path);
+                                    }
                                 }
                             }
                         }
-                    });
+                    }
 
                     if (pathsToDelete.length > 0) {
                         const { error: storageError } = await supabase.storage
@@ -406,13 +619,29 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     }
                 }
 
+                currentStep += 1;
+                setUploadProgress({
+                    active: true,
+                    percent: 100,
+                    message: "Lưu tin thành công!"
+                });
+
                 const successMessage = roomToEdit 
                     ? "Cập nhật tin đăng thành công!" 
                     : (isDraft ? "Đã lưu bản nháp thành công!" : "Tin đăng của bạn đã được gửi và đang chờ duyệt!");
+                
                 addNotification(successMessage, "success");
-                if (onSuccess) onSuccess();
+                setIsSubmitted(true);
+
+                // Giữ trạng thái hoàn thành 100% trong 600ms để tối ưu hóa trải nghiệm thị giác
+                setTimeout(() => {
+                    setUploadProgress({ active: false, percent: 0, message: "" });
+                    if (onSuccess) onSuccess();
+                }, 600);
+
             } catch (err) {
                 console.error("Lỗi khi lưu tin:", err);
+                setUploadProgress({ active: false, percent: 0, message: "" });
                 showModal({ title: "Lỗi", message: "Không thể lưu tin đăng.", type: "error" });
             } finally {
                 setIsSubmitting(false);
@@ -434,7 +663,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 <div className="flex flex-wrap items-center gap-2.5">
                     <button
                         type="button"
-                        onClick={onClear}
+                        onClick={handleClear}
                         className="px-4 py-2 rounded-full border border-stone-300 text-stone-600 font-bold text-sm hover:bg-stone-50 transition-all cursor-pointer bg-white"
                     >
                         Hủy bỏ
@@ -459,7 +688,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             <AppIcon name="photo" color="#d97706" size={16} />
                             <span>Hình ảnh</span>
                         </div>
-                        <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-wider">{previewImages.length} / 10</span>
+                        <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-wider">{previewImages.length} / 6</span>
                     </div>
                     <div className="p-3 pt-1">
                         <div
@@ -483,36 +712,103 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                             initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.8 }}
-                                            className={`relative aspect-square rounded-lg overflow-hidden border ${img.is_cover ? "border-amber-500" : "border-stone-100"}`}
+                                            className={`relative aspect-square rounded-lg overflow-hidden border ${img.is_cover ? "border-amber-500 shadow-md ring-2 ring-amber-500/20" : "border-stone-100"}`}
                                         >
                                             <img src={img.url} className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex flex-col justify-between p-1.5">
-                                                <div className="flex justify-end">
+                                            
+                                            {/* Controls Overlay (Always Visible, Mobile Friendly) */}
+                                            <div className="absolute inset-0 flex flex-col justify-between p-1.5 pointer-events-none z-10">
+                                                <div className="flex justify-end pointer-events-auto">
+                                                    {!img.is_cover && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeImage(idx)}
+                                                            className="w-6 h-6 rounded-full bg-red-500/90 text-white flex items-center justify-center cursor-pointer border-none shadow-md hover:bg-red-600 transition-colors active:scale-90"
+                                                        >
+                                                            <AppIcon name="trash" size={12} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                {!img.is_cover && (
                                                     <button
                                                         type="button"
-                                                        onClick={() => removeImage(idx)}
-                                                        className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center cursor-pointer border-none shadow-sm"
+                                                        onClick={() => setAsCover(idx)}
+                                                        className="w-full py-1.5 rounded-md text-[0.55rem] font-black uppercase cursor-pointer border-none bg-stone-900/80 hover:bg-stone-900 text-white shadow-md active:scale-95 transition-all pointer-events-auto text-center backdrop-blur-[2px]"
                                                     >
-                                                        <AppIcon name="trash" size={10} />
+                                                        Làm bìa
                                                     </button>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setAsCover(idx)}
-                                                    className="w-full py-1 rounded-md text-[0.55rem] font-bold uppercase cursor-pointer border-none bg-white/90 text-stone-900"
-                                                >
-                                                    {img.is_cover ? "Bìa" : "Làm bìa"}
-                                                </button>
+                                                )}
                                             </div>
                                             {img.is_cover && (
-                                                <div className="absolute top-1 left-1 bg-amber-500 text-white text-[0.5rem] font-black uppercase px-1.5 py-0.5 rounded shadow-sm">
-                                                    Bìa
+                                                <div className="absolute top-1.5 left-1.5 bg-amber-500 text-white text-[0.55rem] font-black uppercase px-2 py-0.5 rounded-md shadow-md z-10">
+                                                    Ảnh Bìa
                                                 </div>
                                             )}
                                         </MotionDiv>
                                     ))}
                                 </AnimatePresence>
                             </div>
+                        )}
+                    </div>
+                </section>
+
+                {/* SECTION: VIDEO (YouTube / TikTok) */}
+                <section className="bg-white border border-stone-200 rounded-xl overflow-hidden">
+                    <div className="p-4 border-b border-stone-50 bg-stone-50/30 flex items-center justify-between">
+                        <div className="flex items-center gap-2 font-bold text-stone-800 text-sm">
+                            <AppIcon name="play" color="#d97706" size={16} />
+                            <span>Video giới thiệu (YouTube / TikTok)</span>
+                        </div>
+                        <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-wider">
+                            {(formData.media_contact?.video_urls || []).length} / 3
+                        </span>
+                    </div>
+                    <div className="p-4 space-y-4">
+                        <p className="text-xs text-stone-500">
+                            Thêm liên kết video YouTube hoặc TikTok giới thiệu chi tiết về phòng trọ để thu hút nhiều người thuê hơn.
+                        </p>
+
+                        <div className="space-y-3">
+                            {(formData.media_contact?.video_urls || []).map((url, idx) => (
+                                <div key={idx} className="flex gap-2 items-center">
+                                    <div className="relative flex-1">
+                                        <input
+                                            type="url"
+                                            required
+                                            className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 transition-all text-sm font-medium pr-22"
+                                            placeholder="VD: https://www.youtube.com/watch?v=... hoặc https://www.tiktok.com/@... *"
+                                            value={url}
+                                            onChange={(e) => updateVideoUrl(idx, e.target.value)}
+                                        />
+                                        <div className="absolute right-3 top-2.5">
+                                            {url.toLowerCase().includes('youtube.com') || url.toLowerCase().includes('youtu.be') ? (
+                                                <span className="bg-red-50 text-red-600 text-[0.65rem] font-black uppercase px-2 py-0.5 rounded border border-red-100">YouTube</span>
+                                            ) : url.toLowerCase().includes('tiktok.com') ? (
+                                                <span className="bg-stone-900 text-white text-[0.65rem] font-black uppercase px-2 py-0.5 rounded">TikTok</span>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeVideoUrl(idx)}
+                                        className="w-10 h-10 rounded-lg bg-red-50 border border-red-100 text-red-600 flex items-center justify-center cursor-pointer hover:bg-red-100 hover:text-red-700 transition-all"
+                                        title="Xóa video này"
+                                    >
+                                        <AppIcon name="trash" size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+
+                        {(formData.media_contact?.video_urls || []).length < 3 && (
+                            <button
+                                type="button"
+                                onClick={addVideoUrl}
+                                className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-lg cursor-pointer transition-colors"
+                            >
+                                <AppIcon name="plus" size={14} />
+                                <span>Thêm link video</span>
+                            </button>
                         )}
                     </div>
                 </section>
@@ -686,7 +982,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             required
                             rows={6}
                             placeholder="Mô tả đặc điểm phòng, tiện ích xung quanh, giờ giấc, an ninh... *"
-                            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 transition-all text-sm leading-relaxed"
+                            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 transition-colors text-sm leading-relaxed"
                             value={formData.media_contact.description}
                             onChange={(e) =>
                                 setFormData({
@@ -1116,14 +1412,59 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         {isSubmitting ? "Đang lưu tin..." : roomToEdit ? "Lưu bản nháp" : "Lưu bản nháp"}
                     </button>
                     <div className="mt-4 text-center max-w-sm">
-                        <p className="text-[0.7rem] text-stone-400 leading-relaxed font-medium">
-                            Mọi thông tin sẽ được lưu lại dưới dạng bản nháp.
-                            <br />
-                            Bạn có thể kiểm tra kỹ lại và công khai tin đăng từ danh sách quản lý.
-                        </p>
-                    </div>
-                </div>
-            </div>
+                                        <p className="text-[0.7rem] text-stone-400 leading-relaxed font-medium">
+                                            Mọi thông tin sẽ được lưu lại dưới dạng bản nháp.
+                                            <br />
+                                            Bạn có thể kiểm tra kỹ lại và công khai tin đăng từ danh sách quản lý.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+            {/* Progress overlay */}
+            <AnimatePresence>
+                {uploadProgress.active && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.9, y: 20 }}
+                            className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col items-center text-center space-y-4 border border-stone-100"
+                        >
+                            {/* Animated Loading Ring */}
+                            <div className="relative w-16 h-16 flex items-center justify-center">
+                                <div className="absolute inset-0 rounded-full border-4 border-stone-100" />
+                                <svg className="absolute w-full h-full transform -rotate-90">
+                                    <circle
+                                        cx="32"
+                                        cy="32"
+                                        r="28"
+                                        className="stroke-amber-500 fill-none"
+                                        strokeWidth="4"
+                                        strokeDasharray={`${2 * Math.PI * 28}`}
+                                        strokeDashoffset={`${2 * Math.PI * 28 * (1 - uploadProgress.percent / 100)}`}
+                                        strokeLinecap="round"
+                                        style={{ transition: "stroke-dashoffset 0.3s ease-in-out" }}
+                                    />
+                                </svg>
+                                <span className="text-sm font-black text-stone-800">{uploadProgress.percent}%</span>
+                            </div>
+
+                            <div className="space-y-1 w-full">
+                                <h4 className="font-bold text-stone-950 text-sm">Đang xử lý dữ liệu</h4>
+                                <p className="text-xs text-stone-500 font-medium h-4 overflow-hidden truncate">
+                                    {uploadProgress.message}
+                                </p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </form>
     );
 }
