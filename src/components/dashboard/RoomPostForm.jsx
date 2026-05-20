@@ -131,7 +131,6 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
             ? roomToEdit.media_contact.images.map((img) => ({
                   url: img.url,
                   file: null,
-                  is_cover: img.is_cover,
               }))
             : [];
 
@@ -237,33 +236,16 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
             return;
         }
 
-        const newPreviews = files.map((file, idx) => ({
+        const newPreviews = files.map((file) => ({
             url: URL.createObjectURL(file),
             file,
-            is_cover: previewImages.length === 0 && idx === 0, // Chỉ ảnh đầu tiên của loạt đầu tiên mặc định làm bìa
         }));
 
         setPreviewImages((prev) => [...prev, ...newPreviews]);
     };
 
     const removeImage = (index) => {
-        setPreviewImages((prev) => {
-            const updated = prev.filter((_, i) => i !== index);
-            // Nếu xóa ảnh bìa, chọn ảnh đầu tiên còn lại làm bìa
-            if (prev[index].is_cover && updated.length > 0) {
-                updated[0].is_cover = true;
-            }
-            return updated;
-        });
-    };
-
-    const setAsCover = (index) => {
-        setPreviewImages((prev) =>
-            prev.map((img, i) => ({
-                ...img,
-                is_cover: i === index,
-            })),
-        );
+        setPreviewImages((prev) => prev.filter((_, i) => i !== index));
     };
 
     // --- TỰ ĐỘNG MAP TRƯỜNG ĐẠI HỌC ---
@@ -451,7 +433,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     if (!item.file) {
                         finalImages.push({
                             url: item.url,
-                            is_cover: item.is_cover,
+                            is_cover: i === 0,
                         });
                         continue;
                     }
@@ -523,7 +505,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                     finalImages.push({
                         url: publicUrl,
-                        is_cover: item.is_cover,
+                        is_cover: i === 0,
                     });
                     currentStep += 1;
                 }
@@ -696,34 +678,23 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                             initial={{ opacity: 0, scale: 0.9 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 0.8 }}
-                                            className={`relative aspect-square rounded-lg overflow-hidden border ${img.is_cover ? "border-amber-500 shadow-md ring-2 ring-amber-500/20" : "border-stone-100"}`}
+                                            className={`relative aspect-square rounded-lg overflow-hidden border ${idx === 0 ? "border-amber-500 shadow-md ring-2 ring-amber-500/20" : "border-stone-100"}`}
                                         >
                                             <img src={img.url} className="w-full h-full object-cover" />
                                             
                                             {/* Controls Overlay (Always Visible, Mobile Friendly) */}
                                             <div className="absolute inset-0 flex flex-col justify-between p-1.5 pointer-events-none z-10">
                                                 <div className="flex justify-end pointer-events-auto">
-                                                    {!img.is_cover && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeImage(idx)}
-                                                            className="w-6 h-6 rounded-full bg-red-500/90 text-white flex items-center justify-center cursor-pointer border-none shadow-md hover:bg-red-600 transition-colors active:scale-90"
-                                                        >
-                                                            <AppIcon name="trash" size={12} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                {!img.is_cover && (
                                                     <button
                                                         type="button"
-                                                        onClick={() => setAsCover(idx)}
-                                                        className="w-full py-1.5 rounded-md text-[0.55rem] font-black uppercase cursor-pointer border-none bg-stone-900/80 hover:bg-stone-900 text-white shadow-md active:scale-95 transition-all pointer-events-auto text-center backdrop-blur-[2px]"
+                                                        onClick={() => removeImage(idx)}
+                                                        className="w-6 h-6 rounded-full bg-red-500/90 text-white flex items-center justify-center cursor-pointer border-none shadow-md hover:bg-red-600 transition-colors active:scale-90"
                                                     >
-                                                        Làm bìa
+                                                        <AppIcon name="trash" size={12} />
                                                     </button>
-                                                )}
+                                                </div>
                                             </div>
-                                            {img.is_cover && (
+                                            {idx === 0 && (
                                                 <div className="absolute top-1.5 left-1.5 bg-amber-500 text-white text-[0.55rem] font-black uppercase px-2 py-0.5 rounded-md shadow-md z-10">
                                                     Ảnh Bìa
                                                 </div>
