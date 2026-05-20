@@ -1,208 +1,207 @@
-# 👤 Workflow: Hồ sơ người dùng (Profile)
+# 👤 Hồ sơ cá nhân — Cài đặt tài khoản
 
-Tài liệu mô tả luồng **quản lý thông tin cá nhân**, **đổi mật khẩu**, **tin đã lưu**, **phòng đã bình luận** và **xóa tài khoản**.
+Tài liệu mô tả các tính năng trên trang Hồ sơ cá nhân của TroTot: chỉnh sửa thông tin, đổi ảnh đại diện, xem phòng đã lưu, đổi mật khẩu và xóa tài khoản.
 
-> **Yêu cầu:** Phải đăng nhập. Truy cập qua `/profile`.
+> **Yêu cầu:** Phải đăng nhập. Truy cập qua đường dẫn `/profile`.
 
 ---
 
-## 1. Luồng truy cập và khởi tạo Profile
+## 1. Vào trang Hồ sơ và khởi tạo dữ liệu
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Bấm Hồ sơ\ntrên Header/BottomNav]) --> B{Đã đăng nhập?}
-        B -- Chưa --> C[navigate login]
-        B -- Rồi --> D[ProfilePage hiển thị]
-        D --> E[Tab mặc định: Thông tin cá nhân]
+        A([Bấm Hồ sơ\ntrên thanh điều hướng]) --> B{Đã đăng nhập?}
+        B -- Chưa --> C[Chuyển sang\ntrang Đăng nhập]
+        B -- Rồi --> D[Trang Hồ sơ hiển thị]
+        D --> E[Tab mặc định:\nThông tin cá nhân]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        D --> F[Đọc user.user_metadata\nkhởi tạo formData]
-        F --> G[fetchProfile từ Supabase\nbảng profiles]
-        G --> H[Cập nhật formData\nvới dữ liệu mới nhất từ DB]
+        D --> F[Lấy thông tin từ phiên\nđăng nhập hiện tại]
+        F --> G[Tải thêm thông tin\nmới nhất từ cơ sở dữ liệu]
+        G --> H[Hiển thị thông tin\nmới nhất lên form]
     end
 
-    subgraph LAYOUT["🗂️ Cấu trúc sidebar"]
-        I[Nhóm Cá nhân:\nThông tin cá nhân\nTin đã lưu\nPhòng đã bình luận]
-        J[Nhóm Bảo mật:\nĐổi mật khẩu\nVùng nguy hiểm]
-        K[Nút Đăng xuất\nphía dưới sidebar]
+    subgraph LAYOUT["🗂️ Cấu trúc trang"]
+        I[Sidebar trái: Ảnh đại diện · Tên · Email]
+        J[Menu điều hướng:\n— Nhóm Cá nhân:\n  Thông tin cá nhân\n  Tin đã lưu\n  Phòng đã bình luận\n— Nhóm Bảo mật:\n  Đổi mật khẩu\n  Vùng nguy hiểm]
+        K[Nút Đăng xuất\nphía dưới menu]
     end
 ```
 
 ---
 
-## 2. Luồng Cập nhật thông tin cá nhân
+## 2. Cập nhật thông tin cá nhân
 
 ```mermaid
 flowchart TD
-    subgraph USER["👤 Người dùng – Tab: Thông tin cá nhân"]
+    subgraph USER["👤 Người dùng — Tab: Thông tin cá nhân"]
         A([Xem form thông tin]) --> B[Sửa Tên người dùng]
         B --> C[Sửa Số điện thoại]
-        C --> D{Muốn đổi vai trò?}
-        D -- Có --> E[Chọn: Người thuê / Môi giới / Bên cho thuê]
-        D -- Không --> F[Giữ vai trò hiện tại]
+        C --> D{Muốn đổi\nloại tài khoản?}
+        D -- Có --> E[Chọn:\nNgười thuê · Môi giới · Bên cho thuê]
+        D -- Không --> F[Giữ nguyên]
         E & F --> G[Bấm Lưu thay đổi]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        G --> H{Validate dữ liệu}
-        H --> |Tên trống| I[Toast lỗi:\nVui lòng nhập họ tên]
-        H --> |SĐT không hợp lệ| J[Toast lỗi:\nSĐT không hợp lệ]
-        H --> |Hợp lệ| K{Chuyển từ landlord/agent\nsang tenant?}
-        K -- Có --> L[Modal cảnh báo:\nTất cả tin đăng sẽ bị ẩn]
-        K -- Không --> M[performUpdate trực tiếp]
-        L --> |Xác nhận| N[performUpdate\n+ draftAllUserRooms]
-        L --> |Hủy| O[Không làm gì]
-        M & N --> P[supabase.auth.updateUser\ncập nhật metadata]
-        P --> Q[supabase.profiles.update\ncập nhật bảng profiles]
-        Q --> R[Toast: Cập nhật thành công]
+        G --> H{Kiểm tra thông tin}
+        H --> |Tên trống| I[Thông báo:\nVui lòng nhập họ tên]
+        H --> |SĐT sai định dạng| J[Thông báo:\nSố điện thoại không hợp lệ]
+        H --> |Hợp lệ| K{Có đang chuyển từ\nMôi giới/Bên cho thuê\nsang Người thuê không?}
+        K -- Có --> L[Hộp thoại cảnh báo:\nTất cả tin đăng sẽ bị ẩn tạm thời]
+        K -- Không --> M[Cập nhật thông tin\nngay lập tức]
+        L --> |Hủy| N[Không làm gì]
+        L --> |Xác nhận| O[Cập nhật thông tin\nVÀ ẩn tất cả tin đăng\nvề bản nháp]
+        M & O --> P[Thông báo nhỏ:\nCập nhật thành công]
     end
 ```
 
 ---
 
-## 3. Luồng Upload ảnh đại diện (Avatar)
+## 3. Thay ảnh đại diện
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Hover vào Avatar\nSidebar Profile]) --> B[Overlay camera icon hiển thị]
-        B --> C[Bấm chọn file ảnh]
-        C --> D[Uploading spinner hiển thị]
+        A([Di chuột vào ảnh đại diện\ntrên sidebar]) --> B[Lớp phủ tối + icon camera\nhiển thị]
+        B --> C[Bấm vào để chọn file ảnh]
+        C --> D[Vòng xoay tải\nxuất hiện trong lúc chờ]
     end
 
-    subgraph SYSTEM["⚙️ Hệ thống – imageUtils.js"]
-        D --> E[cropImageToSquare\nCắt trung tâm thành hình vuông 400x400]
-        E --> F{Cloudinary được cấu hình?}
-        F -- Có --> G[Upload lên Cloudinary\ndùng avatar_upload_preset]
-        F -- Không --> H[Upload lên Supabase Storage\nbucket: user_avatar\npath: userId/timestamp.ext]
-        G --> I[Nhận secure_url]
-        H --> J[Lấy publicUrl]
-        I & J --> K[supabase.auth.updateUser\ndata.avatar_url = newUrl]
-        K --> L[supabase.profiles.update\navatar_url = newUrl]
-        L --> M[setFormData cập nhật avatar\nhiển thị ảnh mới]
-        M --> N[Toast: Cập nhật ảnh thành công]
-        N --> O{Có ảnh cũ?}
-        O -- Có, Cloudinary --> P[deleteFromCloudinary\nxóa ảnh cũ]
-        O -- Có, Supabase --> Q[Storage.remove\nxóa file cũ]
+    subgraph SYSTEM["⚙️ Hệ thống"]
+        D --> E[Cắt ảnh thành hình vuông\ntừ trung tâm — 400x400 điểm ảnh]
+        E --> F{Có cấu hình\nCloudinary không?}
+        F -- Có --> G[Tải lên kho ảnh\nCloudinary]
+        F -- Không --> H[Tải lên kho lưu trữ\nSupabase\nthư mục theo ID người dùng]
+        G --> I[Nhận địa chỉ ảnh mới]
+        H --> J[Tạo địa chỉ ảnh mới]
+        I & J --> K[Cập nhật ảnh\ntrên tài khoản đăng nhập]
+        K --> L[Cập nhật ảnh\ntrong bảng hồ sơ người dùng]
+        L --> M[Ảnh mới hiển thị ngay\ntrên giao diện]
+        M --> N[Thông báo nhỏ:\nCập nhật ảnh thành công]
+        N --> O{Có ảnh cũ không?}
+        O -- Có, trên Cloudinary --> P[Xóa ảnh cũ\nkhỏi Cloudinary]
+        O -- Có, trên Supabase --> Q[Xóa file ảnh cũ\nkhỏi kho lưu trữ]
         O -- Không --> R[Kết thúc]
         P & Q --> R
     end
 ```
 
+> **Lý do cắt vuông:** Ảnh đại diện luôn hiển thị trong khung tròn — cắt chính giữa giúp ảnh không bị méo.
+
 ---
 
-## 4. Luồng Tin đã lưu (Favorites)
+## 4. Xem tin phòng đã lưu yêu thích
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Bấm tab Tin đã lưu]) --> B[Fetch danh sách yêu thích]
-        B --> C{Có phòng đã lưu?}
-        C -- Không --> D[Empty state:\nnút Khám phá ngay]
-        D --> E[navigate home]
-        C -- Có --> F[RoomGrid hiển thị\nphòng đã lưu]
-        F --> G[Bấm vào phòng]
-        G --> H[navigate room-detail\nvới fromProfile = true]
-        H --> I[Xem chi tiết phòng\nKhi back → quay lại Profile]
+        A([Bấm tab Tin đã lưu]) --> B[Hệ thống tải danh sách]
+        B --> C{Có phòng đã lưu không?}
+        C -- Không --> D[Màn hình rỗng:\nnút Khám phá ngay]
+        D --> E[Chuyển về Trang chủ]
+        C -- Có --> F[Lưới các thẻ phòng\nđã lưu]
+        F --> G[Bấm vào thẻ phòng]
+        G --> H[Trang chi tiết phòng mở\nkhi quay lại → về trang Hồ sơ]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        B --> J[SELECT rooms\nWHERE id IN favorites array]
-        J --> K[mapSupabaseRoom\nchuyển đổi data]
-        K --> L[setSavedRooms]
-        L --> C
+        B --> I[Lấy danh sách ID phòng\ntừ bảng yêu thích]
+        I --> J[Tải dữ liệu đầy đủ\ncủa từng phòng đó]
+        J --> K[Chuyển đổi sang\nđịnh dạng hiển thị thẻ phòng]
+        K --> C
     end
 ```
 
 ---
 
-## 5. Luồng Phòng đã bình luận
+## 5. Xem phòng đã từng bình luận
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Bấm tab Phòng đã bình luận]) --> B[Fetch danh sách]
-        B --> C{Có phòng đã bình luận?}
-        C -- Không --> D[Empty state]
-        C -- Có --> E[Grid 2 cột\nhiển thị card phòng\nvà số lượt bình luận]
-        E --> F[Bấm vào card]
-        F --> G[navigate room-detail\nvới fromProfile = true]
+        A([Bấm tab Phòng đã bình luận]) --> B[Hệ thống tải danh sách]
+        B --> C{Đã bình luận phòng nào chưa?}
+        C -- Chưa --> D[Màn hình rỗng]
+        C -- Rồi --> E[Lưới 2 cột\nhiển thị thẻ phòng\nvà số lượng bình luận đã viết]
+        E --> F[Bấm vào thẻ phòng]
+        F --> G[Trang chi tiết phòng mở\nkhi quay lại → về trang Hồ sơ]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        B --> H[SELECT comments JOIN rooms\nWHERE user_id = current\nORDER BY created_at DESC]
-        H --> I[Group theo room_id\nTính số comment mỗi phòng]
-        I --> J[setCommentedRooms]
+        B --> H[Lấy tất cả bình luận\ncủa tài khoản này]
+        H --> I[Gộp theo phòng:\nmỗi phòng 1 dòng\nvà đếm số bình luận]
+        I --> J[Sắp xếp theo\nbình luận gần nhất]
         J --> C
     end
 ```
 
 ---
 
-## 6. Luồng Đổi mật khẩu
+## 6. Đổi mật khẩu
 
 ```mermaid
 flowchart TD
-    subgraph USER["👤 Người dùng – Tab: Đổi mật khẩu"]
-        A([Nhập Mật khẩu cũ]) --> B[Nhập Mật khẩu mới]
-        B --> C[Nhập Xác nhận mật khẩu mới]
+    subgraph USER["👤 Người dùng — Tab: Đổi mật khẩu"]
+        A([Nhập Mật khẩu hiện tại]) --> B[Nhập Mật khẩu mới]
+        B --> C[Nhập lại Mật khẩu mới\nđể xác nhận]
         C --> D[Bấm Cập nhật mật khẩu]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        D --> E{Validate}
-        E --> |newPassword ≠ confirm| F[Toast lỗi:\nMật khẩu không khớp]
-        E --> |newPassword < 6 ký tự| G[Toast lỗi:\nMật khẩu quá ngắn]
-        E --> |Hợp lệ| H[signInWithPassword\nvới oldPassword để verify]
-        H --> |Sai| I[Toast lỗi:\nMật khẩu cũ không chính xác]
-        H --> |Đúng| J[supabase.auth.updateUser\npassword = newPassword]
-        J --> K[Toast: Thay đổi thành công]
-        K --> L[Reset form mật khẩu]
+        D --> E{Kiểm tra thông tin}
+        E --> |Mật khẩu mới và xác nhận\nkhông giống nhau| F[Thông báo:\nMật khẩu không khớp]
+        E --> |Mật khẩu mới dưới 6 ký tự| G[Thông báo:\nMật khẩu quá ngắn]
+        E --> |Hợp lệ| H[Đăng nhập lại\nbằng mật khẩu hiện tại\nđể xác minh danh tính]
+        H --> |Mật khẩu hiện tại sai| I[Thông báo:\nMật khẩu cũ không chính xác]
+        H --> |Đúng| J[Cập nhật\nmật khẩu mới lên hệ thống]
+        J --> K[Thông báo nhỏ:\nThay đổi thành công]
+        K --> L[Form mật khẩu\nđược xóa trắng]
     end
 ```
 
 ---
 
-## 7. Luồng Xóa tài khoản vĩnh viễn
+## 7. Xóa tài khoản vĩnh viễn
 
 ```mermaid
 flowchart TD
-    subgraph USER["👤 Người dùng – Tab: Vùng nguy hiểm"]
-        A([Đọc cảnh báo]) --> B[Nhập mật khẩu xác nhận]
+    subgraph USER["👤 Người dùng — Tab: Vùng nguy hiểm"]
+        A([Đọc cảnh báo\ntrên trang]) --> B[Nhập mật khẩu\nđể xác nhận danh tính]
         B --> C[Bấm Xác nhận xóa tài khoản]
-        C --> D[Modal CAUTION:\nHành động không thể hoàn tác]
+        C --> D[Hộp thoại cảnh báo đỏ:\nHành động KHÔNG thể hoàn tác]
         D --> |Hủy bỏ| E[Không làm gì]
         D --> |Xác nhận xóa| F[Tiến hành xóa]
-        F --> G{Thành công?}
-        G -- Có --> H[Modal thông báo thành công]
-        H --> I[navigate home]
-        G -- Lỗi --> J[Toast: Lỗi + message]
+        F --> G{Kết quả}
+        G -- Thành công --> H[Thông báo:\nTài khoản đã được xóa]
+        H --> I[Chuyển về Trang chủ]
+        G -- Lỗi --> J[Thông báo lỗi\ncụ thể]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        F --> K[signInWithPassword\nxác thực lại]
-        K --> |Sai mật khẩu| L[Toast lỗi:\nMật khẩu xác nhận không chính xác]
-        K --> |Đúng| M[supabase.rpc\ndelete_user_account]
-        M --> N[Supabase function xóa:\nProfile, rooms, comments,\nfavorites, auth user]
-        N --> O[supabase.auth.signOut]
+        F --> K[Đăng nhập lại\nbằng mật khẩu vừa nhập\nđể xác minh]
+        K --> |Sai mật khẩu| L[Thông báo:\nMật khẩu xác nhận không đúng]
+        K --> |Đúng| M[Gọi hàm xóa\ntoàn bộ dữ liệu\ntrên cơ sở dữ liệu]
+        M --> N[Xóa: Hồ sơ · Tin đăng · Bình luận\nDanh sách yêu thích · Tài khoản]
+        N --> O[Đăng xuất ngay lập tức]
         O --> H
     end
 ```
 
 ---
 
-## 8. Luồng Đăng xuất
+## 8. Đăng xuất
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Bấm Đăng xuất\ntrên sidebar]) --> B[Modal xác nhận]
+        A([Bấm nút Đăng xuất\nphía dưới sidebar]) --> B[Hộp thoại xác nhận]
         B --> |Hủy| C[Không làm gì]
-        B --> |Đăng xuất| D[supabase.auth.signOut]
-        D --> E[onAuthStateChange kích hoạt\nsetUser = null]
-        E --> F[navigate home]
-        F --> G[Header cập nhật\nhiển thị nút Đăng nhập]
+        B --> |Đăng xuất| D[Hệ thống đăng xuất\nkhỏi dịch vụ xác thực]
+        D --> E[Ứng dụng nhận tín hiệu\ntự động xóa thông tin người dùng]
+        E --> F[Chuyển về Trang chủ]
+        F --> G[Thanh điều hướng\nhiển thị nút Đăng nhập]
     end
 ```

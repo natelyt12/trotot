@@ -1,238 +1,229 @@
-# 📊 Workflow: Dashboard – Quản lý tin đăng
+# 📊 Quản lý tin đăng — Dành cho chủ nhà và môi giới
 
-Tài liệu mô tả luồng **đăng tin mới**, **sửa tin**, **công khai/gỡ**, **xóa tin** và **xem trước** dành cho vai trò **Môi giới** và **Bên cho thuê**.
+Tài liệu mô tả cách đăng tin mới, sửa tin, công khai, gỡ, xóa và xem trước tin đăng phòng trọ trên Dashboard của TroTot.
 
-> **Yêu cầu:** Phải đăng nhập và có role `agent` hoặc `landlord`.
+> **Yêu cầu:** Phải đăng nhập với tài khoản **Môi giới** hoặc **Bên cho thuê**.
 
 ---
 
-## 1. Luồng truy cập Dashboard
+## 1. Vào trang Quản lý tin đăng
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Bấm Dashboard\ntrên Header/BottomNav]) --> B{Đã đăng nhập?}
-        B -- Chưa --> C[navigate login]
-        B -- Rồi --> D[DashboardPage hiển thị]
+        A([Bấm Quản lý tin đăng\ntrên thanh điều hướng]) --> B{Đã đăng nhập?}
+        B -- Chưa --> C[Chuyển sang\ntrang Đăng nhập]
+        B -- Rồi --> D[Trang Dashboard hiển thị]
         D --> E[Tab mặc định:\nQuản lý tin đăng]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        D --> F[fetchUserRooms\ntừ Supabase]
-        F --> G[SELECT rooms\nWHERE user_id = currentUser]
-        G --> H[setRooms với kết quả]
-        H --> I[Render danh sách\ntheo subTab hiện tại]
+        D --> F[Tải danh sách\ntin đăng của tài khoản này]
+        F --> G[Lấy tất cả phòng\ntừ cơ sở dữ liệu]
+        G --> H[Hiển thị danh sách\ntheo bộ lọc tab đang chọn]
     end
 ```
 
 ---
 
-## 2. Luồng xem và lọc tin đăng theo trạng thái
+## 2. Xem tin theo trạng thái
 
 ```mermaid
 flowchart TD
-    subgraph USER["👤 Người dùng – Tab: Quản lý tin đăng"]
-        A([Tab Quản lý tin đăng]) --> B[3 sub-tab phía trên]
-        B --> C{Chọn sub-tab}
-        C -- Tin đã kiểm duyệt --> D[Lọc: status=available\nAND is_verified=true]
-        C -- Tin đã công khai --> E[Lọc: status=available\nAND is_verified=false]
-        C -- Tin nháp --> F[Lọc: status=draft\nOR status=hidden]
+    subgraph USER["👤 Người dùng — Tab: Quản lý tin đăng"]
+        A([Vào tab Quản lý tin đăng]) --> B[3 tab con phía trên]
+        B --> C{Chọn tab}
+        C -- Tin đã kiểm duyệt --> D[Chỉ hiện tin:\nĐã công khai VÀ đã được duyệt]
+        C -- Tin đã công khai --> E[Chỉ hiện tin:\nĐã công khai nhưng chưa được duyệt]
+        C -- Tin nháp --> F[Chỉ hiện tin:\nBản nháp hoặc đã ẩn]
 
-        D & E & F --> G[Hiển thị danh sách tin\nvới phân trang 10 tin/trang]
-        G --> H{Không có tin?}
-        H -- Có --> I[Empty state\nvới hướng dẫn phù hợp]
-        H -- Không --> J[Danh sách tin đăng\nvới action buttons]
+        D & E & F --> G[Hiển thị danh sách\n10 tin mỗi trang — có phân trang]
+        G --> H{Không có tin nào?}
+        H -- Có --> I[Màn hình rỗng\nvới hướng dẫn phù hợp]
+        H -- Không --> J[Danh sách tin\nvới các nút thao tác]
     end
 ```
 
-**Badge trạng thái:**
+**Ý nghĩa các trạng thái:**
 
-| `status` | `is_verified` | Hiển thị |
-|----------|--------------|---------|
-| `available` | `true` | 🟢 Đã công khai · 🔵 Đã kiểm duyệt |
-| `available` | `false` | 🟢 Đã công khai (chờ kiểm duyệt) |
-| `draft` | - | ⬜ Bản nháp |
-| `hidden` | - | 🟡 Đã ẩn |
-| `expired` | - | 🔴 Hết hạn |
+| Trạng thái | Màu nhãn | Ý nghĩa |
+|------------|---------|---------|
+| Đã công khai + Đã kiểm duyệt | 🟢 Xanh · 🔵 Xanh dương | Tin đang hiển thị, đã được admin duyệt |
+| Đã công khai + Chờ duyệt | 🟢 Xanh | Tin đang hiển thị, chờ admin kiểm tra |
+| Bản nháp | ⬜ Xám | Mới tạo, chưa ai xem được |
+| Đã ẩn | 🟡 Vàng | Tạm thời không hiển thị |
+| Hết hạn | 🔴 Đỏ | Tin đã quá ngày hết hạn |
 
 ---
 
-## 3. Luồng Đăng tin mới
+## 3. Đăng tin phòng mới
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
         A([Bấm Đăng tin ngay\nhoặc vào tab Đăng/Sửa tin]) --> B[Tab: Đăng / Sửa tin]
-        B --> C{isCreating hoặc editingRoom?}
-        C -- Không --> D[Empty state:\nnút Tạo tin đăng mới]
-        D --> E[Bấm tạo tin mới\nsetIsCreating = true]
-        C -- Có --> F[RoomPostForm hiển thị\nvới form trống]
+        B --> C{Có tin đang cần sửa\nhoặc đang tạo mới không?}
+        C -- Không --> D[Màn hình rỗng:\nnút Tạo tin đăng mới]
+        D --> E[Bấm Tạo tin mới]
+        C -- Có --> F[Form đăng tin\nhiển thị trống]
         E --> F
 
-        F --> G[Điền thông tin:\nTiêu đề, Địa chỉ, Giá, Diện tích]
-        G --> H[Upload ảnh\ntừ thiết bị hoặc URL]
-        H --> I[Điền Mô tả chi tiết]
-        I --> J[Điền chi phí:\nCọc, Điện, Nước, Internet, ...]
-        J --> K[Chọn Tiện nghi & Nội quy]
-        K --> L{Bấm Lưu nháp\nhoặc Công khai}
+        F --> G[Điền tiêu đề, địa chỉ,\ngiá thuê, diện tích]
+        G --> H[Tải ảnh lên\ntừ thiết bị hoặc dán đường dẫn ảnh]
+        H --> I[Viết mô tả chi tiết]
+        I --> J[Điền chi phí hàng tháng:\nCọc, điện, nước, internet...]
+        J --> K[Chọn tiện nghi và nội quy phòng]
+        K --> L{Muốn làm gì?}
+        L -- Lưu nháp --> M[Lưu dạng bản nháp\nchưa ai xem được]
+        L -- Đăng công khai --> N[Kiểm tra thông tin\ntrước khi đăng]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        L -- Lưu nháp --> M[INSERT rooms\nstatus = draft]
-        L -- Công khai --> N[Validate đủ thông tin\nbắt buộc]
-        N --> |Thiếu thông tin| O[Modal lỗi:\nliệt kê các mục thiếu]
-        N --> |Đủ thông tin| P[INSERT rooms\nstatus = available]
-        M --> Q[Chuyển sang tab\nQuản lý tin đăng]
-        P --> Q
-        O --> F
+        N --> O{Đủ thông tin\nbắt buộc chưa?}
+        O --> |Thiếu| P[Thông báo lỗi:\nliệt kê các mục còn thiếu]
+        O --> |Đủ| Q[Lưu tin đăng\ntrạng thái Đã công khai]
+        M --> R[Lưu tin đăng\ntrạng thái Bản nháp]
+        Q & R --> S[Chuyển sang tab\nQuản lý tin đăng]
+        P --> F
     end
 ```
 
-**Validation khi công khai tin:**
+**Thông tin bắt buộc khi đăng công khai:**
 
-| Trường | Yêu cầu |
-|--------|---------|
-| Tiêu đề | Bắt buộc, không được trống |
-| Giá thuê | ≥ 100.000đ |
-| Diện tích | > 0 m² |
-| Địa chỉ | Đủ: Tỉnh + Huyện + Xã + Số nhà |
-| Tiền cọc | ≥ 500.000đ |
-| Ảnh thực tế | ≥ 1 ảnh |
-| Mô tả | ≥ 20 ký tự |
-| Link video | Nếu có, phải là YouTube hoặc TikTok hợp lệ |
-
----
-
-## 4. Luồng Upload ảnh phòng
-
-```mermaid
-flowchart TD
-    subgraph USER["👤 Người dùng – RoomPostForm"]
-        A([Chọn file ảnh\nhoặc kéo thả]) --> B[File được chọn]
-        B --> C[compressImage\nGiảm chất lượng/kích thước]
-    end
-
-    subgraph SYSTEM["⚙️ Hệ thống – imageUtils.js"]
-        C --> D{Cloudinary được cấu hình?}
-        D -- Có --> E[Upload lên Cloudinary\nVia API + upload_preset]
-        D -- Không --> F[Upload lên Supabase Storage\nbucket: room_media]
-        E --> G[Nhận secure_url\ntừ Cloudinary]
-        F --> H[Lấy publicUrl\ntừ Supabase]
-        G & H --> I[Thêm URL vào\ndanh sách ảnh]
-        I --> J[Ảnh đầu tiên\ntự động là ảnh bìa]
-    end
-```
+| Thông tin | Điều kiện |
+|-----------|-----------|
+| Tiêu đề tin | Không được để trống |
+| Giá thuê | Tối thiểu 100.000đ/tháng |
+| Diện tích | Phải lớn hơn 0 m² |
+| Địa chỉ | Phải có đủ: Tỉnh · Huyện · Xã · Số nhà |
+| Tiền cọc | Tối thiểu 500.000đ |
+| Ảnh thực tế | Ít nhất 1 ảnh phòng |
+| Mô tả | Tối thiểu 20 ký tự |
+| Link video | Nếu có, phải là link YouTube hoặc TikTok hợp lệ |
 
 ---
 
-## 5. Luồng Công khai tin từ bản nháp
-
-```mermaid
-flowchart TD
-    subgraph USER["👤 Người dùng – Sub-tab: Tin nháp"]
-        A([Bấm nút Công khai\ntrên tin nháp]) --> B[handlePublishFromDraft]
-    end
-
-    subgraph SYSTEM["⚙️ Hệ thống"]
-        B --> C[validateRoomData\nkiểm tra đủ thông tin]
-        C --> |Thiếu thông tin| D[Modal lỗi với\nlist các mục còn thiếu]
-        C --> |Đủ thông tin| E[Modal xác nhận:\nBạn có chắc muốn công khai?]
-        E --> |Hủy| F[Không làm gì]
-        E --> |Xác nhận| G[UPDATE rooms\nSET status = available]
-        G --> H[setRooms cập nhật local]
-        H --> I[Toast: Tin đã được gửi\nđang chờ duyệt]
-        I --> J[Chuyển sang sub-tab\nTin đã kiểm duyệt]
-        D --> K[Nút Sửa để bổ sung]
-    end
-```
-
----
-
-## 6. Luồng Gỡ công khai tin
-
-```mermaid
-flowchart TD
-    subgraph USER["👤 Người dùng – Sub-tab: Tin đã công khai / Đã kiểm duyệt"]
-        A([Bấm nút Gỡ công khai]) --> B[handleUnpublish]
-    end
-
-    subgraph SYSTEM["⚙️ Hệ thống"]
-        B --> C{room.is_verified?}
-        C -- Có --> D[Modal cảnh báo:\nGỡ tin đã kiểm duyệt\nsẽ cần kiểm duyệt lại]
-        C -- Không --> E[Modal xác nhận bình thường]
-        D & E --> |Xác nhận| F[moveRoomToDraft\nSET status = draft\nSET is_verified = false]
-        F --> G[setRooms cập nhật local]
-        G --> H[Toast: Đã gỡ công khai]
-        H --> I[Tin xuất hiện trong\nSub-tab Tin nháp]
-        D & E --> |Hủy| J[Không làm gì]
-    end
-```
-
----
-
-## 7. Luồng Xóa tin đăng
-
-```mermaid
-flowchart TD
-    subgraph USER["👤 Người dùng – Sub-tab: Tin nháp"]
-        A([Bấm nút Xóa]) --> B[handleDeleteRoom]
-    end
-
-    subgraph SYSTEM["⚙️ Hệ thống"]
-        B --> C[Modal xác nhận:\nHành động không thể hoàn tác]
-        C --> |Hủy| D[Không làm gì]
-        C --> |Xóa| E[DELETE rooms WHERE id\nvà Cascade Delete dữ liệu liên quan]
-        E --> F{Xóa thành công?}
-        F -- Có --> G[Duyệt qua media_contact.images]
-        G --> H{Ảnh từ Cloudinary?}
-        H -- Có --> I[deleteFromCloudinary\nxóa ảnh trên cloud]
-        H -- Không --> J[Xóa từ Supabase Storage\nbucket room_media]
-        I & J --> K[setRooms filter bỏ room đã xóa]
-        K --> L[Toast: Xóa tin thành công]
-        F -- Không --> M[Modal lỗi:\nKhông thể xóa tin đăng]
-    end
-```
-
----
-
-## 8. Luồng Xem trước tin đăng
+## 4. Tải ảnh phòng lên
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Bấm nút Xem trước\ntrên bất kỳ tin nào]) --> B[setPreviewRoom\nvới data được map]
-        B --> C[Overlay fullscreen\nRoomDetailPage với previewMode=true]
-        C --> D[Banner: Bạn đang ở chế độ xem trước]
-        D --> E{Thoát?}
-        E --> F[Bấm nút đóng\nsetPreviewRoom = null]
-        F --> G[Quay lại Dashboard]
+        A([Chọn ảnh từ thiết bị\nhoặc kéo thả vào form]) --> B[Ảnh được chọn]
+        B --> C[Hệ thống nén ảnh\ntrước khi tải lên]
     end
 
-    subgraph NOTE["📌 Đặc điểm Preview Mode"]
-        H[Nút Lưu tin bị vô hiệu hóa]
-        I[Nút Liên hệ bị vô hiệu hóa]
-        J[Không đếm lượt xem]
-        K[Bình luận: Vẫn có thể xem và đăng]
+    subgraph SYSTEM["⚙️ Hệ thống"]
+        C --> D{Có cấu hình\nCloudinary không?}
+        D -- Có --> E[Tải lên kho ảnh\nCloudinary]
+        D -- Không --> F[Tải lên kho lưu trữ\ncủa Supabase]
+        E --> G[Nhận địa chỉ ảnh\ntrả về từ Cloudinary]
+        F --> H[Tạo địa chỉ ảnh\ntừ Supabase]
+        G & H --> I[Thêm ảnh vào\ndanh sách ảnh của tin đăng]
+        I --> J[Ảnh đầu tiên trong danh sách\ntự động làm ảnh bìa]
     end
 ```
 
 ---
 
-## 9. Luồng Kiểm duyệt tin (Mock)
+## 5. Công khai tin từ bản nháp
 
 ```mermaid
 flowchart TD
-    subgraph USER["👤 Người dùng – Sub-tab: Tin đã công khai"]
-        A([Bấm nút Duyệt tin - Mock]) --> B[handleMockVerify]
+    subgraph USER["👤 Người dùng — Tab: Tin nháp"]
+        A([Bấm nút Công khai\ntrên tin nháp]) --> B[Hệ thống kiểm tra\nthông tin của tin đó]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        B --> C[UPDATE rooms\nSET is_verified = true]
-        C --> D[setRooms cập nhật local]
-        D --> E[Toast: Đã duyệt tin\nMockup]
+        B --> C{Đủ thông tin\nbắt buộc?}
+        C --> |Thiếu| D[Thông báo lỗi:\nliệt kê các mục thiếu\nnút Sửa để bổ sung]
+        C --> |Đủ| E[Hộp thoại xác nhận:\nBạn có chắc muốn công khai?]
+        E --> |Hủy| F[Không làm gì]
+        E --> |Xác nhận| G[Cập nhật trạng thái\nthành Đã công khai]
+        G --> H[Danh sách tin cập nhật\nngay tức thì]
+        H --> I[Thông báo nhỏ:\nTin đã gửi, đang chờ kiểm duyệt]
+        I --> J[Chuyển sang tab\nTin đã kiểm duyệt]
+        D --> K[Quay lại xem tin nháp]
+    end
+```
+
+---
+
+## 6. Gỡ công khai tin đăng
+
+```mermaid
+flowchart TD
+    subgraph USER["👤 Người dùng — Tab: Tin đã công khai hoặc Đã kiểm duyệt"]
+        A([Bấm nút Gỡ công khai]) --> B[Hộp thoại xác nhận hiển thị]
     end
 
-    subgraph NOTE["📌 Lưu ý"]
-        F[Đây là tính năng Mock\nThực tế kiểm duyệt do Admin thực hiện\nphía backend/admin panel]
+    subgraph SYSTEM["⚙️ Hệ thống"]
+        B --> C{Tin này đã được\nkiểm duyệt trước đó?}
+        C -- Có --> D[Cảnh báo thêm:\nGỡ tin đã duyệt có thể\ncần kiểm duyệt lại khi đăng lại]
+        C -- Không --> E[Hộp xác nhận bình thường]
+        D & E --> |Hủy| F[Không làm gì]
+        D & E --> |Xác nhận| G[Chuyển tin về\ntrạng thái Bản nháp\nBỏ trạng thái đã kiểm duyệt]
+        G --> H[Danh sách tin cập nhật\nngay tức thì]
+        H --> I[Thông báo nhỏ:\nĐã gỡ công khai]
+        I --> J[Tin chuyển sang\ntab Tin nháp]
+    end
+```
+
+---
+
+## 7. Xóa tin đăng
+
+```mermaid
+flowchart TD
+    subgraph USER["👤 Người dùng — Tab: Tin nháp"]
+        A([Bấm nút Xóa]) --> B[Hộp thoại xác nhận:\nHành động không thể hoàn tác]
+    end
+
+    subgraph SYSTEM["⚙️ Hệ thống"]
+        B --> |Hủy| C[Không làm gì]
+        B --> |Xóa| D[Xóa tin đăng\nvà tất cả dữ liệu liên quan\nkhỏi cơ sở dữ liệu]
+        D --> E{Xóa thành công?}
+        E -- Có --> F[Duyệt qua các ảnh của tin]
+        F --> G{Ảnh đang lưu ở đâu?}
+        G -- Cloudinary --> H[Xóa ảnh khỏi\nCloudinary]
+        G -- Supabase --> I[Xóa ảnh khỏi\nkho lưu trữ Supabase]
+        H & I --> J[Cập nhật danh sách\nbỏ tin vừa xóa]
+        J --> K[Thông báo nhỏ:\nXóa tin thành công]
+        E -- Thất bại --> L[Thông báo lỗi:\nKhông thể xóa tin đăng]
+    end
+```
+
+---
+
+## 8. Xem trước tin đăng
+
+```mermaid
+flowchart TD
+    subgraph USER["👤 Người dùng"]
+        A([Bấm nút Xem trước\ntrên bất kỳ tin nào]) --> B[Trang chi tiết phòng\nhiển thị toàn màn hình]
+        B --> C[Dải thông báo màu vàng:\nBạn đang ở chế độ Xem trước]
+        C --> D[Kiểm tra giao diện\nnhư người thuê sẽ thấy]
+        D --> E[Bấm nút đóng\nQuay về Dashboard]
+    end
+
+    subgraph NOTE["📌 Trong chế độ Xem trước"]
+        F[✅ Có thể: Cuộn xem nội dung, đọc bình luận]
+        G[❌ Không thể: Lưu yêu thích, xem SĐT, liên hệ chủ nhà]
+        H[❌ Không tính: Lượt xem không tăng]
+    end
+```
+
+---
+
+## 9. Kiểm duyệt tin — Tính năng thử nghiệm
+
+```mermaid
+flowchart TD
+    subgraph USER["👤 Người dùng — Tab: Tin đã công khai"]
+        A([Bấm nút Duyệt tin\nMock]) --> B[Hệ thống đánh dấu tin\nđã được kiểm duyệt]
+        B --> C[Thông báo nhỏ:\nĐã duyệt tin thành công — Mockup]
+    end
+
+    subgraph NOTE["📌 Lưu ý quan trọng"]
+        D[Đây là tính năng MÔ PHỎNG\nchỉ dùng để test\nTrong thực tế, kiểm duyệt do\nquản trị viên thực hiện]
     end
 ```

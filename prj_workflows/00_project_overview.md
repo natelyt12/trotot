@@ -1,7 +1,7 @@
 # 🏠 TroTot – Tổng Quan Dự Án
 
-> **TroTot** là nền tảng tìm phòng trọ trực tuyến dành cho thị trường Việt Nam.  
-> Kết nối người thuê phòng với chủ nhà / môi giới một cách nhanh chóng, minh bạch và tiện lợi.
+> **TroTot** là ứng dụng web giúp người dùng tìm phòng trọ tại Việt Nam.  
+> Kết nối người thuê phòng với chủ nhà và môi giới một cách nhanh chóng, minh bạch và tiện lợi.
 
 ---
 
@@ -9,150 +9,170 @@
 
 | File | Nội dung |
 |------|----------|
-| `00_project_overview.md` | Tổng quan dự án, tech stack, kiến trúc |
-| `01_auth_workflow.md` | Luồng đăng ký, đăng nhập, quên mật khẩu |
-| `02_home_search_workflow.md` | Luồng tìm kiếm & lọc phòng trang chủ |
-| `03_room_detail_workflow.md` | Luồng xem chi tiết phòng, yêu thích, liên hệ |
-| `04_dashboard_workflow.md` | Luồng quản lý tin đăng (chủ nhà / môi giới) |
-| `05_profile_workflow.md` | Luồng quản lý hồ sơ người dùng |
+| `00_project_overview.md` | Tổng quan dự án, công nghệ sử dụng, cấu trúc hệ thống |
+| `01_auth_workflow.md` | Đăng ký, đăng nhập, quên mật khẩu |
+| `02_home_search_workflow.md` | Tìm kiếm & lọc phòng trên trang chủ |
+| `03_room_detail_workflow.md` | Xem chi tiết phòng, yêu thích, liên hệ, bình luận |
+| `04_dashboard_workflow.md` | Quản lý tin đăng — dành cho chủ nhà và môi giới |
+| `05_profile_workflow.md` | Quản lý hồ sơ cá nhân |
 
 ---
 
 ## 🎯 Mục tiêu sản phẩm
 
-- Cung cấp **hàng trăm phòng trọ được xác minh** trên cả nước
-- **Miễn phí tìm kiếm**, không phí trung gian cho người thuê
-- Giao diện thân thiện, hỗ trợ cả **desktop và mobile**
-- Ba nhóm vai trò: **Người thuê** (tenant) · **Môi giới** (agent) · **Bên cho thuê** (landlord)
+- Cung cấp **hàng trăm phòng trọ đã được xác minh** trên cả nước
+- **Miễn phí tìm kiếm** — không thu phí trung gian từ người thuê
+- Giao diện thân thiện, chạy được trên cả máy tính và điện thoại
+- Ba loại tài khoản: **Người thuê** · **Môi giới** · **Bên cho thuê**
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Công nghệ sử dụng
 
-### Frontend
+### Giao diện người dùng (`Frontend`)
 
-```
-React 19          – UI framework
-Vite 8            – Build tool & dev server
-TailwindCSS 4     – Utility-first CSS framework
-Framer Motion 12  – Animations & transitions
-React Icons 5     – Icon library
-```
+| Công nghệ | Vai trò |
+|-----------|---------|
+| **React 19** | Thư viện xây dựng giao diện, mỗi thành phần là một "mảnh" màn hình độc lập |
+| **Vite 8** | Công cụ chạy ứng dụng khi lập trình và đóng gói khi phát hành |
+| **TailwindCSS 4** | Bộ công cụ tạo giao diện — tô màu, căn chỉnh bố cục qua class CSS |
+| **Framer Motion 12** | Thư viện tạo hiệu ứng chuyển động và animation |
+| **React Icons 5** | Bộ icon dùng trong giao diện |
 
-### Backend-as-a-Service (BaaS)
+### Dữ liệu & đăng nhập (`Backend` — dùng dịch vụ Supabase)
 
-```
-Supabase          – PostgreSQL Database + Auth + Storage
-  ├── Auth          Email/Password authentication, JWT sessions
-  ├── Database      PostgreSQL (rooms, profiles, comments, favorites)
-  └── Storage       room_media (ảnh phòng), user_avatar (ảnh đại diện)
-```
+| Thành phần | Vai trò |
+|------------|---------|
+| **Xác thực** (`Auth`) | Quản lý đăng nhập bằng email và mật khẩu, cấp phiên làm việc |
+| **Cơ sở dữ liệu** (`PostgreSQL`) | Lưu trữ thông tin phòng, người dùng, bình luận, danh sách yêu thích |
+| **Kho lưu trữ file** (`Storage`) | Lưu ảnh phòng và ảnh đại diện người dùng |
 
-### Media & Storage
+### Lưu trữ hình ảnh
 
-```
-Cloudinary        – Upload & optimize ảnh phòng và avatar
-                    (fallback về Supabase Storage nếu chưa cấu hình)
-```
+| Công nghệ | Vai trò |
+|-----------|---------|
+| **Cloudinary** | Dịch vụ tải lên và tối ưu ảnh phòng, ảnh đại diện _(nếu không cấu hình, ảnh sẽ được lưu trên Supabase Storage)_ |
 
-### Deployment
+### Triển khai & phát hành (`Deployment`)
 
-```
-Vercel            – Hosting & CI/CD (vercel.json)
-```
+| Công nghệ | Vai trò |
+|-----------|---------|
+| **Vercel** | Nền tảng đăng ứng dụng lên mạng, tự động cập nhật khi có thay đổi code |
 
 ---
 
-## 🗂️ Kiến trúc thư mục
+## 🗂️ Cấu trúc thư mục mã nguồn
+
+> Đây là cách các file code được tổ chức trong dự án.  
+> Bạn không cần nhớ hết — chỉ cần biết mỗi nhóm phụ trách việc gì.
 
 ```
 src/
-├── App.jsx                    # Root component, routing SPA thủ công, auth listener
-├── main.jsx                   # Entry point
-├── index.css                  # Global styles
 │
-├── pages/                     # Các trang chính
-│   ├── HomePage.jsx           # Trang chủ – Danh sách & tìm kiếm phòng
-│   ├── RoomDetailPage.jsx     # Chi tiết phòng (overlay modal)
-│   ├── LoginPage.jsx          # Đăng nhập
-│   ├── RegisterPage.jsx       # Đăng ký (multi-step)
-│   ├── ProfilePage.jsx        # Hồ sơ cá nhân
-│   └── DashboardPage.jsx      # Bảng điều khiển chủ nhà/môi giới
+├── pages/                     ← Các trang chính của ứng dụng
+│   ├── HomePage.jsx           │  Trang chủ: danh sách và tìm kiếm phòng
+│   ├── RoomDetailPage.jsx     │  Trang chi tiết một phòng (hiện ra như cửa sổ pop-up)
+│   ├── LoginPage.jsx          │  Trang đăng nhập
+│   ├── RegisterPage.jsx       │  Trang đăng ký (nhiều bước)
+│   ├── ProfilePage.jsx        │  Trang hồ sơ cá nhân
+│   └── DashboardPage.jsx      │  Trang quản lý tin đăng (dành cho chủ nhà/môi giới)
 │
-├── components/
-│   ├── auth/                  # ForgotPasswordForm, VerificationForm
-│   ├── common/                # AppIcon, BaseModal, GlobalModal, ToastContainer
-│   ├── dashboard/             # RoomPostForm (form đăng/sửa tin)
-│   ├── layout/                # Header, Footer, BottomNav
-│   ├── rooms/                 # RoomCard, RoomGrid, RoomFilters, CommentSection, MobileFilterModal
-│   └── search/                # SearchTrigger, LocationWizardModal
+├── components/                ← Các thành phần giao diện tái sử dụng
+│   ├── auth/                  │  Giao diện quên mật khẩu, xác minh danh tính
+│   ├── common/                │  Hộp thoại thông báo, icon, toast notification
+│   ├── dashboard/             │  Form đăng/sửa tin phòng
+│   ├── layout/                │  Thanh điều hướng trên/dưới, footer
+│   ├── rooms/                 │  Thẻ phòng, lưới phòng, bộ lọc, bình luận
+│   └── search/                │  Ô tìm kiếm, hộp thoại chọn vị trí
 │
-├── context/
-│   ├── FavoritesContext.jsx   # Quản lý danh sách yêu thích (persist Supabase)
-│   ├── ModalContext.jsx       # Global modal/dialog
-│   └── NotificationContext.jsx # Toast notifications
+├── context/                   ← Dữ liệu dùng chung toàn ứng dụng
+│   ├── FavoritesContext.jsx   │  Danh sách phòng yêu thích
+│   ├── ModalContext.jsx       │  Hộp thoại xác nhận (modal) dùng chung
+│   └── NotificationContext.jsx│  Thông báo nhỏ góc màn hình (toast)
 │
-├── hooks/
-│   └── useRoomFilter.js       # Custom hook – toàn bộ logic filter & fetch phòng
+├── hooks/                     ← Logic xử lý tái sử dụng
+│   └── useRoomFilter.js       │  Toàn bộ logic tìm kiếm và lọc phòng
 │
 ├── lib/
-│   └── supabase.js            # Khởi tạo Supabase client
+│   └── supabase.js            ← Kết nối đến dịch vụ Supabase
 │
-├── utils/
-│   ├── formatters.js          # Định dạng giá tiền, diện tích, ngày tháng...
-│   ├── imageUtils.js          # Nén ảnh, cắt avatar, xóa Cloudinary
-│   ├── roomMapper.js          # Map dữ liệu Supabase → format UI
-│   └── roomUtils.js           # moveRoomToDraft, draftAllUserRooms
-│
-└── data/
-    ├── constants.js           # AMENITIES, STATUS_LABELS, CURFEW_LABELS...
-    └── universities.js        # Danh sách trường đại học theo khu vực
+└── utils/                     ← Các hàm tiện ích nhỏ
+    ├── formatters.js          │  Định dạng giá tiền, diện tích, ngày tháng
+    ├── imageUtils.js          │  Nén ảnh, cắt avatar, xóa ảnh cũ
+    ├── roomMapper.js          │  Chuyển dữ liệu từ database sang định dạng hiển thị
+    └── roomUtils.js           │  Ẩn tin đăng, chuyển về bản nháp
 ```
 
 ---
 
-## 🗃️ Database Schema (Supabase PostgreSQL)
+## 🗃️ Cơ sở dữ liệu — Các bảng chính
 
-```
-profiles          – Thông tin người dùng (full_name, phone, role, avatar_url)
-rooms             – Tin đăng phòng (title, price, address, media_contact, status...)
-comments          – Bình luận theo phòng
-favorites         – Danh sách phòng yêu thích của user
-```
+> Dữ liệu của ứng dụng được lưu trong các "bảng" như bảng tính Excel,  
+> mỗi bảng chứa một loại thông tin.
 
-**Các trường quan trọng của `rooms`:**
+| Bảng | Lưu gì |
+|------|--------|
+| `profiles` | Thông tin người dùng: tên, số điện thoại, vai trò, ảnh đại diện |
+| `rooms` | Tin đăng phòng: tiêu đề, giá, địa chỉ, ảnh, trạng thái |
+| `comments` | Bình luận của người dùng trên từng phòng |
+| `favorites` | Danh sách phòng mà người dùng đã bấm "Lưu tin" |
 
-| Cột | Kiểu | Mô tả |
-|-----|------|--------|
-| `status` | enum | `draft` / `available` / `hidden` / `expired` |
-| `is_verified` | bool | Đã kiểm duyệt bởi admin |
-| `slug` | text | URL-friendly slug (dùng cho routing) |
-| `media_contact` | jsonb | `{ images, video_urls, description, contact }` |
-| `monthly_costs` | jsonb | `{ deposit_amount, electricity, water, internet, parking_fee, extra_services }` |
-| `room_features` | jsonb | `{ amenities, bathroom_type, counts, ... }` |
-| `rules_utilities` | jsonb | `{ curfew, is_pet_allowed, laundry_type, ... }` |
+**Các trạng thái của tin đăng phòng:**
+
+| Trạng thái | Ý nghĩa |
+|------------|---------|
+| `draft` — Bản nháp | Mới tạo, chưa hiển thị công khai |
+| `available` — Đã công khai | Hiển thị trên trang chủ cho người thuê xem |
+| `hidden` — Đã ẩn | Tạm thời không hiển thị |
+| `expired` — Hết hạn | Tin đăng đã quá hạn |
+
+**Thông tin lưu trong mỗi tin đăng phòng (`rooms`):**
+
+| Nhóm thông tin | Nội dung |
+|----------------|---------|
+| Thông tin cơ bản | Tiêu đề, giá thuê, diện tích, địa chỉ đầy đủ |
+| Chi phí hàng tháng | Tiền cọc, điện, nước, internet, gửi xe, dịch vụ thêm |
+| Đặc điểm phòng | Tiện nghi (wifi, điều hòa...), loại phòng vệ sinh, sức chứa |
+| Nội quy | Giờ giấc, thú cưng, giặt đồ, chung chủ hay không |
+| Hình ảnh & Liên hệ | Danh sách ảnh, link video, mô tả chi tiết, thông tin người đăng |
+| Trạng thái | Đã kiểm duyệt chưa, còn phòng hay không, ngày hết hạn |
 
 ---
 
-## 🔐 Hệ thống vai trò (Role)
+## 🔐 Các loại tài khoản
 
-```
-tenant    – Người thuê: Tìm phòng, lưu yêu thích, bình luận
-agent     – Môi giới: Đăng tin, quản lý tin đăng (cần KYC)
-landlord  – Bên cho thuê: Đăng tin, quản lý tin đăng (cần KYC)
-```
+| Loại | Quyền hạn |
+|------|----------|
+| **Người thuê** (`tenant`) | Tìm phòng, lưu yêu thích, đọc và viết bình luận |
+| **Môi giới** (`agent`) | Tất cả quyền trên + đăng và quản lý tin phòng _(cần xác minh danh tính khi đăng ký)_ |
+| **Bên cho thuê** (`landlord`) | Tương tự Môi giới — dành cho chủ nhà trực tiếp _(cần xác minh danh tính khi đăng ký)_ |
 
 ---
 
-## 📱 Routing (SPA thủ công – không dùng React Router)
+## 📱 Các trang (đường dẫn URL)
 
-| URL | Trang |
-|-----|-------|
-| `/` | Trang chủ |
-| `/login` | Đăng nhập |
-| `/register` | Đăng ký |
-| `/profile` | Hồ sơ (yêu cầu đăng nhập) |
-| `/dashboard` | Bảng điều khiển (yêu cầu đăng nhập) |
-| `/:slug` | Chi tiết phòng theo slug |
+| Đường dẫn | Trang hiển thị | Ai truy cập được |
+|-----------|---------------|-----------------|
+| `/` | Trang chủ | Tất cả |
+| `/login` | Đăng nhập | Tất cả |
+| `/register` | Đăng ký | Tất cả |
+| `/profile` | Hồ sơ cá nhân | Phải đăng nhập |
+| `/dashboard` | Quản lý tin đăng | Phải đăng nhập |
+| `/:ten-phong` | Chi tiết phòng theo tên thân thiện | Tất cả |
 
-> **Lưu ý:** Room Detail được render dạng **overlay modal** trên trang chủ (giữ nguyên scroll position).
+> **Lưu ý kỹ thuật:** Trang Chi tiết phòng không thực sự "chuyển trang" mà hiện ra như một lớp phủ (`overlay`) bên trên trang chủ — giúp giữ nguyên vị trí cuộn và bộ lọc bên dưới.
+
+---
+
+## ⚙️ Cấu hình môi trường
+
+> Đây là các "chìa khóa" để ứng dụng kết nối đến các dịch vụ bên ngoài.  
+> Được lưu trong file `.env` — **không được chia sẻ công khai**.
+
+| Biến | Dùng để |
+|------|---------|
+| `VITE_SUPABASE_URL` | Địa chỉ kết nối đến cơ sở dữ liệu Supabase |
+| `VITE_SUPABASE_ANON_KEY` | Mã xác thực khi truy cập Supabase từ trình duyệt |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Tên tài khoản Cloudinary để tải ảnh lên |
+| `VITE_CLOUDINARY_UPLOAD_PRESET` | Cấu hình upload ảnh phòng lên Cloudinary |
+| `VITE_CLOUDINARY_AVATAR_UPLOAD_PRESET` | Cấu hình upload ảnh đại diện lên Cloudinary |

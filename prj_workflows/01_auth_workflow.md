@@ -1,80 +1,80 @@
-# 🔐 Workflow: Xác thực người dùng (Auth)
+# 🔐 Đăng ký · Đăng nhập · Quên mật khẩu
 
-Tài liệu mô tả luồng **Đăng ký**, **Đăng nhập** và **Quên mật khẩu** trong hệ thống TroTot.
+Tài liệu mô tả cách người dùng tạo tài khoản, đăng nhập và lấy lại mật khẩu trong TroTot.
 
 ---
 
-## 1. Luồng Đăng nhập
+## 1. Đăng nhập
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Bắt đầu]) --> B[Truy cập trang /login]
-        B --> C[Nhập Email & Mật khẩu]
+        A([Bắt đầu]) --> B[Vào trang Đăng nhập]
+        B --> C[Nhập Email và Mật khẩu]
         C --> D{Bấm Đăng nhập}
         D --> E{Quên mật khẩu?}
-        E -- Có --> F[Bấm 'Quên mật khẩu?']
-        E -- Không --> G[Gửi form]
-        G --> |Thành công| H[Chuyển về trang chủ]
-        G --> |Thất bại| I[Hiển thị lỗi inline]
+        E -- Có --> F[Bấm nút\nQuên mật khẩu?]
+        E -- Không --> G[Gửi thông tin\nlên hệ thống]
+        G --> |Thành công| H[Chuyển về Trang chủ]
+        G --> |Thất bại| I[Hiện thông báo lỗi\nngay dưới ô nhập]
         I --> C
-        F --> J[Xem Luồng Quên Mật Khẩu]
+        F --> J[Xem Luồng Quên Mật Khẩu bên dưới]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        G --> K[supabase.auth.signInWithPassword]
-        K --> |Email chưa xác thực| L[Lỗi: Vui lòng xác thực tài khoản]
-        K --> |Sai credentials| M[Lỗi: Email hoặc mật khẩu không chính xác]
-        K --> |Thành công| N[Trả về session + user]
-        N --> O[onAuthStateChange cập nhật state]
+        G --> K[Kiểm tra email và mật khẩu\nvới dịch vụ xác thực]
+        K --> |Email chưa xác nhận| L[Lỗi: Vui lòng xác thực\ntài khoản qua email]
+        K --> |Sai thông tin| M[Lỗi: Email hoặc mật khẩu\nkhông chính xác]
+        K --> |Đúng| N[Cấp phiên đăng nhập\ncho người dùng]
+        N --> O[Ứng dụng nhận tín hiệu\ntự động cập nhật trạng thái]
         O --> H
         L --> I
         M --> I
     end
 ```
 
-**Chi tiết xử lý lỗi:**
+**Các thông báo lỗi:**
 
-| Lỗi từ Supabase | Thông báo hiển thị |
+| Tình huống | Thông báo hiển thị |
 |---|---|
-| `Invalid login credentials` | Email hoặc mật khẩu không chính xác. |
-| `Email not confirmed` | Vui lòng xác thực tài khoản trước khi đăng nhập. |
-| Lỗi khác | Hiển thị trực tiếp message từ Supabase |
+| Sai email hoặc mật khẩu | Email hoặc mật khẩu không chính xác. |
+| Chưa xác nhận email | Vui lòng xác thực tài khoản trước khi đăng nhập. |
+| Lỗi khác | Hiển thị mô tả lỗi cụ thể |
 
 ---
 
-## 2. Luồng Đăng ký
+## 2. Đăng ký tài khoản
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Bắt đầu]) --> B[Truy cập trang /register]
-        B --> C{Chọn vai trò}
-        C -- Mặc định Người thuê --> D[Điền form: Tên, Email, SĐT, Mật khẩu]
-        C -- Môi giới/Bên cho thuê --> E[Bật role selector\nChọn Agent hoặc Landlord]
+        A([Bắt đầu]) --> B[Vào trang Đăng ký]
+        B --> C{Loại tài khoản?}
+        C -- Người thuê\nnặc định --> D[Điền form:\nTên · Email · SĐT · Mật khẩu]
+        C -- Môi giới\nhoặc Bên cho thuê --> E[Bật lựa chọn vai trò\nChọn loại tài khoản]
         E --> D
-        D --> F[Tick đồng ý Điều khoản]
+        D --> F[Tick xác nhận\nĐiều khoản sử dụng]
         F --> G{Bấm Tạo tài khoản}
 
-        G -- Role = tenant --> H[Gửi thẳng lên server]
-        G -- Role = agent/landlord --> I[Chuyển sang Bước 2:\nXác minh danh tính KYC]
-        I --> J[Xem thông tin KYC\nBấm Xác nhận]
+        G -- Người thuê --> H[Gửi thông tin lên hệ thống]
+        G -- Môi giới hoặc\nBên cho thuê --> I[Chuyển sang Bước 2:\nXác minh danh tính]
+        I --> J[Đọc thông tin KYC\nBấm Xác nhận]
         J --> H
 
-        H --> |Thành công| K[Modal: Đăng ký thành công!]
-        H --> |Lỗi| L[Hiển thị lỗi tương ứng]
-        K --> M[Chuyển về trang chủ]
+        H --> |Thành công| K[Thông báo: Đăng ký thành công!]
+        H --> |Lỗi| L[Thông báo lỗi\ncụ thể]
+        K --> M[Chuyển về Trang chủ]
         L --> D
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        H --> N[Kiểm tra Tên đã tồn tại\ntrong profiles table]
-        N --> |Đã tồn tại| O[Modal: Tên người dùng đã tồn tại]
-        N --> |Chưa có| P[Kiểm tra SĐT đã tồn tại\ntrong profiles table]
-        P --> |Đã tồn tại| Q[Modal: Số điện thoại đã tồn tại]
-        P --> |Chưa có| R[supabase.auth.signUp\nvới metadata: name, phone, role]
-        R --> |Email đã đăng ký| S[Modal: Email đã tồn tại\nGợi ý Đăng nhập]
-        R --> |Thành công| T[Supabase tự tạo profile\nqua trigger]
+        H --> N[Kiểm tra tên người dùng\nđã có ai dùng chưa]
+        N --> |Đã tồn tại| O[Thông báo:\nTên người dùng đã tồn tại]
+        N --> |Chưa có| P[Kiểm tra số điện thoại\nđã đăng ký chưa]
+        P --> |Đã tồn tại| Q[Thông báo:\nSố điện thoại đã tồn tại]
+        P --> |Chưa có| R[Tạo tài khoản mới\nlưu email, tên, SĐT, vai trò]
+        R --> |Email đã đăng ký trước đó| S[Thông báo:\nEmail đã tồn tại — Gợi ý Đăng nhập]
+        R --> |Thành công| T[Hệ thống tự tạo\nhồ sơ người dùng]
         T --> K
         O --> D
         Q --> D
@@ -82,67 +82,67 @@ flowchart TD
     end
 ```
 
-**Validation phía client:**
+**Quy tắc nhập thông tin:**
 
-| Trường | Quy tắc |
+| Trường | Yêu cầu |
 |--------|---------|
-| Tên người dùng | Tối đa 30 ký tự, chỉ chữ cái (tiếng Việt), số, khoảng trắng |
-| Email | Phải chứa `@` |
-| Mật khẩu | Tối thiểu 6 ký tự, ≥1 chữ hoa, ≥1 chữ số |
-| Xác nhận mật khẩu | Phải trùng với mật khẩu |
-| Số điện thoại | 10 số, bắt đầu bằng `0` |
-| Điều khoản | Bắt buộc tick |
+| Tên người dùng | Tối đa 30 ký tự, chỉ dùng chữ cái (có dấu tiếng Việt), số và khoảng trắng |
+| Email | Phải có dấu `@` và đúng định dạng email |
+| Mật khẩu | Tối thiểu 6 ký tự, có ít nhất 1 chữ hoa và 1 chữ số |
+| Xác nhận mật khẩu | Phải giống hệt mật khẩu vừa nhập |
+| Số điện thoại | 10 số, bắt đầu bằng số `0` |
+| Điều khoản | Bắt buộc phải tick vào ô đồng ý |
 
 ---
 
-## 3. Luồng Quên mật khẩu
+## 3. Quên mật khẩu
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A[Bấm 'Quên mật khẩu?' trên trang Login] --> B[ForgotPasswordForm hiển thị]
-        B --> C[Nhập địa chỉ email]
+        A[Bấm nút Quên mật khẩu?\ntrên trang Đăng nhập] --> B[Form quên mật khẩu\nhiển thị]
+        B --> C[Nhập địa chỉ email\nđã đăng ký]
         C --> D[Bấm Gửi link đặt lại]
-        D --> |Thành công| E[Thông báo: Kiểm tra hộp thư]
+        D --> |Thành công| E[Thông báo:\nKiểm tra hộp thư của bạn]
         D --> |Lỗi| F[Hiển thị thông báo lỗi]
-        E --> G[Mở email, bấm link reset]
-        G --> H[Supabase redirect đến trang đặt lại mật khẩu]
-        H --> I[Nhập mật khẩu mới]
-        I --> J[Xác nhận – đăng nhập lại]
+        E --> G[Mở email\nBấm vào link đặt lại mật khẩu]
+        G --> H[Trang đặt mật khẩu mới\ndo hệ thống cung cấp]
+        H --> I[Nhập mật khẩu mới\nrồi xác nhận]
+        I --> J[Đăng nhập lại với\nmật khẩu mới]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        D --> K[supabase.auth.resetPasswordForEmail]
-        K --> |Không tìm thấy email| L[Supabase vẫn trả success\nvì lý do bảo mật]
-        K --> |Email hợp lệ| M[Gửi email reset link]
+        D --> K[Gửi yêu cầu reset\nđến dịch vụ xác thực]
+        K --> |Dù email đúng hay không| L[Luôn báo gửi thành công\nđể bảo vệ thông tin người dùng]
+        K --> |Email có tồn tại| M[Gửi email chứa\nlink đặt lại mật khẩu]
         L --> E
         M --> E
     end
 ```
 
-> **Lưu ý bảo mật:** Supabase không phân biệt email tồn tại hay không khi reset password (để tránh email enumeration attack).
+> **Lưu ý bảo mật:** Hệ thống luôn hiển thị thông báo "Kiểm tra hộp thư" dù email có tồn tại hay không — để tránh kẻ xấu đoán được email nào đã đăng ký.
 
 ---
 
-## 4. Luồng Auth Session (Global)
+## 4. Phiên đăng nhập hoạt động toàn ứng dụng
 
 ```mermaid
 flowchart TD
-    subgraph SYSTEM["⚙️ Hệ thống – App.jsx"]
-        A([App khởi động]) --> B[supabase.auth.getSession]
-        B --> |Có session| C[setUser với user hiện tại]
-        B --> |Không có session| D[setUser = null]
-        C --> E[setAuthLoaded = true]
+    subgraph SYSTEM["⚙️ Hệ thống — Chạy ngầm khi mở ứng dụng"]
+        A([Ứng dụng khởi động]) --> B[Kiểm tra phiên đăng nhập\ncòn hiệu lực không]
+        B --> |Còn phiên| C[Lấy thông tin người dùng\nđang đăng nhập]
+        B --> |Hết phiên| D[Đặt trạng thái\nchưa đăng nhập]
+        C --> E[Đánh dấu đã tải xong\nthông tin xác thực]
         D --> E
 
-        F[supabase.auth.onAuthStateChange] --> |Đăng nhập| G[setUser = user mới]
-        F --> |Đăng xuất| H[setUser = null]
+        F[Lắng nghe sự kiện:\nĐăng nhập hoặc Đăng xuất] --> |Vừa đăng nhập| G[Cập nhật thông tin\nngười dùng mới]
+        F --> |Vừa đăng xuất| H[Xóa thông tin\nngười dùng]
 
-        G --> I{currentPage = profile/dashboard?}
+        G --> I{Đang ở trang\nHồ sơ hoặc Dashboard?}
         H --> I
-        I -- user = null --> J[navigate to /login]
-        I -- user có giá trị --> K[Giữ nguyên trang hiện tại]
+        I -- Chưa đăng nhập --> J[Tự động\nchuyển sang Đăng nhập]
+        I -- Đã đăng nhập --> K[Giữ nguyên trang]
     end
 ```
 
-**Protected routes:** `/profile` và `/dashboard` — chuyển hướng về `/login` nếu chưa đăng nhập.
+**Các trang yêu cầu đăng nhập:** Hồ sơ cá nhân (`/profile`) và Quản lý tin đăng (`/dashboard`) — nếu chưa đăng nhập sẽ tự động chuyển về trang Đăng nhập.

@@ -1,155 +1,151 @@
-# 🔍 Workflow: Tìm kiếm & Lọc phòng (Home + Search)
+# 🔍 Tìm kiếm & Lọc phòng — Trang chủ
 
-Tài liệu mô tả luồng **tìm kiếm theo vị trí**, **lọc phòng theo tiêu chí** và **phân trang** trên trang chủ.
+Tài liệu mô tả cách người dùng tìm kiếm phòng theo vị trí, lọc theo tiêu chí và xem thêm kết quả trên trang chủ TroTot.
 
 ---
 
-## 1. Luồng Tìm kiếm theo vị trí
+## 1. Tìm kiếm theo vị trí
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Vào trang chủ]) --> B[Thấy SearchTrigger\ntrên Hero section hoặc Header]
+        A([Vào trang chủ]) --> B[Thấy ô tìm kiếm\ntrên banner hoặc thanh điều hướng]
         B --> C[Bấm vào ô tìm kiếm]
-        C --> D[LocationWizardModal mở ra]
-        D --> E{Chọn phương thức}
-        E -- Theo thành phố --> F[Chọn Tỉnh/Thành phố]
-        E -- Theo trường ĐH --> G[Chọn Trường đại học]
+        C --> D[Hộp thoại chọn vị trí\nhiện ra]
+        D --> E{Muốn tìm theo cách nào?}
+        E -- Theo tỉnh/thành phố --> F[Chọn Tỉnh hoặc Thành phố\ntừ danh sách]
+        E -- Theo trường đại học --> G[Chọn Trường đại học]
         F --> H[Bấm Tìm kiếm]
         G --> H
-        H --> I[LocationWizardModal đóng]
-        I --> J[Danh sách phòng cập nhật\nScroll đến listing-section]
+        H --> I[Hộp thoại đóng lại]
+        I --> J[Danh sách phòng cập nhật\ntrang tự cuộn xuống kết quả]
     end
 
-    subgraph SYSTEM["⚙️ Hệ thống – useRoomFilter.js"]
-        H --> K[updateFilter gọi với\ncity hoặc university]
-        K --> L[useRoomFilter refetch\ntừ Supabase với filter mới]
-        L --> M[Supabase query:\nrooms WHERE city = ?\nOR university = ?]
-        M --> N[Trả về danh sách phòng\nphù hợp]
-        N --> O[setFilteredRooms\ncập nhật UI]
+    subgraph SYSTEM["⚙️ Hệ thống"]
+        H --> K[Cập nhật bộ lọc vị trí\nvới thành phố hoặc trường ĐH đã chọn]
+        K --> L[Truy vấn lại danh sách phòng\nkhớp vị trí từ cơ sở dữ liệu]
+        L --> M[Trả về danh sách phòng\nphù hợp]
+        M --> O[Cập nhật giao diện\nhiển thị kết quả mới]
         O --> J
     end
 ```
 
 ---
 
-## 2. Luồng Lọc phòng nâng cao
+## 2. Lọc phòng nâng cao
 
 ```mermaid
 flowchart TD
-    subgraph USER["👤 Người dùng – Desktop"]
-        A([Xem danh sách phòng]) --> B[Sidebar RoomFilters\nbên phải màn hình]
+    subgraph USER_DESKTOP["🖥️ Người dùng — Máy tính"]
+        A([Xem danh sách phòng]) --> B[Thanh lọc hiển thị\nbên phải danh sách]
         B --> C{Chọn tiêu chí lọc}
-        C --> D[Lọc theo Giá thuê\nmin/max]
-        C --> E[Lọc theo Diện tích\nmin/max]
-        C --> F[Lọc theo Loại phòng\nSingle/Double/Studio/...]
-        C --> G[Bật/tắt Tiện nghi\nWifi, AC, Tủ lạnh...]
-        C --> H[Tìm theo từ khóa\nfulltext search]
-        D & E & F & G & H --> I[Kết quả tự động cập nhật\nkhi thay đổi filter]
+        C --> D[Giá thuê: kéo thả\nhoặc nhập khoảng min/max]
+        C --> E[Diện tích: nhập\nkhoảng min/max]
+        C --> F[Loại phòng:\nphòng đơn, đôi, studio...]
+        C --> G[Tiện nghi: bật/tắt\nWifi, điều hòa, tủ lạnh...]
+        C --> H[Tìm theo từ khóa:\ntheo tên hoặc địa chỉ]
+        D & E & F & G & H --> I[Kết quả tự động cập nhật\nngay sau khi thay đổi]
     end
 
-    subgraph USER_MOBILE["📱 Người dùng – Mobile"]
-        J([Bấm icon Filter\ntrên BottomNav]) --> K[MobileFilterModal mở\ndrawer từ dưới lên]
-        K --> L[Chọn tiêu chí\ngiống Desktop]
+    subgraph USER_MOBILE["📱 Người dùng — Điện thoại"]
+        J([Bấm icon Lọc\ntrên thanh điều hướng dưới]) --> K[Bảng lọc trượt lên\ntừ phía dưới màn hình]
+        K --> L[Chọn tiêu chí\ntương tự máy tính]
         L --> M[Bấm Áp dụng]
-        M --> N[MobileFilterModal đóng\nDanh sách cập nhật]
+        M --> N[Bảng lọc đóng\nDanh sách cập nhật kết quả]
     end
 
-    subgraph SYSTEM["⚙️ Hệ thống – useRoomFilter.js"]
-        I --> O[Debounce 300ms\ntrước khi gọi API]
-        O --> P[Supabase query với\ntất cả filter active]
-        P --> Q[Trả về rooms\nkhớp tất cả điều kiện]
-        Q --> R[setFilteredRooms\ncập nhật RoomGrid]
+    subgraph SYSTEM["⚙️ Hệ thống"]
+        I --> O[Chờ một chút\ntrước khi gọi lên server\nđể tránh gọi quá nhiều lần]
+        O --> P[Truy vấn cơ sở dữ liệu\nvới tất cả tiêu chí đang bật]
+        P --> Q[Trả về danh sách phòng\nkhớp tất cả điều kiện]
+        Q --> R[Cập nhật giao diện]
         M --> O
     end
 ```
 
-**Danh sách filter hỗ trợ:**
+**Các tiêu chí lọc hỗ trợ:**
 
-| Filter | Kiểu | Mô tả |
-|--------|------|--------|
-| `city` | string | Tỉnh/Thành phố |
-| `university` | string | Trường đại học gần đó |
-| `search` | string | Tìm theo từ khóa (title, address) |
-| `minPrice` / `maxPrice` | number | Khoảng giá (VNĐ/tháng) |
-| `minArea` / `maxArea` | number | Khoảng diện tích (m²) |
-| `roomType` | string | Loại phòng |
-| `amenities` | string[] | Danh sách tiện nghi (toggle) |
+| Tiêu chí | Loại | Mô tả |
+|----------|------|--------|
+| Tỉnh/Thành phố | Chọn một | Lọc theo vị trí địa lý |
+| Trường đại học | Chọn một | Lọc phòng gần trường |
+| Từ khóa | Nhập text | Tìm theo tên phòng hoặc địa chỉ |
+| Giá thuê | Khoảng số | Giá tháng tối thiểu và tối đa |
+| Diện tích | Khoảng số | Diện tích tối thiểu và tối đa |
+| Loại phòng | Chọn một | Phòng đơn, đôi, studio, căn hộ mini... |
+| Tiện nghi | Bật/tắt nhiều | Wifi, điều hòa, tủ lạnh, máy giặt... |
 
 ---
 
-## 3. Luồng Load thêm kết quả (Pagination)
+## 3. Xem thêm kết quả
 
 ```mermaid
 flowchart TD
     subgraph USER["👤 Người dùng"]
-        A([Cuộn xuống cuối danh sách]) --> B{Còn kết quả?}
-        B -- Có --> C[Thấy nút 'Xem thêm kết quả']
+        A([Cuộn xuống cuối\ndanh sách phòng]) --> B{Còn phòng chưa hiển thị?}
+        B -- Có --> C[Thấy nút\nXem thêm kết quả]
         B -- Không --> D[Thông báo:\nĐã hiển thị tất cả kết quả]
-        C --> E[Bấm nút Xem thêm]
-        E --> F[Loading spinner hiển thị]
-        F --> G[Thêm phòng mới vào danh sách]
+        C --> E[Bấm nút]
+        E --> F[Vòng xoay tải\nhiển thị trên nút]
+        F --> G[Các phòng mới\nthêm vào bên dưới danh sách]
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        E --> H[loadMore được gọi\ntừ useRoomFilter]
-        H --> I[Supabase query với\nrange: offset += PAGE_SIZE]
-        I --> J[Append rooms mới\nvào filteredRooms]
-        J --> K{Còn data?}
-        K -- Có --> L[setHasMore = true]
-        K -- Không --> M[setHasMore = false]
-        L --> G
-        M --> D
+        E --> H[Tải thêm một trang phòng tiếp theo\nvị trí bắt đầu dịch chuyển về phía sau]
+        H --> I[Gộp phòng mới vào\ndanh sách hiện tại]
+        I --> J{Vẫn còn phòng tiếp theo?}
+        J -- Có --> K[Giữ nút Xem thêm]
+        J -- Không --> L[Ẩn nút\nHiện thông báo hết]
+        K --> G
+        L --> D
     end
 ```
 
 ---
 
-## 4. Luồng Hiển thị danh sách phòng
+## 4. Danh sách phòng hiển thị như thế nào
 
 ```mermaid
 flowchart TD
-    subgraph SYSTEM["⚙️ Hệ thống"]
-        A([useRoomFilter mount]) --> B[Fetch initial rooms\ntừ Supabase]
-        B --> C{Loading state}
-        C -- loading = true --> D[RoomGrid hiển thị\nSkeleton loading cards]
-        C -- loading = false, error --> E[Hiển thị thông báo lỗi\nnút Thử lại]
-        C -- loading = false, data --> F[RoomGrid render\ndanh sách RoomCard]
+    subgraph SYSTEM["⚙️ Hệ thống — Khi trang chủ mở"]
+        A([Trang chủ tải lên]) --> B[Tự động tải danh sách phòng\ntừ cơ sở dữ liệu]
+        B --> C{Trạng thái tải}
+        C -- Đang tải --> D[Hiển thị thẻ phòng mờ\nchờ dữ liệu về]
+        C -- Lỗi kết nối --> E[Thông báo lỗi\nnút Thử lại]
+        C -- Tải xong --> F[Hiển thị lưới\ncác thẻ phòng]
     end
 
     subgraph USER["👤 Người dùng"]
-        F --> G[Xem danh sách phòng\ndạng Grid]
+        F --> G[Xem và cuộn qua\ncác thẻ phòng]
         G --> H{Bấm vào phòng nào?}
-        H -- Có --> I[navigate room-detail\nvới room data]
-        H -- Không --> J[Tiếp tục scroll]
+        H -- Có --> I[Trang chi tiết phòng\nhiển thị dạng lớp phủ]
+        H -- Không --> J[Tiếp tục cuộn\nxem các phòng khác]
     end
 
-    subgraph SYSTEM2["⚙️ Hệ thống – RoomDetailPage"]
-        I --> K{room.status = draft?}
-        K -- Có --> L[Modal cảnh báo:\nPhòng không tồn tại]
-        K -- Không --> M[Hiển thị RoomDetailPage\ndạng overlay modal]
-        M --> N[URL cập nhật sang /:slug]
+    subgraph SYSTEM2["⚙️ Hệ thống — Khi mở chi tiết phòng"]
+        I --> K{Phòng còn hiển thị\nkhông?}
+        K -- Đã bị ẩn hoặc xóa --> L[Thông báo:\nPhòng không còn tồn tại]
+        K -- Vẫn còn --> M[Hiện chi tiết phòng\nURL chuyển sang tên phòng]
         L --> G
     end
 ```
 
 ---
 
-## 5. Cấu trúc component trang chủ
+## 5. Sơ đồ các thành phần trang chủ
 
 ```
-App.jsx
-└── HomePage.jsx
-    ├── Hero Section
-    │   ├── SearchTrigger         ← Mở LocationWizardModal
-    │   └── Stats bar (300+ phòng, N thành phố, ...)
-    │
-    └── Listing Section (#listing-section)
-        ├── RoomFilters (Desktop sidebar)   ← useRoomFilter filters
-        └── RoomGrid
-            └── RoomCard × N               ← Click → navigate('room-detail')
+Trang chủ (HomePage)
+│
+├── Banner Hero
+│   ├── Ô tìm kiếm (SearchTrigger)     ← Bấm để mở hộp chọn vị trí
+│   └── Số liệu thống kê (300+ phòng, N thành phố...)
+│
+└── Khu vực danh sách phòng
+    ├── Thanh lọc bên phải (máy tính)  ← Bộ lọc nâng cao
+    └── Lưới phòng                     ← Các thẻ phòng, bấm để xem chi tiết
 
-App.jsx (global)
-└── LocationWizardModal           ← isLocationModalOpen state
-└── MobileFilterModal             ← showMobileFilter state
+Toàn ứng dụng (App)
+├── Hộp thoại chọn vị trí             ← Hiện khi bấm ô tìm kiếm
+└── Bảng lọc điện thoại               ← Trượt lên từ dưới khi bấm icon lọc
 ```
