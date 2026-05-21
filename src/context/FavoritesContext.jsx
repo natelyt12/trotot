@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { supabase } from "../lib/supabase";
+import { getUserFavorites, addUserFavorite, removeUserFavorite } from "../data/favorites";
 
 const FavoritesContext = createContext();
 
@@ -16,7 +16,7 @@ export const FavoritesProvider = ({ children, user }) => {
 
         try {
             setLoading(true);
-            const { data, error } = await supabase.from("user_favorites").select("room_id").eq("user_id", user.id);
+            const { data, error } = await getUserFavorites(user.id);
 
             if (error) {
                 // If table doesn't exist yet, we don't want to crash the app
@@ -56,13 +56,13 @@ export const FavoritesProvider = ({ children, user }) => {
         try {
             if (currentlyFavorite) {
                 // Remove
-                const { error } = await supabase.from("user_favorites").delete().eq("user_id", user.id).eq("room_id", roomId);
+                const { error } = await removeUserFavorite(user.id, roomId);
 
                 if (error) throw error;
                 setFavorites((prev) => prev.filter((id) => id !== roomId));
             } else {
                 // Add
-                const { error } = await supabase.from("user_favorites").insert([{ user_id: user.id, room_id: roomId }]);
+                const { error } = await addUserFavorite(user.id, roomId);
 
                 if (error) throw error;
                 setFavorites((prev) => [...prev, roomId]);

@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchTrigger from "../search/SearchTrigger.jsx";
+import { useRoomFilterContext } from "../../context/RoomFilterContext.jsx";
 
-export default function Header({ currentPage, navigate, user, onSearchClick, searchDisplayText, isSearchFilled }) {
+export default function Header({ currentPage, navigate, user, onSearchClick }) {
+    const { filters, getLocationDisplayText } = useRoomFilterContext();
+    const searchDisplayText = getLocationDisplayText();
+    const isSearchFilled = filters.city || filters.university;
     const [mobileOpen, setMobileOpen] = useState(false);
     const [showSearch, setShowSearch] = useState(false);
 

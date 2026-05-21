@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "../../lib/supabase";
+import { createRoom, updateRoom, uploadRoomMedia, deleteRoomMedia, getRoomMediaPublicUrl } from "../../data/rooms";
 import { useModal } from "../../context/ModalContext";
 import { useNotification } from "../../context/NotificationContext";
+import { validateRoomData } from "../../utils/validation";
 import AppIcon from "../common/AppIcon";
-import { AMENITIES, ROOM_TYPES, BATHROOM_TYPES, LAUNDRY_TYPES, CURFEW_LABELS, KITCHEN_TYPES, GENDER_PREFERENCES } from "../../data/constants";
-import { PROVINCE } from "../../data/province";
-import { UNIVERSITIES } from "../../data/universities";
+import { AMENITIES, ROOM_TYPES, BATHROOM_TYPES, LAUNDRY_TYPES, CURFEW_LABELS, KITCHEN_TYPES, GENDER_PREFERENCES } from "../../constants/constants";
+import { PROVINCE } from "../../constants/province";
+import { UNIVERSITIES } from "../../constants/universities";
 import { motion, AnimatePresence } from "framer-motion";
 import { compressImage, deleteFromCloudinary } from "../../utils/imageUtils";
 
@@ -25,7 +26,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
         // Cơ bản
         title: "",
         room_type: "room",
-        status: "available",
+        status: "draft",
         price_monthly: "",
         area_sqm: "",
 
@@ -91,7 +92,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
         const initialForm = {
             title: roomToEdit.title || "",
-            status: roomToEdit.status || "available",
+            status: "draft",
             room_type: roomToEdit.room_type || "room",
             price_monthly: roomToEdit.price_monthly?.toString() || "",
             area_sqm: roomToEdit.area_sqm?.toString() || "",
@@ -344,72 +345,21 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     };
 
     // --- XỬ LÝ SUBMIT ---
-    const handleSubmit = async (e, forcedStatus = null) => {
+    const handleSubmit = async (e) => {
         if (e) e.preventDefault();
 
-        const isDraft = forcedStatus === "draft";
-        const normalizedFormData = isDraft
-            ? {
-                  ...formData,
-                  title: formData.title.trim() || "Tin đăng không có tiêu đề",
-                  price_monthly:
-                      formData.price_monthly === null || formData.price_monthly === undefined || formData.price_monthly === "" ? 0 : formData.price_monthly,
-                  area_sqm: formData.area_sqm === null || formData.area_sqm === undefined || formData.area_sqm === "" ? 0 : formData.area_sqm,
-              }
-            : formData;
+        // Biểu mẫu đăng/sửa từ Form sẽ luôn được lưu dưới dạng Bản nháp (draft)
+        const isDraft = true;
+        const normalizedFormData = {
+            ...formData,
+            title: formData.title.trim() || "Tin đăng không có tiêu đề",
+            price_monthly:
+                formData.price_monthly === null || formData.price_monthly === undefined || formData.price_monthly === "" ? 0 : formData.price_monthly,
+            area_sqm: formData.area_sqm === null || formData.area_sqm === undefined || formData.area_sqm === "" ? 0 : formData.area_sqm,
+        };
 
-        // Chỉ kiểm tra validation đầy đủ khi KHÔNG PHẢI là bản nháp (tức là khi công khai)
-        if (!isDraft) {
-            if (
-                !formData.title.trim() ||
-                !formData.price_monthly ||
-                !formData.area_sqm ||
-                !formData.address ||
-                !formData.city ||
-                !formData.district ||
-                !formData.ward
-            ) {
-                showModal({ title: "Thiếu thông tin", message: "Vui lòng điền đầy đủ các thông tin địa chỉ và giá thuê.", type: "error" });
-                return;
-            }
-
-            if (parseInt(formData.price_monthly) < 100000) {
-                showModal({ title: "Giá thuê không lệ", message: "Giá thuê tối thiểu là 100.000đ.", type: "error" });
-                return;
-            }
-
-            if (parseInt(formData.monthly_costs.deposit_amount) < 500000) {
-                showModal({ title: "Tiền cọc không lệ", message: "Tiền cọc tối thiểu là 500.000đ.", type: "error" });
-                return;
-            }
-
-            if (previewImages.length === 0) {
-                showModal({ title: "Thiếu hình ảnh", message: "Vui lòng tải lên ít nhất 1 hình ảnh thực tế của phòng.", type: "error" });
-                return;
-            }
-
-            if (!formData.media_contact.description || formData.media_contact.description.length < 20) {
-                showModal({ title: "Mô tả quá ngắn", message: "Vui lòng nhập mô tả chi tiết ít nhất 20 ký tự.", type: "error" });
-                return;
-            }
-
-            const videoUrls = formData.media_contact?.video_urls || [];
-            if (videoUrls.length > 0) {
-                if (videoUrls.some((url) => !url || !url.trim())) {
-                    showModal({ title: "Thiếu liên kết video", message: "Vui lòng điền đầy đủ hoặc xóa bớt các ô liên kết video trống.", type: "error" });
-                    return;
-                }
-
-                const hasInvalidUrl = videoUrls.some((url) => {
-                    const lower = url.toLowerCase().trim();
-                    return !(lower.includes("youtube.com") || lower.includes("youtu.be") || lower.includes("tiktok.com"));
-                });
-                if (hasInvalidUrl) {
-                    showModal({ title: "Liên kết video không hợp lệ", message: "Vui lòng nhập liên kết YouTube hoặc TikTok hợp lệ cho tất cả video.", type: "error" });
-                    return;
-                }
-            }
-        }
+        // Bỏ qua kiểm tra tính hợp lệ đầy đủ của tin (Validation) khi đăng/sửa tin.
+        // Quy trình kiểm duyệt đầy đủ sẽ chỉ chạy khi người dùng bấm "Công khai" từ Dashboard.
 
         const executeSubmit = async () => {
             setIsSubmitting(true);
@@ -489,16 +439,12 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         const fileName = `${Date.now()}_${i}_${safeName}`;
                         const filePath = `${uploadFolder}/${fileName}`;
 
-                        const { data: _uploadData, error: uploadError } = await supabase.storage
-                            .from("room_media")
-                            .upload(filePath, fileToUpload);
+                        const { data: _uploadData, error: uploadError } = await uploadRoomMedia(filePath, fileToUpload);
 
                         if (uploadError) throw uploadError;
 
                         // Lấy Public URL
-                        const {
-                            data: { publicUrl: supabaseUrl },
-                        } = supabase.storage.from("room_media").getPublicUrl(filePath);
+                        const supabaseUrl = getRoomMediaPublicUrl(filePath);
 
                         publicUrl = supabaseUrl;
                     }
@@ -540,17 +486,17 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             .filter(url => url.length > 0),
                     },
                     available_until: availableUntil.toISOString(),
-                    status: forcedStatus || normalizedFormData.status || "available",
-                    is_verified: roomToEdit ? roomToEdit.is_verified : false,
+                    status: "draft", // Luôn lưu dưới dạng bản nháp
+                    is_verified: false, // Chỉnh sửa/Đăng mới luôn yêu cầu duyệt lại khi công khai
                     total_views: roomToEdit ? roomToEdit.total_views : 0,
                     total_favorites: roomToEdit ? roomToEdit.total_favorites : 0,
                 };
 
                 let result;
                 if (roomToEdit) {
-                    result = await supabase.from("rooms").update(payload).eq("id", roomToEdit.id).select();
+                    result = await updateRoom(roomToEdit.id, payload);
                 } else {
-                    result = await supabase.from("rooms").insert([payload]).select();
+                    result = await createRoom(payload);
                 }
 
                 const { error } = result;
@@ -579,9 +525,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     }
 
                     if (pathsToDelete.length > 0) {
-                        const { error: storageError } = await supabase.storage
-                            .from('room_media')
-                            .remove(pathsToDelete);
+                        const { error: storageError } = await deleteRoomMedia(pathsToDelete);
                         
                         if (storageError) {
                             console.error('Lỗi khi xóa ảnh thừa từ storage:', storageError);
@@ -593,8 +537,8 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 updateProgress(100, "Lưu tin thành công!");
 
                 const successMessage = roomToEdit 
-                    ? "Cập nhật tin đăng thành công!" 
-                     : (isDraft ? "Đã lưu bản nháp thành công!" : "Tin đăng của bạn đã được gửi và đang chờ duyệt!");
+                    ? "Đã cập nhật tin đăng và lưu dưới dạng bản nháp thành công! Bạn có thể công khai tin trọ này từ Dashboard bất cứ lúc nào." 
+                    : "Đã lưu bản nháp thành công! Bạn có thể công khai tin trọ này từ Dashboard bất cứ lúc nào.";
                 
                 addNotification(successMessage, "success");
                 setIsSubmitted(true);
@@ -637,11 +581,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                     <button
                         type="button"
-                        onClick={(e) => handleSubmit(e, "draft")}
+                        onClick={handleSubmit}
                         disabled={isSubmitting}
                         className={`px-6 py-2 rounded-full bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
-                        {isSubmitting ? "Đang lưu..." : roomToEdit ? "Lưu bản nháp" : "Lưu bản nháp"}
+                        {isSubmitting ? "Đang lưu..." : "Lưu bản nháp"}
                     </button>
                 </div>
             </div>
@@ -834,11 +778,9 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
                                 <label className="block text-xs font-bold text-stone-500 mb-1">Tỉnh/Thành phố *</label>
-                                <input
+                                <select
                                     required
-                                    list="cities"
-                                    placeholder="Chọn Tỉnh/Thành phố"
-                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
+                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
                                     value={formData.city}
                                     onChange={(e) => {
                                         const nextCity = e.target.value;
@@ -852,20 +794,19 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                                 : "";
                                         setFormData((prev) => ({ ...prev, city: nextCity, district: nextDistrict, ward: nextWard }));
                                     }}
-                                />
-                                <datalist id="cities">
+                                >
+                                    <option value="" disabled>Chọn Tỉnh/Thành phố</option>
                                     {PROVINCE.map((p) => (
-                                        <option key={p.name} value={p.name} />
+                                        <option key={p.name} value={p.name}>{p.name}</option>
                                     ))}
-                                </datalist>
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-stone-500 mb-1">Quận/Huyện *</label>
-                                <input
+                                <select
                                     required
-                                    list="districts"
-                                    placeholder="Chọn Quận/Huyện"
-                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
+                                    disabled={!formData.city}
+                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                                     value={formData.district}
                                     onChange={(e) => {
                                         const nextDistrict = e.target.value;
@@ -873,28 +814,27 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         const nextWard = selectedDistrict?.wards.some((w) => w.name === formData.ward) ? formData.ward : "";
                                         setFormData((prev) => ({ ...prev, district: nextDistrict, ward: nextWard }));
                                     }}
-                                />
-                                <datalist id="districts">
+                                >
+                                    <option value="" disabled>Chọn Quận/Huyện</option>
                                     {districts.map((d) => (
-                                        <option key={d.name} value={d.name} />
+                                        <option key={d.name} value={d.name}>{d.name}</option>
                                     ))}
-                                </datalist>
+                                </select>
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-stone-500 mb-1">Phường/Xã *</label>
-                                <input
+                                <select
                                     required
-                                    list="wards"
-                                    placeholder="Chọn Phường/Xã"
-                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none text-sm"
+                                    disabled={!formData.district}
+                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                                     value={formData.ward}
                                     onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
-                                />
-                                <datalist id="wards">
+                                >
+                                    <option value="" disabled>Chọn Phường/Xã</option>
                                     {wards.map((w) => (
-                                        <option key={w.name} value={w.name} />
+                                        <option key={w.name} value={w.name}>{w.name}</option>
                                     ))}
-                                </datalist>
+                                </select>
                             </div>
                         </div>
                         <div>
@@ -1360,11 +1300,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 <div className="pt-6 border-t border-stone-100 flex flex-col items-center">
                     <button
                         type="button"
-                        onClick={(e) => handleSubmit(e, "draft")}
+                        onClick={handleSubmit}
                         disabled={isSubmitting}
                         className={`w-full md:w-auto px-16 py-3 rounded-full bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
-                        {isSubmitting ? "Đang lưu tin..." : roomToEdit ? "Lưu bản nháp" : "Lưu bản nháp"}
+                        {isSubmitting ? "Đang lưu..." : "Lưu bản nháp"}
                     </button>
                     <div className="mt-4 text-center max-w-sm">
                                         <p className="text-[0.7rem] text-stone-400 leading-relaxed font-medium">

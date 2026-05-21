@@ -3,17 +3,14 @@ import { useModal } from '../context/ModalContext';
 import { useNotification } from '../context/NotificationContext.jsx';
 import AppIcon from '../components/common/AppIcon.jsx';
 import RoomPostForm from '../components/dashboard/RoomPostForm.jsx';
-import { supabase } from '../lib/supabase';
+import { getUserRooms, publishRoom, verifyRoomMock, deleteRoom, deleteRoomMedia } from '../data/rooms.js';
 import { formatPrice } from '../utils/formatters.js';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
 import { moveRoomToDraft } from '../utils/roomUtils.js';
 import RoomDetailPage from './RoomDetailPage.jsx';
 import { deleteFromCloudinary } from '../utils/imageUtils.js';
+import { validateRoomData } from '../utils/validation.js';
 
-/* ============================================
-   DashboardPage – Property Manager
-   Flat design, amber palette
-   ============================================ */
 export default function DashboardPage({ user, navigate, initialData }) {
     const { showModal } = useModal();
     const { addNotification } = useNotification();
@@ -25,35 +22,6 @@ export default function DashboardPage({ user, navigate, initialData }) {
     const [loadingRooms, setLoadingRooms] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [subTab, setSubTab] = useState('verified');
-
-    const validateRoomData = (room) => {
-        const errors = [];
-        if (!room.title || !room.title.trim()) errors.push("Thiếu tiêu đề tin đăng");
-        if (!room.price_monthly || room.price_monthly < 100000) errors.push("Giá thuê phải từ 100.000đ trở lên");
-        if (!room.area_sqm || room.area_sqm <= 0) errors.push("Thiếu diện tích phòng");
-        if (!room.address || !room.address.trim() || !room.city || !room.district || !room.ward) errors.push("Thiếu địa chỉ đầy đủ (Tỉnh, Huyện, Xã, Số nhà)");
-        if (!room.monthly_costs?.deposit_amount || room.monthly_costs.deposit_amount < 500000) errors.push("Tiền cọc phải từ 500.000đ trở lên");
-        if (!room.media_contact?.images || room.media_contact.images.length === 0) errors.push("Chưa tải lên hình ảnh thực tế nào");
-        if (!room.media_contact?.description || room.media_contact.description.length < 20) errors.push("Mô tả chi tiết quá ngắn (tối thiểu 20 ký tự)");
-        
-        // Cảnh báo link video YouTube/TikTok (chỉ bắt buộc khi đã bấm thêm ô link)
-        const videoUrls = room.media_contact?.video_urls || [];
-        if (videoUrls.length > 0) {
-            const hasEmptyUrl = videoUrls.some(url => !url || !url.trim());
-            if (hasEmptyUrl) {
-                errors.push("Bạn có ô liên kết video chưa điền");
-            } else {
-                const hasInvalidUrl = videoUrls.some(url => {
-                    const lower = url.toLowerCase().trim();
-                    return !(lower.includes("youtube.com") || lower.includes("youtu.be") || lower.includes("tiktok.com"));
-                });
-                if (hasInvalidUrl) {
-                    errors.push("Liên kết video phải là link YouTube hoặc TikTok hợp lệ");
-                }
-            }
-        }
-        return errors;
-    };
 
     const handlePublishFromDraft = (room) => {
         const errors = validateRoomData(room);
@@ -77,10 +45,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
             cancelText: "Hủy",
             onConfirm: async () => {
                 try {
-                    const { error } = await supabase
-                        .from('rooms')
-                        .update({ status: 'available' })
-                        .eq('id', room.id);
+                    const { error } = await publishRoom(room.id);
 
                     if (error) throw error;
 
@@ -125,10 +90,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
 
     const handleMockVerify = async (room) => {
         try {
-            const { error } = await supabase
-                .from('rooms')
-                .update({ is_verified: true })
-                .eq('id', room.id);
+            const { error } = await verifyRoomMock(room.id);
 
             if (error) throw error;
 
@@ -146,11 +108,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
         if (!user) return;
         setLoadingRooms(true);
         try {
-            const { data, error } = await supabase
-                .from('rooms')
-                .select('*, profiles!user_id(full_name, phone, avatar_url, role)')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
+            const { data, error } = await getUserRooms(user.id);
 
             if (error) throw error;
             setRooms(data || []);
@@ -174,11 +132,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
             onConfirm: async () => {
                 try {
                     // Xóa tin đăng (Database sẽ tự động xóa dữ liệu liên quan nhờ Cascade Delete)
-                    const { data, error } = await supabase
-                        .from('rooms')
-                        .delete()
-                        .eq('id', room.id)
-                        .select();
+                    const { data, error } = await deleteRoom(room.id);
 
                     if (error) throw error;
 
@@ -212,10 +166,8 @@ export default function DashboardPage({ user, navigate, initialData }) {
                         }
 
                         if (pathsToDelete.length > 0) {
-                            const { error: storageError } = await supabase.storage
-                                .from('room_media')
-                                .remove(pathsToDelete);
-                            
+                            const { error: storageError } = await deleteRoomMedia(pathsToDelete);
+
                             if (storageError) {
                                 console.error('Lỗi khi xóa ảnh từ storage:', storageError);
                             }

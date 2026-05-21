@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase.js';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
-import { UNIVERSITIES } from '../data/universities.js';
+import { UNIVERSITIES } from '../constants/universities.js';
+import { getFilteredRooms, getDistinctCities } from '../data/rooms.js';
 
 
 const DEFAULT_FILTERS = {
@@ -44,56 +44,11 @@ export const useRoomFilter = () => {
                 setError(null);
             }
 
-            let query = supabase
-                .from('rooms')
-                .select('*, profiles(*)', { count: 'exact' })
-                .eq('status', 'available');
-
-            // Apply Filters
-            if (filters.city) query = query.eq('city', filters.city);
-            if (filters.district) query = query.eq('district', filters.district);
-            if (filters.ward) query = query.eq('ward', filters.ward);
-
-            if (filters.priceMin > 0) query = query.gte('price_monthly', filters.priceMin);
-            if (filters.priceMax < 50000000) query = query.lte('price_monthly', filters.priceMax);
-
-            if (filters.areaMin > 0) query = query.gte('area_sqm', filters.areaMin);
-            if (filters.areaMax < 200) query = query.lte('area_sqm', filters.areaMax);
-
-            if (filters.verifiedOnly) query = query.eq('is_verified', true);
-
-            if (filters.bathroomType) {
-                query = query.contains('room_features', { bathroom_type: filters.bathroomType });
-            }
-
-            if (filters.amenities.length > 0) {
-                query = query.contains('room_features', { amenities: filters.amenities });
-            }
-
-            if (filters.search.trim()) {
-                query = query.ilike('title', `%${filters.search}%`);
-            }
-
-            // Sorting
-            const sortMap = {
-                'price_asc': { column: 'price_monthly', ascending: true },
-                'price_desc': { column: 'price_monthly', ascending: false },
-                'area_asc': { column: 'area_sqm', ascending: true },
-                'newest': { column: 'created_at', ascending: false },
-            };
-            const sort = sortMap[filters.sortBy] || sortMap.newest;
-            query = query.order(sort.column, { ascending: sort.ascending });
-
-            // Pagination
-            const from = targetPage * ITEMS_PER_PAGE;
-            const to = from + ITEMS_PER_PAGE - 1;
-            query = query.range(from, to);
-
-            const { data, error, count } = await query;
+            const { data, error, count } = await getFilteredRooms(filters, targetPage, ITEMS_PER_PAGE);
 
             if (error) throw error;
 
-            const mappedData = data.map(mapSupabaseRoom);
+            const mappedData = data ? data.map(mapSupabaseRoom) : [];
 
             if (isLoadMore) {
                 setRooms(prev => [...prev, ...mappedData]);
@@ -198,21 +153,12 @@ export const useRoomFilter = () => {
         return count;
     }, [filters]);
 
-    // For cities, we might still need a separate query or a constant list
-    // For now, let's just return a static list or fetch once
+    // For cities, fetch from distinct cities service
     const [availableCities, setAvailableCities] = useState([]);
     useEffect(() => {
         const fetchCities = async () => {
-            const { data } = await supabase.rpc('get_distinct_cities'); // Or just use a constant list
-            // If RPC doesn't exist, we can just use PROVINCE list or a simple select
-            if (!data) {
-                // Fallback to fetching first 1000 and extracting (not ideal but works for now)
-                const { data: rooms } = await supabase.from('rooms').select('city').limit(1000);
-                if (rooms) {
-                    const cities = [...new Set(rooms.map(r => r.city))].filter(Boolean).sort();
-                    setAvailableCities(cities);
-                }
-            } else {
+            const { data } = await getDistinctCities();
+            if (data) {
                 setAvailableCities(data);
             }
         };

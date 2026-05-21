@@ -15,7 +15,7 @@ import { FavoritesProvider } from './context/FavoritesContext';
 import { useModal } from './context/ModalContext.jsx';
 import { NotificationProvider } from './context/NotificationContext';
 import ToastContainer from './components/common/ToastContainer.jsx';
-import { useRoomFilter } from './hooks/useRoomFilter.js';
+import { RoomFilterProvider } from './context/RoomFilterContext.jsx';
 import LocationWizardModal from './components/search/LocationWizardModal.jsx';
 import MobileFilterModal from './components/rooms/MobileFilterModal.jsx';
 
@@ -36,17 +36,6 @@ function ScrollLock({ isActive }) {
 }
 
 export default function App() {
-    const filterState = useRoomFilter();
-    const {
-        filters,
-        updateFilter,
-        resetFilters,
-        toggleAmenity,
-        activeFilterCount,
-        highlightedField,
-        getLocationDisplayText
-    } = filterState;
-
     const [currentPage, setCurrentPage] = useState('home');
     const [pageData, setPageData] = useState(null);
     const [isClosing, setIsClosing] = useState(false);
@@ -212,91 +201,79 @@ export default function App() {
     return (
         <NotificationProvider>
             <FavoritesProvider user={user}>
-                {showLayout && (
-                    <Header
-                        currentPage={currentPage}
-                        navigate={navigate}
-                        user={user}
-                        onSearchClick={() => setIsLocationModalOpen(true)}
-                        searchDisplayText={getLocationDisplayText()}
-                        isSearchFilled={filters.city || filters.university}
-                    />
-                )}
-
-                {/* Guided Search Modal - Global */}
-                <LocationWizardModal
-                    isOpen={isLocationModalOpen}
-                    onClose={() => setIsLocationModalOpen(false)}
-                    onComplete={(locationFilters) => {
-                        updateFilter({ ...locationFilters, search: '' });
-                        setIsLocationModalOpen(false);
-                    }}
-                />
-
-
-                <main>
-                    {/* Base Layer: HomePage remains mounted to preserve scroll/filters */}
-                    <div className={(showLayout && !['profile', 'dashboard'].includes(currentPage) && !(currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
-                        <HomePage
+                <RoomFilterProvider>
+                    {showLayout && (
+                        <Header
+                            currentPage={currentPage}
                             navigate={navigate}
                             user={user}
                             onSearchClick={() => setIsLocationModalOpen(true)}
-                            filterState={filterState}
-                            currentPage={currentPage}
                         />
-                    </div>
-
-                    {/* Profile Layer */}
-                    <div className={(currentPage === 'profile' || (currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
-                        <ProfilePage user={user} navigate={navigate} initialData={pageData} />
-                    </div>
-
-                    {/* Dashboard Layer */}
-                    <div className={currentPage === 'dashboard' ? 'block' : 'hidden'}>
-                        <DashboardPage user={user} navigate={navigate} initialData={pageData} />
-                    </div>
-
-                    {/* Overlay Layer: Room Detail as a popup */}
-                    {shouldShowModal && (
-                        <div
-                            className={`fixed inset-0 z-50 overflow-y-auto ${isClosing ? 'pointer-events-none animate-modal-out' : 'pointer-events-auto animate-modal-up'}`}
-                        >
-                            {currentPage === 'room-detail' && <RoomDetailPage room={pageData} navigate={navigate} user={user} isClosing={isClosing} />}
-                        </div>
                     )}
 
-                    {currentPage === 'login' && <LoginPage navigate={navigate} />}
-                    {currentPage === 'register' && <RegisterPage navigate={navigate} initialData={pageData} />}
-                </main>
-
-                {showLayout && <Footer navigate={navigate} />}
-                {showLayout && (
-                    <BottomNav
-                        currentPage={currentPage}
-                        navigate={navigate}
-                        user={user}
-                        onFilterClick={() => setShowMobileFilter(true)}
+                    {/* Guided Search Modal - Global */}
+                    <LocationWizardModal
+                        isOpen={isLocationModalOpen}
+                        onClose={() => setIsLocationModalOpen(false)}
                     />
-                )}
 
-                {/* Global Mobile Filter Modal */}
-                <MobileFilterModal
-                    isOpen={showMobileFilter}
-                    onClose={() => setShowMobileFilter(false)}
-                    filters={filters}
-                    updateFilter={updateFilter}
-                    resetFilters={resetFilters}
-                    toggleAmenity={toggleAmenity}
-                    activeFilterCount={activeFilterCount}
-                    highlightedField={highlightedField}
-                    refetch={filterState.refetch}
-                />
 
-                {/* Scroll lock handler */}
-                <ScrollLock isActive={shouldShowModal} />
+                    <main>
+                        {/* Base Layer: HomePage remains mounted to preserve scroll/filters */}
+                        <div className={(showLayout && !['profile', 'dashboard'].includes(currentPage) && !(currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
+                            <HomePage
+                                navigate={navigate}
+                                user={user}
+                                onSearchClick={() => setIsLocationModalOpen(true)}
+                                currentPage={currentPage}
+                            />
+                        </div>
 
-                {/* Global Toast Container */}
-                <ToastContainer />
+                        {/* Profile Layer */}
+                        <div className={(currentPage === 'profile' || (currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
+                            <ProfilePage user={user} navigate={navigate} initialData={pageData} />
+                        </div>
+
+                        {/* Dashboard Layer */}
+                        <div className={currentPage === 'dashboard' ? 'block' : 'hidden'}>
+                            <DashboardPage user={user} navigate={navigate} initialData={pageData} />
+                        </div>
+
+                        {/* Overlay Layer: Room Detail as a popup */}
+                        {shouldShowModal && (
+                            <div
+                                className={`fixed inset-0 z-50 overflow-y-auto ${isClosing ? 'pointer-events-none animate-modal-out' : 'pointer-events-auto animate-modal-up'}`}
+                            >
+                                {currentPage === 'room-detail' && <RoomDetailPage room={pageData} navigate={navigate} user={user} isClosing={isClosing} />}
+                            </div>
+                        )}
+
+                        {currentPage === 'login' && <LoginPage navigate={navigate} />}
+                        {currentPage === 'register' && <RegisterPage navigate={navigate} initialData={pageData} />}
+                    </main>
+
+                    {showLayout && <Footer navigate={navigate} />}
+                    {showLayout && (
+                        <BottomNav
+                            currentPage={currentPage}
+                            navigate={navigate}
+                            user={user}
+                            onFilterClick={() => setShowMobileFilter(true)}
+                        />
+                    )}
+
+                    {/* Global Mobile Filter Modal */}
+                    <MobileFilterModal
+                        isOpen={showMobileFilter}
+                        onClose={() => setShowMobileFilter(false)}
+                    />
+
+                    {/* Scroll lock handler */}
+                    <ScrollLock isActive={shouldShowModal} />
+
+                    {/* Global Toast Container */}
+                    <ToastContainer />
+                </RoomFilterProvider>
             </FavoritesProvider>
         </NotificationProvider>
     );

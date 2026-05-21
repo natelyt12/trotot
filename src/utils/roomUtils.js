@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { moveRoomToDraft as serviceMoveRoomToDraft, draftAllUserRooms as serviceDraftAllUserRooms } from '../data/rooms.js';
 
 /**
  * Move a single room to draft status and reset verification.
@@ -6,10 +6,7 @@ import { supabase } from '../lib/supabase';
  * @returns {Promise<{data, error}>}
  */
 export const moveRoomToDraft = async (roomId) => {
-    return await supabase
-        .from('rooms')
-        .update({ status: 'draft', is_verified: false })
-        .eq('id', roomId);
+    return await serviceMoveRoomToDraft(roomId);
 };
 
 /**
@@ -18,9 +15,5 @@ export const moveRoomToDraft = async (roomId) => {
  * @returns {Promise<{data, error}>}
  */
 export const draftAllUserRooms = async (userId) => {
-    return await supabase
-        .from('rooms')
-        .update({ status: 'draft', is_verified: false })
-        .eq('user_id', userId)
-        .eq('status', 'available');
+    return await serviceDraftAllUserRooms(userId);
 };

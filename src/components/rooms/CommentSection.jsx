@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../../lib/supabase";
+import { getCommentsByRoomId, createComment, updateComment, deleteComment, voteComment } from "../../data/comments";
 import { formatDate } from "../../utils/formatters.js";
 import AppIcon from "../common/AppIcon.jsx";
 import { useModal } from "../../context/ModalContext";
@@ -50,38 +50,10 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
 
             setLoadingComments(true);
             try {
-                const { data, error } = await supabase
-                    .from("comments")
-                    .select(
-                        `
-                        *,
-                        profiles!user_id(full_name, avatar_url),
-                        comment_votes(user_id, vote_type)
-                    `,
-                    )
-                    .eq("room_id", room.id)
-                    .order("created_at", { ascending: true });
+                const { data, error } = await getCommentsByRoomId(room.id, userId);
 
                 if (!error && data) {
-                    const processed = data.map((comment) => {
-                        const votes = comment.comment_votes || [];
-                        const likeCount = votes.filter((v) => v.vote_type === 1).length;
-                        const dislikeCount = votes.filter((v) => v.vote_type === -1).length;
-                        const userVote = userId ? votes.find((v) => v.user_id === userId)?.vote_type : null;
-                        const profileData = comment.profiles || comment["profiles!user_id"];
-                        return { ...comment, profiles: profileData, likeCount, dislikeCount, userVote };
-                    });
-
-                    const parents = processed.filter((c) => !c.parent_id);
-                    const children = processed.filter((c) => c.parent_id);
-                    const structured = parents
-                        .map((p) => ({
-                            ...p,
-                            replies: children.filter((c) => c.parent_id === p.id),
-                        }))
-                        .reverse();
-
-                    setComments(structured);
+                    setComments(data);
                 }
             } catch (err) {
                 console.error("Error fetching comments:", err);
@@ -118,11 +90,11 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
 
         setSubmitting(true);
         try {
-            const { data, error } = await supabase
-                .from("comments")
-                .insert([{ room_id: room.id, user_id: user.id, content: newComment.trim() }])
-                .select("*, profiles!user_id(full_name, avatar_url)")
-                .single();
+            const { data, error } = await createComment({
+                roomId: room.id,
+                userId: user.id,
+                content: newComment
+            });
 
             if (error) throw error;
 
@@ -163,18 +135,12 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
         const finalContent = userName ? `@${userName}\u200B ${replyContent.trim()}` : replyContent.trim();
 
         try {
-            const { data, error } = await supabase
-                .from("comments")
-                .insert([
-                    {
-                        room_id: room.id,
-                        user_id: user.id,
-                        content: finalContent,
-                        parent_id: parentId,
-                    },
-                ])
-                .select("*, profiles!user_id(full_name, avatar_url)")
-                .single();
+            const { data, error } = await createComment({
+                roomId: room.id,
+                userId: user.id,
+                content: finalContent,
+                parentId: parentId
+            });
 
             if (error) throw error;
 
@@ -204,7 +170,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
         const finalContent = editingTag ? `@${editingTag}\u200B ${editingContent.trim()}` : editingContent.trim();
 
         try {
-            const { error } = await supabase.from("comments").update({ content: finalContent }).eq("id", commentId);
+            const { error } = await updateComment(commentId, finalContent);
 
             if (error) throw error;
 
@@ -256,11 +222,8 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
             if (!targetComment) return;
 
             const existingVote = targetComment.userVote;
-            if (existingVote === voteType) {
-                await supabase.from("comment_votes").delete().eq("user_id", user.id).eq("comment_id", commentId);
-            } else {
-                await supabase.from("comment_votes").upsert({ user_id: user.id, comment_id: commentId, vote_type: voteType });
-            }
+            const { error } = await voteComment(commentId, user.id, voteType, existingVote);
+            if (error) throw error;
 
             const updateMap = (c) => {
                 if (c.id !== commentId) return c;
@@ -302,7 +265,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
             cancelText: "Hủy",
             onConfirm: async () => {
                 try {
-                    const { error } = await supabase.from("comments").delete().eq("id", commentId);
+                    const { error } = await deleteComment(commentId);
                     if (error) throw error;
                     setComments((prev) =>
                         prev

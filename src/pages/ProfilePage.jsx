@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useModal } from '../context/ModalContext';
 import { useNotification } from '../context/NotificationContext';
-import { supabase } from '../lib/supabase';
+import { signIn, signOut } from '../data/auth.js';
+import { getUserProfile, updateUserProfile, updateUserAuth, uploadAvatar, getAvatarPublicUrl, removeAvatar, deleteUserAccount } from '../data/profile.js';
+import { getRoomsByIds } from '../data/rooms.js';
+import { getUserCommentedRooms } from '../data/comments.js';
 import AppIcon from '../components/common/AppIcon.jsx';
 import { useFavorites } from '../context/FavoritesContext.jsx';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
@@ -49,11 +52,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
     const fetchProfile = async () => {
         if (!user) return;
         try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
+            const { data, error } = await getUserProfile(user.id);
 
             if (data && !error) {
                 setFormData({
@@ -84,8 +83,10 @@ export default function ProfilePage({ user, navigate, initialData }) {
     }, [user]);
 
     useEffect(() => {
-        // Always sync activeTab with initialData, defaulting to 'info' if not specified
-        setActiveTab(initialData?.tab || 'info');
+        // Only sync activeTab if initialData?.tab is explicitly specified
+        if (initialData?.tab) {
+            setActiveTab(initialData.tab);
+        }
     }, [initialData]);
 
     const TAB_GROUPS = [
@@ -112,11 +113,8 @@ export default function ProfilePage({ user, navigate, initialData }) {
             const fetchSavedRooms = async () => {
                 setLoadingSaved(true);
                 try {
-                    const { data, error } = await supabase
-                        .from('rooms')
-                        .select('*, profiles(*)')
-                        .in('id', favorites);
-
+                    const { data, error } = await getRoomsByIds(favorites);
+ 
                     if (error) throw error;
                     setSavedRooms(data.map(mapSupabaseRoom));
                 } catch (err) {
@@ -136,11 +134,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
             const fetchCommentedRooms = async () => {
                 setLoadingCommented(true);
                 try {
-                    const { data, error } = await supabase
-                        .from('comments')
-                        .select('*, rooms(*, profiles(*))')
-                        .eq('user_id', user.id)
-                        .order('created_at', { ascending: false });
+                    const { data, error } = await getUserCommentedRooms(user.id);
 
                     if (error) throw error;
 
@@ -179,7 +173,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
             confirmText: 'Đăng xuất',
             cancelText: 'Hủy',
             onConfirm: async () => {
-                await supabase.auth.signOut();
+                await signOut();
                 navigate('home');
             }
         });
@@ -208,15 +202,21 @@ export default function ProfilePage({ user, navigate, initialData }) {
         const performUpdate = async (shouldDraftRooms) => {
             setLoading(true);
             try {
-                const { error } = await supabase.auth.updateUser({
-                    data: { full_name: formData.full_name, role: formData.role }
+                const { error } = await updateUserAuth({
+                    data: { 
+                        full_name: formData.full_name, 
+                        role: formData.role,
+                        phone: formData.phone,
+                        avatar_url: formData.avatar_url
+                    }
                 });
                 if (error) throw error;
 
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .update({ full_name: formData.full_name, phone: formData.phone, role: formData.role })
-                    .eq('id', user.id);
+                const { error: profileError } = await updateUserProfile(user.id, {
+                    full_name: formData.full_name,
+                    phone: formData.phone,
+                    role: formData.role
+                });
                 if (profileError) throw profileError;
 
                 if (shouldDraftRooms) {
@@ -297,30 +297,21 @@ export default function ProfilePage({ user, navigate, initialData }) {
                 const filePath = `${user.id}/${Date.now()}.${fileExt}`;
 
                 // 2. Upload file đã nén lên Supabase
-                const { error: uploadError } = await supabase.storage
-                    .from('user_avatar')
-                    .upload(filePath, compressedFile, { upsert: true });
+                const { error: uploadError } = await uploadAvatar(filePath, compressedFile);
                 if (uploadError) throw uploadError;
 
                 // 3. Lấy Public URL từ Supabase
-                const { data: { publicUrl: supabaseUrl } } = supabase.storage
-                    .from('user_avatar')
-                    .getPublicUrl(filePath);
-
-                publicUrl = supabaseUrl;
+                publicUrl = getAvatarPublicUrl(filePath);
             }
 
             // 4. Cập nhật Auth metadata
-            const { error: updateError } = await supabase.auth.updateUser({
+            const { error: updateError } = await updateUserAuth({
                 data: { avatar_url: publicUrl }
             });
             if (updateError) throw updateError;
 
             // 5. Cập nhật bảng profiles
-            const { error: profileError } = await supabase
-                .from('profiles')
-                .update({ avatar_url: publicUrl })
-                .eq('id', user.id);
+            const { error: profileError } = await updateUserProfile(user.id, { avatar_url: publicUrl });
             if (profileError) throw profileError;
 
             // 6. Cập nhật state
@@ -336,9 +327,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                     if (urlParts.length > 1) {
                         const oldPath = urlParts[1].split('?')[0];
                         if (oldPath.startsWith(`${user.id}/`)) {
-                            const { error: removeError } = await supabase.storage
-                                .from('user_avatar')
-                                .remove([oldPath]);
+                            const { error: removeError } = await removeAvatar(oldPath);
                             
                             if (removeError) {
                                 console.error('Lỗi khi xóa ảnh cũ từ storage:', removeError);
@@ -366,13 +355,10 @@ export default function ProfilePage({ user, navigate, initialData }) {
         }
         setPasswordLoading(true);
         try {
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-                email: user.email,
-                password: passwordData.oldPassword,
-            });
+            const { error: signInError } = await signIn(user.email, passwordData.oldPassword);
             if (signInError) throw new Error('Mật khẩu cũ không chính xác.');
 
-            const { error } = await supabase.auth.updateUser({ password: passwordData.newPassword });
+            const { error } = await updateUserAuth({ password: passwordData.newPassword });
             if (error) throw error;
 
             addNotification('Thay đổi mật khẩu thành công!', 'success');
@@ -396,16 +382,13 @@ export default function ProfilePage({ user, navigate, initialData }) {
             onConfirm: async () => {
                 setLoading(true);
                 try {
-                    const { error: authError } = await supabase.auth.signInWithPassword({
-                        email: user.email,
-                        password: deletePassword,
-                    });
+                    const { error: authError } = await signIn(user.email, deletePassword);
                     if (authError) throw new Error('Mật khẩu xác nhận không chính xác.');
 
-                    const { error } = await supabase.rpc('delete_user_account');
+                    const { error } = await deleteUserAccount();
                     if (error) throw error;
 
-                    await supabase.auth.signOut();
+                    await signOut();
                     showModal({
                         title: 'Thành công',
                         message: 'Tài khoản của bạn đã được xóa thành công.',
@@ -621,7 +604,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                             <RoomGrid
                                                 rooms={savedRooms}
                                                 isLoading={loadingSaved}
-                                                onRoomClick={(room) => navigate('room-detail', { ...room, fromProfile: true })}
+                                                onRoomClick={(room) => navigate('room-detail', { ...room, fromProfile: true, originTab: 'favorites' })}
                                             />
                                         ) : (
                                             <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl">
@@ -659,7 +642,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                             commentedRooms.map(({ room, count }) => (
                                                 <div
                                                     key={room.id}
-                                                    onClick={() => navigate('room-detail', { ...room, fromProfile: true })}
+                                                    onClick={() => navigate('room-detail', { ...room, fromProfile: true, originTab: 'commented_rooms' })}
                                                     className="flex gap-4 p-3 border border-stone-100 rounded-xl hover:border-amber-300 hover:shadow-md transition-all cursor-pointer bg-white group"
                                                 >
                                                     {/* Thumbnail */}

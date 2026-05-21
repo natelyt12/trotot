@@ -1,10 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import AppIcon from '../common/AppIcon.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UNIVERSITIES } from '../../data/universities.js';
-import { PROVINCE } from '../../data/province.js';
+import { UNIVERSITIES } from '../../constants/universities.js';
+import { PROVINCE } from '../../constants/province.js';
+import { useRoomFilterContext } from '../../context/RoomFilterContext.jsx';
 
-export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
+export default function LocationWizardModal({ isOpen, onClose }) {
+    const { updateFilter } = useRoomFilterContext();
     // Steps: 'uni', 'city', 'district', 'ward'
     const [step, setStep] = useState('uni');
 
@@ -37,7 +39,7 @@ export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
     };
 
     const handleUniSelect = (uniName) => {
-        onComplete({ university: uniName });
+        updateFilter({ university: uniName, search: '' });
         handleClose();
     };
 
@@ -54,11 +56,12 @@ export default function LocationWizardModal({ isOpen, onClose, onComplete }) {
     };
 
     const handleWardSelect = (wardName) => {
-        onComplete({
+        updateFilter({
             city: tempCity,
             district: tempDistrict,
             ward: wardName,
-            university: '' // Explicitly clear university when choosing a custom location
+            university: '', // Explicitly clear university when choosing a custom location
+            search: ''
         });
         handleClose();
     };

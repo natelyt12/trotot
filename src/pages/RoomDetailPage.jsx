@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useModal } from '../context/ModalContext';
-import { supabase } from '../lib/supabase';
-import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from '../data/constants.js';
-import { UNIVERSITIES } from '../data/universities';
+import { incrementRoomViews } from '../data/rooms';
+import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from '../constants/constants.js';
+import { UNIVERSITIES } from '../constants/universities';
 import {
     formatPrice,
     formatArea,
@@ -91,34 +91,9 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
         lastIncrementedRoomId.current = room.id;
 
         const incrementViews = async () => {
-            try {
-                // Better approach: Use RPC to bypass RLS for non-owners
-                // If you haven't created the RPC yet, this will fail and fall back to the update() method
-                const { error: rpcError } = await supabase.rpc('increment_room_views', { 
-                    room_id: room.id 
-                });
-
-                if (rpcError) {
-                    console.warn('RPC failed, falling back to direct update (may fail for non-owners due to RLS):', rpcError);
-                    
-                    // Fallback to direct update (only works if RLS allows or user is owner)
-                    const { data, error: updateError } = await supabase
-                        .from('rooms')
-                        .update({ total_views: (room.metadata?.total_views || 0) + 1 })
-                        .eq('id', room.id)
-                        .select('total_views')
-                        .maybeSingle();
-
-                    if (!updateError && data) {
-                        setViews(data.total_views);
-                    }
-                } else {
-                    // If RPC succeeded, the view count on server is incremented
-                    // We can just increment the local state to show immediate feedback
-                    setViews(prev => prev + 1);
-                }
-            } catch (err) {
-                console.error('Failed to increment views:', err);
+            const { data, error } = await incrementRoomViews(room.id, room.metadata?.total_views || 0);
+            if (!error && data) {
+                setViews(data.total_views);
             }
         };
 
@@ -172,7 +147,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                             } else if (room?.fromDashboard) {
                                 navigate('dashboard');
                             } else {
-                                navigate(room?.fromProfile ? 'profile' : 'home');
+                                navigate(room?.fromProfile ? 'profile' : 'home', room?.fromProfile ? { tab: room?.originTab || 'info' } : undefined);
                             }
                         }}
                         className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"

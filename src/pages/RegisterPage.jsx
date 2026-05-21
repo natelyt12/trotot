@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { signUp, checkNameExists, checkPhoneExists } from '../data/auth.js';
 import VerificationForm from '../components/auth/VerificationForm.jsx';
 import { useModal } from '../context/ModalContext';
 
@@ -87,13 +87,9 @@ export default function RegisterPage({ navigate, initialData }) {
         setLoading(true);
         try {
             // 1. Kiểm tra Tên người dùng đã tồn tại chưa
-            const { data: existingName } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('full_name', form.name.trim())
-                .maybeSingle();
+            const nameExists = await checkNameExists(form.name);
 
-            if (existingName) {
+            if (nameExists) {
                 showModal({
                     title: 'Tên người dùng đã tồn tại',
                     message: 'Tên người dùng này đã được người khác sử dụng. Vui lòng chọn một tên khác.',
@@ -104,13 +100,9 @@ export default function RegisterPage({ navigate, initialData }) {
             }
 
             // 2. Kiểm tra Số điện thoại đã tồn tại chưa
-            const { data: existingPhone } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('phone', form.phone.trim())
-                .maybeSingle();
+            const phoneExists = await checkPhoneExists(form.phone);
 
-            if (existingPhone) {
+            if (phoneExists) {
                 showModal({
                     title: 'Số điện thoại đã tồn tại',
                     message: 'Số điện thoại này đã được liên kết với một tài khoản khác. Vui lòng sử dụng số khác hoặc Đăng nhập.',
@@ -121,16 +113,10 @@ export default function RegisterPage({ navigate, initialData }) {
             }
 
             // 3. Tiến hành đăng ký
-            const { error } = await supabase.auth.signUp({
-                email: form.email,
-                password: form.password,
-                options: {
-                    data: {
-                        full_name: form.name.trim(),
-                        phone: form.phone.trim(),
-                        role: form.role,
-                    },
-                },
+            const { error } = await signUp(form.email, form.password, {
+                full_name: form.name.trim(),
+                phone: form.phone.trim(),
+                role: form.role,
             });
 
             if (error) {

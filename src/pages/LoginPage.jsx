@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { signIn } from '../data/auth.js';
 import ForgotPasswordForm from '../components/auth/ForgotPasswordForm.jsx';
 
 /* ============================================
@@ -25,10 +25,7 @@ export default function LoginPage({ navigate }) {
         }
         setLoading(true);
         try {
-            const { error: authError } = await supabase.auth.signInWithPassword({
-                email: form.email,
-                password: form.password,
-            });
+            const { error: authError } = await signIn(form.email, form.password);
             if (authError) throw authError;
             navigate('home');
         } catch (err) {

@@ -1,6 +1,6 @@
-import { PROVINCE } from '../../data/province.js';
-import { AMENITIES, PRICE_RANGES, AREA_RANGES } from '../../data/constants.js';
-import { UNIVERSITIES } from '../../data/universities.js';
+import { PROVINCE } from '../../constants/province.js';
+import { AMENITIES, PRICE_RANGES, AREA_RANGES } from '../../constants/constants.js';
+import { UNIVERSITIES } from '../../constants/universities.js';
 import AppIcon from '../common/AppIcon.jsx';
 
 /* ============================================

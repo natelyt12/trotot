@@ -2,22 +2,22 @@ import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import RoomFilters from './RoomFilters.jsx';
 import AppIcon from '../common/AppIcon.jsx';
+import { useRoomFilterContext } from '../../context/RoomFilterContext.jsx';
 
 /**
  * MobileFilterModal - iOS style slide-up modal
  * Simple slide up/down with no drag, expoOut easing, and no blur on backdrop.
  */
-export default function MobileFilterModal({
-    isOpen,
-    onClose,
-    filters,
-    updateFilter,
-    resetFilters,
-    toggleAmenity,
-    activeFilterCount,
-    highlightedField,
-    refetch
-}) {
+export default function MobileFilterModal({ isOpen, onClose }) {
+    const {
+        filters,
+        updateFilter,
+        resetFilters,
+        toggleAmenity,
+        activeFilterCount,
+        highlightedField,
+        refetch
+    } = useRoomFilterContext();
     // Lock body scroll when modal is open
     useEffect(() => {
         if (isOpen) {

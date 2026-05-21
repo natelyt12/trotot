@@ -4,12 +4,14 @@ import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
 import AppIcon from '../components/common/AppIcon.jsx';
 import SearchTrigger from '../components/search/SearchTrigger.jsx';
+import { useRoomFilterContext } from '../context/RoomFilterContext.jsx';
 
 /* ============================================
    HomePage – Listing + search + filters
    Flat design, amber palette
    ============================================ */
-export default function HomePage({ navigate, user, onSearchClick, filterState, currentPage }) {
+export default function HomePage({ navigate, user, onSearchClick, currentPage }) {
+    const filterState = useRoomFilterContext();
     const {
         filters,
         filteredRooms,

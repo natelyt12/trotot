@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { deleteCloudinaryImage } from '../data/rooms.js';
 
 /**
  * Nén ảnh sử dụng HTML5 Canvas
@@ -154,9 +154,7 @@ export const deleteFromCloudinary = async (url) => {
     if (!publicId) return false;
 
     try {
-        const { data, error } = await supabase.functions.invoke('delete-cloudinary-image', {
-            body: { publicId }
-        });
+        const { data, error } = await deleteCloudinaryImage(publicId);
 
         if (error) {
             console.error("Lỗi khi gọi Edge Function xóa ảnh:", error);
