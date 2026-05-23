@@ -57,7 +57,6 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
 
     const roleLabel = (role) => {
         if (role === "landlord") return "Bên cho thuê";
-        if (role === "agent") return "Môi giới";
         return "Người thuê";
     };
 
@@ -154,7 +153,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             <AppIcon name="user" size={16} />
                                             <span>Trang cá nhân</span>
                                         </button>
-                                        {["landlord", "agent"].includes(user.user_metadata?.role) && (
+                                        {user.user_metadata?.role === "landlord" && (
                                             <>
                                                 <button
                                                     onClick={() => navigate("dashboard", { tab: "post_room" })}
@@ -265,7 +264,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                     </div>
 
                     {/* Nav links */}
-                    {user && ["landlord", "agent"].includes(user.user_metadata?.role) && (
+                    {user && user.user_metadata?.role === "landlord" && (
                         <>
                             <button
                                 onClick={() => {

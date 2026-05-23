@@ -51,7 +51,7 @@ export default function RoomCard({ room, onClick, style }) {
                         alt={basic_info.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
                         loading="lazy"
-                        onError={(e) => { e.currentTarget.src = `../public/images/placeholder.png`; }}
+                        onError={(e) => { e.currentTarget.src = "/images/placeholder.png"; }}
                     />
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-stone-400 gap-1 bg-stone-100">

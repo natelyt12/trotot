@@ -203,7 +203,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                             src={mediaItems[activeImage].url}
                                             alt={`${basic_info.title} - ảnh ${activeImage + 1}`}
                                             className="w-full h-full object-cover animate-fade-in"
-                                            onError={(e) => { e.currentTarget.src = `../public/images/placeholder.png`; }}
+                                            onError={(e) => { e.currentTarget.src = "/images/placeholder.png"; }}
                                         />
                                     )}
                                     {/* Status badges grouped */}

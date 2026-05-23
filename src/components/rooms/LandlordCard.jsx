@@ -70,8 +70,8 @@ export default function LandlordCard({
                             <p className="font-bold text-sm text-stone-900 leading-tight mb-1">
                                 {previewMode && user ? user.user_metadata?.full_name : media_contact.contact.name}
                             </p>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold ${(previewMode ? 'landlord' : media_contact.contact.role) === 'landlord' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
-                                {(previewMode ? 'landlord' : media_contact.contact.role) === 'landlord' ? 'Bên cho thuê' : 'Môi giới'}
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold bg-amber-100 text-amber-800">
+                                Bên cho thuê
                             </span>
                         </div>
                     </div>

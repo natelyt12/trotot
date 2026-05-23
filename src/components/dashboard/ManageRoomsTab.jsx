@@ -134,7 +134,7 @@ export default function ManageRoomsTab({
                                                 src={room.media_contact.images[0].url}
                                                 alt={room.title}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                onError={(e) => { e.currentTarget.src = `../public/images/placeholder.png`; }}
+                                                onError={(e) => { e.currentTarget.src = "/images/placeholder.png"; }}
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-stone-300">

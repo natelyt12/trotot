@@ -207,7 +207,7 @@ export default function RegisterPage({ navigate, initialData }) {
                                         type="button"
                                         onClick={() => {
                                             setShowRoleSelector(true);
-                                            setForm(prev => ({ ...prev, role: 'agent' }));
+                                            setForm(prev => ({ ...prev, role: 'landlord' }));
                                         }}
                                         className="w-full py-2.5 px-4 bg-stone-50 border border-dashed border-stone-300 rounded-xl text-stone-500 text-xs font-bold hover:bg-stone-100 hover:border-stone-400 transition-all flex items-center justify-center gap-2 group"
                                     >
@@ -217,13 +217,13 @@ export default function RegisterPage({ navigate, initialData }) {
                                             <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                                             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                                         </svg>
-                                        Tôi là môi giới / bên cho thuê
+                                        Tôi là bên cho thuê (Chủ nhà)
                                     </button>
                                 </div>
                             ) : (
                                 <div className="animate-[fadeIn_0.3s_ease-out]">
                                     <div className="flex items-center justify-between mb-2 px-1">
-                                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Chọn vai trò</span>
+                                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Vai trò đăng ký</span>
                                         <button
                                             type="button"
                                             onClick={() => {
@@ -235,40 +235,18 @@ export default function RegisterPage({ navigate, initialData }) {
                                             Hủy bỏ
                                         </button>
                                     </div>
-                                    <div className="bg-stone-100 p-1 rounded-xl flex gap-1 mb-2">
-                                        {[
-                                            { id: 'agent', label: 'Môi giới' },
-                                            { id: 'landlord', label: 'Bên cho thuê' },
-                                        ].map((opt) => (
-                                            <button
-                                                key={opt.id}
-                                                type="button"
-                                                onClick={() => setForm(prev => ({ ...prev, role: opt.id }))}
-                                                className={`flex-1 py-2 rounded-lg font-bold text-xs cursor-pointer transition-all duration-200 border-none ${form.role === opt.id
-                                                    ? 'bg-white text-amber-600 shadow-sm'
-                                                    : 'bg-transparent text-stone-500 hover:text-stone-700'
-                                                    }`}
-                                            >
-                                                {opt.label}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* Verification Notice for elevated roles */}
-                                    {form.role !== 'tenant' && (
-                                        <div className="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-100 rounded-xl mb-4">
-                                            <div className="mt-0.5 text-amber-500 shrink-0">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                    <circle cx="12" cy="12" r="10" />
-                                                    <line x1="12" y1="8" x2="12" y2="12" />
-                                                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                                                </svg>
-                                            </div>
-                                            <p className="text-[11px] text-amber-800 leading-relaxed m-0 font-medium">
-                                                Vai trò <span className="font-bold uppercase">{form.role === 'agent' ? 'Môi giới' : 'Bên cho thuê'}</span> yêu cầu xác minh danh tính (KYC) trước khi có thể đăng tin.
-                                            </p>
+                                    <div className="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-100 rounded-xl mb-4">
+                                        <div className="mt-0.5 text-amber-500 shrink-0">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <line x1="12" y1="8" x2="12" y2="12" />
+                                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                                            </svg>
                                         </div>
-                                    )}
+                                        <p className="text-[11px] text-amber-800 leading-relaxed m-0 font-medium">
+                                            Vai trò <span className="font-bold uppercase">Bên cho thuê</span> yêu cầu xác minh danh tính (KYC) trước khi có thể đăng tin.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
 

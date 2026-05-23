@@ -9,7 +9,7 @@ import AppIcon from '../common/AppIcon.jsx';
    - Micro-animations with Framer Motion
    ============================================ */
 export default function BottomNav({ currentPage, navigate, user, onFilterClick }) {
-    const isHost = user && ['landlord', 'agent'].includes(user.user_metadata?.role);
+    const isHost = user && user.user_metadata?.role === 'landlord';
     const isDashboard = currentPage === 'dashboard';
 
     const navItems = [

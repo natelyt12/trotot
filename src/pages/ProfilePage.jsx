@@ -243,10 +243,10 @@ export default function ProfilePage({ user, navigate, initialData }) {
             confirmText: 'Xác nhận',
             cancelText: 'Hủy',
             onConfirm: () => {
-                if (oldRole === 'tenant' && (newRole === 'landlord' || newRole === 'agent')) {
+                if (oldRole === 'tenant' && newRole === 'landlord') {
                     // Trigger KYC flow in ProfilePage
                     setShowVerification(true);
-                } else if (newRole === 'tenant' && (oldRole === 'landlord' || oldRole === 'agent')) {
+                } else if (newRole === 'tenant' && oldRole === 'landlord') {
                     // Trigger role downgrade warning confirmation
                     showModal({
                         title: 'Xác nhận chuyển vai trò',
@@ -611,10 +611,9 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                             </div>
 
                                             <Field label="Vai trò của bạn">
-                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                     {[
                                                         { id: 'tenant', label: 'Người thuê' },
-                                                        { id: 'agent', label: 'Môi giới' },
                                                         { id: 'landlord', label: 'Bên cho thuê' },
                                                     ].map((opt) => (
                                                         <button
@@ -703,7 +702,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                                                 src={room.media_contact.images[0].url}
                                                                 alt={room.basic_info.title}
                                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                                onError={(e) => { e.currentTarget.src = `../public/images/placeholder.png`; }}
+                                                                onError={(e) => { e.currentTarget.src = "/images/placeholder.png"; }}
                                                             />
                                                         ) : (
                                                             <div className="w-full h-full flex items-center justify-center text-stone-300">
