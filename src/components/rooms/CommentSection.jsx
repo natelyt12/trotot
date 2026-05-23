@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getCommentsByRoomId, createComment, updateComment, deleteComment, voteComment } from "../../data/comments";
+import { getCommentsByRoomId, createComment, updateComment, deleteComment, voteComment } from "../../services/commentService";
 import { formatDate } from "../../utils/formatters.js";
 import AppIcon from "../common/AppIcon.jsx";
 import { useModal } from "../../context/ModalContext";

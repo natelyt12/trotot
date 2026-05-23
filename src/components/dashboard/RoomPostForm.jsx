@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { createRoom, updateRoom, uploadRoomMedia, deleteRoomMedia, getRoomMediaPublicUrl } from "../../data/rooms";
+import { createRoom, updateRoom, uploadRoomMedia, deleteRoomMedia, getRoomMediaPublicUrl } from "../../services/roomService";
 import { useModal } from "../../context/ModalContext";
 import { useNotification } from "../../context/NotificationContext";
-import { validateRoomData } from "../../utils/validation";
 import AppIcon from "../common/AppIcon";
 import { AMENITIES, ROOM_TYPES, BATHROOM_TYPES, LAUNDRY_TYPES, CURFEW_LABELS, KITCHEN_TYPES, GENDER_PREFERENCES } from "../../constants/constants";
 import { PROVINCE } from "../../constants/province";
@@ -73,6 +72,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
             images: [],
             video_urls: [],
             description: "",
+            google_map_url: "",
         },
     });
 
@@ -125,6 +125,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 images: roomToEdit.media_contact?.images || [],
                 video_urls: roomToEdit.media_contact?.video_urls || [],
                 description: roomToEdit.media_contact?.description || "",
+                google_map_url: roomToEdit.media_contact?.google_map_url || "",
             },
         };
 
@@ -264,6 +265,17 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
         return str.replace(/[^a-zA-Z0-9.]/g, "_").replace(/_+/g, "_");
     };
 
+    const extractMapSrc = (input) => {
+        if (!input) return '';
+        if (input.includes('src=')) {
+            const match = input.match(/src=["'](https:\/\/www\.google\.com\/maps\/embed[^"']+)["']/);
+            if (match && match[1]) {
+                return match[1];
+            }
+        }
+        return input.trim();
+    };
+
     const toggleAmenity = (key) => {
         setFormData((prev) => {
             const amenities = prev.room_features.amenities.includes(key)
@@ -348,8 +360,6 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
 
-        // Biểu mẫu đăng/sửa từ Form sẽ luôn được lưu dưới dạng Bản nháp (draft)
-        const isDraft = true;
         const normalizedFormData = {
             ...formData,
             title: formData.title.trim() || "Tin đăng không có tiêu đề",
@@ -484,6 +494,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         video_urls: (normalizedFormData.media_contact?.video_urls || [])
                             .map(url => url.trim())
                             .filter(url => url.length > 0),
+                        google_map_url: extractMapSrc(normalizedFormData.media_contact.google_map_url),
                     },
                     available_until: availableUntil.toISOString(),
                     status: "draft", // Luôn lưu dưới dạng bản nháp
@@ -846,6 +857,39 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
                                 value={formData.address}
                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                            />
+                        </div>
+
+                        {/* Google Maps Embed Field */}
+                        <div className="mt-4 relative group/map">
+                            <label className="block text-xs font-bold text-stone-500 mb-1 flex items-center gap-1.5">
+                                <AppIcon name="map" size={14} className="text-amber-500" />
+                                <span>Bản đồ Google Maps (Iframe hoặc Link chia sẻ)</span>
+                                <div className="relative inline-block cursor-help group/tooltip">
+                                    <span className="text-amber-500 text-xs font-bold flex items-center justify-center w-4 h-4 rounded-full bg-amber-50 border border-amber-200">💡</span>
+                                    <div className="absolute left-6 bottom-0 hidden group-hover/tooltip:block w-72 p-3 bg-stone-900 text-white text-[0.7rem] rounded-xl shadow-xl z-35 leading-relaxed font-normal">
+                                        <p className="font-bold text-amber-400 mb-1">💡 Hướng dẫn lấy bản đồ:</p>
+                                        1. Truy cập <span className="underline">google.com/maps</span> và tìm kiếm địa chỉ của bạn.<br />
+                                        2. Chọn nút <span className="font-bold text-amber-400">Chia sẻ</span>.<br />
+                                        3. Chọn tab <span className="font-bold text-amber-400">Nhúng bản đồ (Embed a map)</span>.<br />
+                                        4. Sao chép đường dẫn trong thuộc tính <span className="font-bold text-amber-400">src="..."</span> (hoặc sao chép toàn bộ thẻ Iframe) và dán vào đây.
+                                    </div>
+                                </div>
+                            </label>
+                            <input
+                                type="text"
+                                placeholder="Dán mã nhúng iframe hoặc link chia sẻ Google Maps vào đây..."
+                                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
+                                value={formData.media_contact.google_map_url || ""}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        media_contact: {
+                                            ...formData.media_contact,
+                                            google_map_url: e.target.value
+                                        }
+                                    })
+                                }
                             />
                         </div>
 

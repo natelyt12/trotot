@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signIn } from '../data/auth.js';
+import { signIn } from '../services/authService.js';
 import ForgotPasswordForm from '../components/auth/ForgotPasswordForm.jsx';
 
 /* ============================================

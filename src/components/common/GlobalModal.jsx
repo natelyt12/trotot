@@ -80,13 +80,12 @@ export default function GlobalModal({ config, onClose }) {
                             <div className="flex flex-col gap-3">
                                 <button
                                     onClick={handleConfirm}
-                                    className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer border-none shadow-lg shadow-amber-500/20 ${
-                                        type === 'error' ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600'
-                                    } text-white`}
+                                    className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer border-none shadow-lg shadow-amber-500/20 ${type === 'error' ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600'
+                                        } text-white`}
                                 >
                                     {confirmText}
                                 </button>
-                                
+
                                 {cancelText && (
                                     <button
                                         onClick={onClose}

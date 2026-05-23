@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
@@ -10,7 +10,7 @@ import { useRoomFilterContext } from '../context/RoomFilterContext.jsx';
    HomePage – Listing + search + filters
    Flat design, amber palette
    ============================================ */
-export default function HomePage({ navigate, user, onSearchClick, currentPage }) {
+export default function HomePage({ navigate, user, onSearchClick }) {
     const filterState = useRoomFilterContext();
     const {
         filters,

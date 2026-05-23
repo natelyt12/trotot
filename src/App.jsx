@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from './lib/supabase';
 
 import Header from './components/layout/Header.jsx';
@@ -18,6 +18,7 @@ import ToastContainer from './components/common/ToastContainer.jsx';
 import { RoomFilterProvider } from './context/RoomFilterContext.jsx';
 import LocationWizardModal from './components/search/LocationWizardModal.jsx';
 import MobileFilterModal from './components/rooms/MobileFilterModal.jsx';
+import PageTransition from './components/common/PageTransition.jsx';
 
 const PAGES_WITHOUT_LAYOUT = ['login', 'register'];
 
@@ -45,6 +46,121 @@ export default function App() {
     const [showMobileFilter, setShowMobileFilter] = useState(false);
     const { showModal } = useModal();
 
+    // Trạng thái cho hiệu ứng chuyển trang cửa trượt
+    const [transitionState, setTransitionState] = useState({
+        isTransitioning: false,
+        stage: 'idle', // 'idle' | 'closing' | 'closed' | 'opening'
+    });
+
+    const isInitialLoad = useRef(true);
+
+    const navigate = (page, data = null) => {
+        // Auth Check for Protected Routes
+        if (['profile', 'dashboard'].includes(page) && !user) {
+            navigate('login');
+            return;
+        }
+
+        // Draft Check for Room Detail
+        if (page === 'room-detail' && data?.status === 'draft') {
+            showModal({
+                title: "Thông báo",
+                message: "Phòng không tồn tại, có vẻ chủ bài đăng đã gỡ công khai hoặc phòng đã có người thuê",
+                type: "warning"
+            });
+            return;
+        }
+
+        // Nếu đang trong quá trình chuyển trang thì không nhận thêm click điều hướng
+        if (transitionState.isTransitioning) return;
+
+        // Xác định trang đích cụ thể
+        let targetPage = page;
+        let targetData = data;
+
+        if (page === 'back') {
+            targetPage = pageData?.fromProfile ? 'profile' : 'home';
+            targetData = null;
+        }
+
+        // Chỉ kích hoạt hiệu ứng cửa trượt khi thực sự chuyển sang trang khác, 
+        // VÀ trang nguồn lẫn trang đích KHÔNG phải là trang chi tiết phòng (room-detail)
+        if (targetPage !== currentPage && targetPage !== 'room-detail' && currentPage !== 'room-detail') {
+            setTransitionState({
+                isTransitioning: true,
+                stage: 'closing'
+            });
+
+            // Giai đoạn 1: Đợi 2 cánh cửa đóng khít (700ms - khớp với thời lượng trượt expo-out mới)
+            setTimeout(() => {
+                setTransitionState(prev => ({ ...prev, stage: 'closed' }));
+
+                // Giai đoạn 2: Thay đổi trang và cuộn tức thì (instant) bên dưới cánh cửa đã đóng kín
+                setCurrentPage(targetPage);
+                setPageData(targetData);
+                window.scrollTo({ top: 0, behavior: 'instant' });
+
+                // --- SLUG ROUTING LOGIC (Cập nhật URL tức thời khi cửa đã đóng) ---
+                if (targetPage === 'home') {
+                    window.history.pushState(null, '', '/');
+                } else if (['login', 'register', 'profile', 'dashboard'].includes(targetPage)) {
+                    window.history.pushState(null, '', `/${targetPage}`);
+                }
+
+                // Giai đoạn 3: Giữ spinner hiển thị thêm 800ms (tăng 0.3s) cho cảm giác tải trang tự nhiên
+                setTimeout(() => {
+                    setTransitionState(prev => ({ ...prev, stage: 'opening' }));
+
+                    // Giai đoạn 4: Dọn dẹp trạng thái sau khi cửa mở hoàn toàn (700ms - khớp với ease-in-out mới)
+                    setTimeout(() => {
+                        setTransitionState({
+                            isTransitioning: false,
+                            stage: 'idle'
+                        });
+                    }, 700);
+                }, 800);
+            }, 700);
+        } else {
+            // Không sử dụng hiệu ứng cửa trượt (ví dụ: trigger xem chi tiết phòng hoặc đóng chi tiết phòng về trang chủ)
+            // Khôi phục hoàn toàn cơ chế chuyển động trượt lên/xuống (slide up/down overlay modal) nguyên bản
+            if (currentPage === 'room-detail' && targetPage !== 'room-detail') {
+                setIsClosing(true);
+                setTimeout(() => {
+                    setIsClosing(false);
+                    setCurrentPage(targetPage);
+                    setPageData(targetData);
+
+                    // Cuộn lên đầu khi trở về trang chính từ modal chi tiết
+                    if (targetPage !== 'home') {
+                        window.scrollTo({ top: 0, behavior: 'instant' });
+                    }
+
+                    // Cập nhật URL
+                    const url = targetPage === 'home' ? '/' : `/${targetPage}`;
+                    window.history.pushState(null, '', url);
+                }, 250); // Khớp thời lượng hoạt ảnh trượt xuống của modal
+                return;
+            }
+
+            // Chỉ cuộn mượt khi chuyển giữa các trang lớn thông thường không qua cửa trượt
+            if (targetPage !== 'room-detail') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Cập nhật slug định tuyến
+            if (targetPage === 'room-detail' && targetData?.slug) {
+                window.history.pushState(null, '', `/${targetData.slug}`);
+            } else if (targetPage === 'home') {
+                window.history.pushState(null, '', '/');
+            } else if (['login', 'register', 'profile', 'dashboard'].includes(targetPage)) {
+                window.history.pushState(null, '', `/${targetPage}`);
+            }
+
+            setCurrentPage(targetPage);
+            setPageData(targetData);
+        }
+    };
+
     useEffect(() => {
         // Check current session
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -68,128 +184,101 @@ export default function App() {
         }
     }, [authLoaded, user, currentPage]);
 
-
-    const navigate = (page, data = null) => {
-        // Auth Check for Protected Routes
-        if (['profile', 'dashboard'].includes(page) && !user) {
-            navigate('login');
-            return;
-        }
-
-        // Draft Check for Room Detail
-        if (page === 'room-detail' && data?.status === 'draft') {
-            showModal({
-                title: "Thông báo",
-                message: "Phòng không tồn tại, có vẻ chủ bài đăng đã gỡ công khai hoặc phòng đã có người thuê",
-                type: "warning"
-            });
-            return;
-        }
-
-        // Exit animation logic for modal (Room Detail)
-        if (currentPage === 'room-detail' && page !== 'room-detail') {
-            setIsClosing(true);
-
-            // Determine where we actually want to go
-            let targetPage = page;
-            let targetData = data;
-
-            if (page === 'back') {
-                targetPage = pageData?.fromProfile ? 'profile' : 'home';
-                targetData = null;
-            }
-
-            setTimeout(() => {
-                setIsClosing(false);
-                setCurrentPage(targetPage);
-                setPageData(targetData);
-
-                // Scroll to top when moving to a new major page from a modal
-                if (targetPage !== 'home') {
-                    window.scrollTo({ top: 0, behavior: 'instant' });
-                }
-
-                // Update URL
-                const url = targetPage === 'home' ? '/' : `/${targetPage}`;
-                window.history.pushState(null, '', url);
-            }, 250); // Match animation duration
-            return;
-        }
-
-
-        // Only scroll to top for "major" page changes (login, register, home, profile)
-        // but NOT when we are just opening/closing the Room Detail modal overlay.
-        if (page !== 'room-detail') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // --- SLUG ROUTING LOGIC ---
-        if (page === 'room-detail' && data?.slug) {
-            window.history.pushState(null, '', `/${data.slug}`);
-        } else if (page === 'home') {
-            window.history.pushState(null, '', '/');
-        } else if (['login', 'register', 'profile', 'dashboard'].includes(page)) {
-            window.history.pushState(null, '', `/${page}`);
-        }
-
-        setCurrentPage(page);
-        setPageData(data);
-    };
-
-    // Handle initial URL and Back/Forward buttons
+    // Xử lý tải URL ban đầu và các nút Back/Forward của trình duyệt
     useEffect(() => {
-        const handleLocationChange = async () => {
-            const path = window.location.pathname.slice(1); // Remove leading /
+        const handleLocationChange = async (isPopstate = false) => {
+            const path = window.location.pathname.slice(1); // Loại bỏ dấu gạch chéo đầu tiên
 
-            if (!path) {
-                setCurrentPage('home');
-                setPageData(null);
-                return;
-            }
-
-            if (['login', 'register', 'profile', 'dashboard'].includes(path)) {
-                setCurrentPage(path);
-                return;
-            }
-
-            // Assume it's a room slug
-            try {
-                // Fetch room along with its owner profile
-                const { data: room, error } = await supabase
-                    .from('rooms')
-                    .select('*, profiles(*)')
-                    .eq('slug', path)
-                    .single();
-
-                if (room && !error) {
-                    if (room.status === 'draft') {
-                        showModal({
-                            title: "Thông báo",
-                            message: "Phòng không tồn tại, có vẻ chủ bài đăng đã gỡ công khai hoặc phòng đã có người thuê",
-                            type: "warning"
-                        });
-                        setCurrentPage('home');
-                        window.history.pushState(null, '', '/');
-                    } else {
-                        const mappedRoom = mapSupabaseRoom(room);
-                        setCurrentPage('room-detail');
-                        setPageData(mappedRoom);
-                    }
-                } else {
-                    // Fallback to home if slug not found
+            const performSwap = async () => {
+                if (!path) {
                     setCurrentPage('home');
+                    setPageData(null);
+                    return;
                 }
-            } catch (err) {
-                console.error('Error fetching room by slug:', err);
-                setCurrentPage('home');
+
+                if (['login', 'register', 'profile', 'dashboard'].includes(path)) {
+                    setCurrentPage(path);
+                    setPageData(null);
+                    return;
+                }
+
+                // Giả định đó là một room slug
+                try {
+                    const { data: room, error } = await supabase
+                        .from('rooms')
+                        .select('*, profiles(*)')
+                        .eq('slug', path)
+                        .single();
+
+                    if (room && !error) {
+                        if (room.status === 'draft') {
+                            showModal({
+                                title: "Thông báo",
+                                message: "Phòng không tồn tại, có vẻ chủ bài đăng đã gỡ công khai hoặc phòng đã có người thuê",
+                                type: "warning"
+                            });
+                            setCurrentPage('home');
+                            window.history.pushState(null, '', '/');
+                        } else {
+                            const mappedRoom = mapSupabaseRoom(room);
+                            setCurrentPage('room-detail');
+                            setPageData(mappedRoom);
+                        }
+                    } else {
+                        // Fallback về trang chủ nếu không tìm thấy slug
+                        setCurrentPage('home');
+                        setPageData(null);
+                    }
+                } catch (err) {
+                    console.error('Error fetching room by slug:', err);
+                    setCurrentPage('home');
+                    setPageData(null);
+                }
+            };
+
+            // Xác định xem trang mới (target) hoặc trang hiện tại (current) có phải là room-detail không
+            const isTargetRoomDetail = !['', 'login', 'register', 'profile', 'dashboard'].includes(path);
+            const isCurrentRoomDetail = currentPage === 'room-detail';
+
+            // Nếu đây là popstate (Back/Forward trình duyệt) và không phải lần tải đầu tiên, và không liên quan đến chi tiết phòng
+            // thì mới kích hoạt hiệu ứng cửa trượt tự động
+            if (isPopstate && !isInitialLoad.current && !isTargetRoomDetail && !isCurrentRoomDetail) {
+                setTransitionState({
+                    isTransitioning: true,
+                    stage: 'closing'
+                });
+
+                // Chờ cửa khép lại hoàn chỉnh mới thực hiện swap dữ liệu ngầm (700ms)
+                setTimeout(async () => {
+                    setTransitionState(prev => ({ ...prev, stage: 'closed' }));
+
+                    await performSwap();
+                    window.scrollTo({ top: 0, behavior: 'instant' });
+
+                    setTimeout(() => {
+                        setTransitionState(prev => ({ ...prev, stage: 'opening' }));
+
+                        setTimeout(() => {
+                            setTransitionState({
+                                isTransitioning: false,
+                                stage: 'idle'
+                            });
+                        }, 700);
+                    }, 800);
+                }, 700);
+            } else {
+                // Tải trang lần đầu tiên: Chạy trực tiếp tức thì không qua cửa trượt
+                await performSwap();
+                isInitialLoad.current = false;
             }
         };
 
-        handleLocationChange();
+        handleLocationChange(false);
 
-        // Listen for back/forward buttons
-        window.addEventListener('popstate', handleLocationChange);
-        return () => window.removeEventListener('popstate', handleLocationChange);
+        // Lắng nghe sự kiện nút Back/Forward trình duyệt
+        const onPopState = () => handleLocationChange(true);
+        window.addEventListener('popstate', onPopState);
+        return () => window.removeEventListener('popstate', onPopState);
     }, []);
 
     const showLayout = !PAGES_WITHOUT_LAYOUT.includes(currentPage);
@@ -273,6 +362,9 @@ export default function App() {
 
                     {/* Global Toast Container */}
                     <ToastContainer />
+
+                    {/* Hiệu ứng chuyển trang cửa trượt tự động màu trắng */}
+                    <PageTransition stage={transitionState.stage} isTransitioning={transitionState.isTransitioning} />
                 </RoomFilterProvider>
             </FavoritesProvider>
         </NotificationProvider>

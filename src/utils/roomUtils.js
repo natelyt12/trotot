@@ -1,4 +1,4 @@
-import { moveRoomToDraft as serviceMoveRoomToDraft, draftAllUserRooms as serviceDraftAllUserRooms } from '../data/rooms.js';
+import { moveRoomToDraft as serviceMoveRoomToDraft, draftAllUserRooms as serviceDraftAllUserRooms } from '../services/roomService.js';
 
 /**
  * Move a single room to draft status and reset verification.

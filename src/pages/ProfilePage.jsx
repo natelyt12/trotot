@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useModal } from '../context/ModalContext';
 import { useNotification } from '../context/NotificationContext';
-import { signIn, signOut } from '../data/auth.js';
-import { getUserProfile, updateUserProfile, updateUserAuth, uploadAvatar, getAvatarPublicUrl, removeAvatar, deleteUserAccount } from '../data/profile.js';
-import { getRoomsByIds } from '../data/rooms.js';
-import { getUserCommentedRooms } from '../data/comments.js';
+import { signIn, signOut } from '../services/authService.js';
+import { getUserProfile, updateUserProfile, updateUserAuth, uploadAvatar, getAvatarPublicUrl, removeAvatar, deleteUserAccount } from '../services/profileService.js';
+import { getRoomsByIds } from '../services/roomService.js';
+import { getUserCommentedRooms } from '../services/commentService.js';
 import AppIcon from '../components/common/AppIcon.jsx';
 import { useFavorites } from '../context/FavoritesContext.jsx';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
 import { formatPrice } from '../utils/formatters.js';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
-import { compressImage, deleteFromCloudinary, cropImageToSquare } from '../utils/imageUtils';
+import { deleteFromCloudinary, cropImageToSquare } from '../utils/imageUtils';
 import { draftAllUserRooms } from '../utils/roomUtils.js';
+import VerificationForm from '../components/auth/VerificationForm.jsx';
 
 
 /* ============================================
@@ -46,6 +47,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
     const [deletePassword, setDeletePassword] = useState('');
 
     const [activeTab, setActiveTab] = useState(initialData?.tab || 'info');
+    const [showVerification, setShowVerification] = useState(false);
 
 
     // Fetch latest profile from database
@@ -114,7 +116,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                 setLoadingSaved(true);
                 try {
                     const { data, error } = await getRoomsByIds(favorites);
- 
+
                     if (error) throw error;
                     setSavedRooms(data.map(mapSupabaseRoom));
                 } catch (err) {
@@ -179,9 +181,43 @@ export default function ProfilePage({ user, navigate, initialData }) {
         });
     };
 
+    const performUpdate = async (shouldDraftRooms) => {
+        setLoading(true);
+        try {
+            const { error } = await updateUserAuth({
+                data: {
+                    full_name: formData.full_name,
+                    role: formData.role,
+                    phone: formData.phone,
+                    avatar_url: formData.avatar_url
+                }
+            });
+            if (error) throw error;
+
+            const { error: profileError } = await updateUserProfile(user.id, {
+                full_name: formData.full_name,
+                phone: formData.phone,
+                role: formData.role
+            });
+            if (profileError) throw profileError;
+
+            if (shouldDraftRooms) {
+                const { error: roomsError } = await draftAllUserRooms(user.id);
+                if (roomsError) throw roomsError;
+                addNotification('Đã chuyển vai trò và chuyển tất cả tin đăng về bản nháp (đã hủy kiểm duyệt)!', 'success');
+            } else {
+                addNotification('Cập nhật thông tin thành công!', 'success');
+            }
+        } catch (err) {
+            addNotification(err.message, 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleUpdateProfile = async (e) => {
         e.preventDefault();
-        
+
         if (!formData.full_name?.trim()) {
             addNotification('Vui lòng nhập họ tên của bạn.', 'error');
             return;
@@ -198,55 +234,34 @@ export default function ProfilePage({ user, navigate, initialData }) {
 
         const oldRole = user?.user_metadata?.role || 'tenant';
         const newRole = formData.role;
-        
-        const performUpdate = async (shouldDraftRooms) => {
-            setLoading(true);
-            try {
-                const { error } = await updateUserAuth({
-                    data: { 
-                        full_name: formData.full_name, 
-                        role: formData.role,
-                        phone: formData.phone,
-                        avatar_url: formData.avatar_url
-                    }
-                });
-                if (error) throw error;
 
-                const { error: profileError } = await updateUserProfile(user.id, {
-                    full_name: formData.full_name,
-                    phone: formData.phone,
-                    role: formData.role
-                });
-                if (profileError) throw profileError;
-
-                if (shouldDraftRooms) {
-                    const { error: roomsError } = await draftAllUserRooms(user.id);
-                    
-                    if (roomsError) throw roomsError;
-                    addNotification('Đã chuyển vai trò và chuyển tất cả tin đăng về bản nháp (đã hủy kiểm duyệt)!', 'success');
+        // Always show confirmation modal first
+        showModal({
+            title: 'Xác nhận thay đổi',
+            message: 'Bạn có chắc chắn muốn lưu các thay đổi đối với thông tin cá nhân của mình không?',
+            type: 'warning',
+            confirmText: 'Xác nhận',
+            cancelText: 'Hủy',
+            onConfirm: () => {
+                if (oldRole === 'tenant' && (newRole === 'landlord' || newRole === 'agent')) {
+                    // Trigger KYC flow in ProfilePage
+                    setShowVerification(true);
+                } else if (newRole === 'tenant' && (oldRole === 'landlord' || oldRole === 'agent')) {
+                    // Trigger role downgrade warning confirmation
+                    showModal({
+                        title: 'Xác nhận chuyển vai trò',
+                        message: 'Nếu bạn chuyển về Người thuê, tất cả tin đăng hiện tại của bạn sẽ bị tạm ẩn (chuyển về trạng thái Nháp). Bạn có chắc chắn muốn tiếp tục?',
+                        type: 'warning',
+                        confirmText: 'Xác nhận',
+                        cancelText: 'Hủy',
+                        onConfirm: () => performUpdate(true)
+                    });
                 } else {
-                    addNotification('Cập nhật thông tin thành công!', 'success');
+                    // Standard update
+                    performUpdate(false);
                 }
-            } catch (err) {
-                addNotification(err.message, 'error');
-            } finally {
-                setLoading(false);
             }
-        };
-
-        if (newRole === 'tenant' && (oldRole === 'landlord' || oldRole === 'agent')) {
-            showModal({
-                title: 'Xác nhận chuyển vai trò',
-                message: 'Nếu bạn chuyển về Người thuê, tất cả tin đăng hiện tại của bạn sẽ bị tạm ẩn (chuyển về trạng thái Nháp). Bạn có chắc chắn muốn tiếp tục?',
-                type: 'warning',
-                confirmText: 'Xác nhận',
-                cancelText: 'Hủy',
-                onConfirm: () => performUpdate(true)
-            });
-            return;
-        }
-
-        performUpdate(false);
+        });
     };
 
     const handleAvatarUpload = async (e) => {
@@ -328,7 +343,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
                         const oldPath = urlParts[1].split('?')[0];
                         if (oldPath.startsWith(`${user.id}/`)) {
                             const { error: removeError } = await removeAvatar(oldPath);
-                            
+
                             if (removeError) {
                                 console.error('Lỗi khi xóa ảnh cũ từ storage:', removeError);
                             }
@@ -385,6 +400,28 @@ export default function ProfilePage({ user, navigate, initialData }) {
                     const { error: authError } = await signIn(user.email, deletePassword);
                     if (authError) throw new Error('Mật khẩu xác nhận không chính xác.');
 
+                    // 1. Xóa ảnh đại diện (avatar) khỏi storage (Cloudinary hoặc Supabase) trước khi xóa tài khoản
+                    // Việc này cần thực hiện khi người dùng vẫn còn phiên đăng nhập để có quyền xóa tệp
+                    const avatarUrl = formData.avatar_url;
+                    if (avatarUrl) {
+                        try {
+                            if (avatarUrl.includes("res.cloudinary.com")) {
+                                await deleteFromCloudinary(avatarUrl);
+                            } else {
+                                const urlParts = avatarUrl.split('/user_avatar/');
+                                if (urlParts.length > 1) {
+                                    const path = urlParts[1].split('?')[0];
+                                    if (path.startsWith(`${user.id}/`)) {
+                                        await removeAvatar(path);
+                                    }
+                                }
+                            }
+                        } catch (avatarErr) {
+                            console.error('Lỗi khi xóa ảnh đại diện khi xóa tài khoản:', avatarErr);
+                        }
+                    }
+
+                    // 2. Gọi API xóa tài khoản trong DB (Profiles & Auth Users)
                     const { error } = await deleteUserAccount();
                     if (error) throw error;
 
@@ -528,70 +565,84 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                 <div className="animate-fade-in">
                                     <TabHeader icon="user" title="Thông tin cá nhân" />
 
-                                    <form onSubmit={handleUpdateProfile} className="flex flex-col gap-6">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <Field label="Tên người dùng" required>
-                                                <input
-                                                    type="text"
-                                                    className={inputCls}
-                                                    value={formData.full_name}
-                                                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                                                    placeholder="Nhập họ tên của bạn"
-                                                    required
-                                                />
-                                            </Field>
-                                            <Field label="Email (Cố định)">
-                                                <input
-                                                    type="text"
-                                                    className={`${inputCls} bg-stone-50 text-stone-500 cursor-not-allowed`}
-                                                    value={user?.email || ''}
-                                                    disabled
-                                                />
-                                            </Field>
-                                            <Field label="Số điện thoại" required>
-                                                <input
-                                                    type="tel"
-                                                    className={inputCls}
-                                                    value={formData.phone}
-                                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                    placeholder="09xx xxx xxx"
-                                                    required
-                                                />
-                                            </Field>
+                                    {showVerification ? (
+                                        <div className="max-w-md mx-auto bg-white border border-stone-200 rounded-2xl p-6 md:p-8">
+                                            <VerificationForm
+                                                role={formData.role}
+                                                loading={loading}
+                                                onBack={() => setShowVerification(false)}
+                                                onSubmit={() => {
+                                                    performUpdate(false);
+                                                    setShowVerification(false);
+                                                }}
+                                            />
                                         </div>
-
-                                        <Field label="Vai trò của bạn">
-                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                                {[
-                                                    { id: 'tenant', label: 'Người thuê' },
-                                                    { id: 'agent', label: 'Môi giới' },
-                                                    { id: 'landlord', label: 'Bên cho thuê' },
-                                                ].map((opt) => (
-                                                    <button
-                                                        key={opt.id}
-                                                        type="button"
-                                                        onClick={() => setFormData({ ...formData, role: opt.id })}
-                                                        className={`py-3 rounded-lg border-2 font-bold text-sm cursor-pointer transition-all duration-200 ${formData.role === opt.id
-                                                            ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                                            : 'border-stone-100 bg-white text-stone-500 hover:bg-stone-50 hover:border-stone-200'
-                                                            }`}
-                                                    >
-                                                        {opt.label}
-                                                    </button>
-                                                ))}
+                                    ) : (
+                                        <form onSubmit={handleUpdateProfile} className="flex flex-col gap-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <Field label="Tên người dùng" required>
+                                                    <input
+                                                        type="text"
+                                                        className={inputCls}
+                                                        value={formData.full_name}
+                                                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                                        placeholder="Nhập họ tên của bạn"
+                                                        required
+                                                    />
+                                                </Field>
+                                                <Field label="Email (Cố định)">
+                                                    <input
+                                                        type="text"
+                                                        className={`${inputCls} bg-stone-50 text-stone-500 cursor-not-allowed`}
+                                                        value={user?.email || ''}
+                                                        disabled
+                                                    />
+                                                </Field>
+                                                <Field label="Số điện thoại" required>
+                                                    <input
+                                                        type="tel"
+                                                        className={inputCls}
+                                                        value={formData.phone}
+                                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                                        placeholder="09xx xxx xxx"
+                                                        required
+                                                    />
+                                                </Field>
                                             </div>
-                                        </Field>
 
-                                        <div className="pt-4 flex justify-end">
-                                            <button
-                                                type="submit"
-                                                disabled={loading}
-                                                className="bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold px-10 py-3 rounded-full! cursor-pointer border-none transition-colors duration-200 shadow-md shadow-amber-200"
-                                            >
-                                                {loading ? 'Đang cập nhật...' : 'Lưu thay đổi'}
-                                            </button>
-                                        </div>
-                                    </form>
+                                            <Field label="Vai trò của bạn">
+                                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                    {[
+                                                        { id: 'tenant', label: 'Người thuê' },
+                                                        { id: 'agent', label: 'Môi giới' },
+                                                        { id: 'landlord', label: 'Bên cho thuê' },
+                                                    ].map((opt) => (
+                                                        <button
+                                                            key={opt.id}
+                                                            type="button"
+                                                            onClick={() => setFormData({ ...formData, role: opt.id })}
+                                                            className={`py-3 rounded-lg border-2 font-bold text-sm cursor-pointer transition-all duration-200 ${formData.role === opt.id
+                                                                ? 'border-amber-500 bg-amber-50 text-amber-700'
+                                                                : 'border-stone-100 bg-white text-stone-500 hover:bg-stone-50 hover:border-stone-200'
+                                                                }`}
+                                                        >
+                                                            {opt.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </Field>
+
+                                            <div className="pt-4 flex justify-end">
+                                                <button
+                                                    type="submit"
+                                                    disabled={loading}
+                                                    className="bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold px-10 py-3 rounded-full! cursor-pointer border-none transition-colors duration-200 shadow-md shadow-amber-200"
+                                                >
+                                                    {loading ? 'Đang cập nhật...' : 'Lưu thay đổi'}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
                                 </div>
                             )}
 

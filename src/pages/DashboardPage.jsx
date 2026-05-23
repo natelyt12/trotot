@@ -1,199 +1,37 @@
-import { useState, useEffect } from 'react';
-import { useModal } from '../context/ModalContext';
-import { useNotification } from '../context/NotificationContext.jsx';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import AppIcon from '../components/common/AppIcon.jsx';
 import RoomPostForm from '../components/dashboard/RoomPostForm.jsx';
-import { getUserRooms, publishRoom, verifyRoomMock, deleteRoom, deleteRoomMedia } from '../data/rooms.js';
-import { formatPrice } from '../utils/formatters.js';
-import { mapSupabaseRoom } from '../utils/roomMapper.js';
-import { moveRoomToDraft } from '../utils/roomUtils.js';
+import ManageRoomsTab from '../components/dashboard/ManageRoomsTab.jsx';
 import RoomDetailPage from './RoomDetailPage.jsx';
-import { deleteFromCloudinary } from '../utils/imageUtils.js';
-import { validateRoomData } from '../utils/validation.js';
+import { useDashboard } from '../hooks/useDashboard.js';
 
 export default function DashboardPage({ user, navigate, initialData }) {
-    const { showModal } = useModal();
-    const { addNotification } = useNotification();
-    const [activeTab, setActiveTab] = useState(initialData?.tab || 'manage_rooms');
-    const [editingRoom, setEditingRoom] = useState(null);
-    const [isCreating, setIsCreating] = useState(false);
-    const [previewRoom, setPreviewRoom] = useState(null);
-    const [rooms, setRooms] = useState([]);
-    const [loadingRooms, setLoadingRooms] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [subTab, setSubTab] = useState('verified');
-
-    const handlePublishFromDraft = (room) => {
-        const errors = validateRoomData(room);
-
-        if (errors.length > 0) {
-            const errorMessage = "Không thể công khai tin đăng vì thiếu thông tin:\n" + errors.map(e => "\n• " + e).join("") + "\n\nVui lòng bấm vào Sửa để bổ sung.";
-            showModal({
-                title: 'Thiếu thông tin bắt buộc',
-                message: errorMessage,
-                type: 'error',
-                confirmText: 'Đã hiểu'
-            });
-            return;
-        }
-
-        showModal({
-            title: "Xác nhận công khai tin đăng",
-            message: "Bạn có chắc chắn muốn công khai tin đăng này? Hãy đảm bảo bạn đã kiểm tra kỹ các thông tin. Tin đăng của bạn sẽ được hệ thống kiểm duyệt trong vòng 24h trước khi hiển thị rộng rãi.",
-            type: "warning",
-            confirmText: "Công khai ngay",
-            cancelText: "Hủy",
-            onConfirm: async () => {
-                try {
-                    const { error } = await publishRoom(room.id);
-
-                    if (error) throw error;
-
-                    setRooms(rooms.map(r => r.id === room.id ? { ...r, status: 'available' } : r));
-                    addNotification('Tin đăng của bạn đã được gửi và đang chờ duyệt!', 'success');
-                    setSubTab('verified'); // Chuyển qua tab kiểm duyệt để thấy tin
-                } catch (err) {
-                    console.error("Lỗi khi công khai:", err);
-                    showModal({ title: 'Lỗi', message: 'Có lỗi xảy ra, không thể công khai tin.', type: 'error' });
-                }
-            }
-        });
-    };
-
-    const handleUnpublish = async (room) => {
-        const isVerified = room.is_verified;
-        const message = isVerified
-            ? 'Tin đăng này đã được kiểm duyệt. Nếu bạn gỡ công khai và chỉnh sửa, tin đăng có thể cần được kiểm duyệt lại. Bạn có chắc chắn muốn tiếp tục?'
-            : 'Bạn có chắc chắn muốn gỡ công khai tin đăng này? Tin đăng sẽ chuyển về trạng thái nháp.';
-
-        showModal({
-            title: 'Xác nhận gỡ công khai',
-            message: message,
-            type: 'warning',
-            confirmText: 'Gỡ công khai',
-            cancelText: 'Hủy',
-            onConfirm: async () => {
-                try {
-                    const { error } = await moveRoomToDraft(room.id);
-
-                    if (error) throw error;
-
-                    setRooms(rooms.map(r => r.id === room.id ? { ...r, status: 'draft', is_verified: false } : r));
-                    addNotification('Đã gỡ công khai tin đăng. Bạn có thể sửa nó trong phần Tin nháp.', 'success');
-                } catch (err) {
-                    console.error('Error unpublishing room:', err);
-                    showModal({ title: 'Lỗi', message: 'Không thể gỡ công khai tin đăng.', type: 'error' });
-                }
-            }
-        });
-    };
-
-    const handleMockVerify = async (room) => {
-        try {
-            const { error } = await verifyRoomMock(room.id);
-
-            if (error) throw error;
-
-            setRooms(rooms.map(r => r.id === room.id ? { ...r, is_verified: true } : r));
-            addNotification('Đã duyệt tin đăng thành công! (Mockup)', 'success');
-        } catch (err) {
-            console.error('Error verifying room:', err);
-            showModal({ title: 'Lỗi', message: 'Không thể duyệt tin đăng.', type: 'error' });
-        }
-    };
-
-    const ITEMS_PER_PAGE = 10;
-
-    const fetchUserRooms = async () => {
-        if (!user) return;
-        setLoadingRooms(true);
-        try {
-            const { data, error } = await getUserRooms(user.id);
-
-            if (error) throw error;
-            setRooms(data || []);
-            setCurrentPage(1);
-        } catch (err) {
-            console.error('Error fetching user rooms:', err);
-        } finally {
-            setLoadingRooms(false);
-        }
-    };
-
-
-
-    const handleDeleteRoom = (room) => {
-        showModal({
-            title: 'Xác nhận xóa',
-            message: `Bạn có chắc chắn muốn xóa tin đăng "${room.title}" không? Hành động này không thể hoàn tác.`,
-            type: 'warning',
-            confirmText: 'Xóa',
-            cancelText: 'Hủy',
-            onConfirm: async () => {
-                try {
-                    // Xóa tin đăng (Database sẽ tự động xóa dữ liệu liên quan nhờ Cascade Delete)
-                    const { data, error } = await deleteRoom(room.id);
-
-                    if (error) throw error;
-
-                    if (!data || data.length === 0) {
-                        showModal({
-                            title: 'Cảnh báo',
-                            message: 'Không thể xóa tin đăng. Có thể bạn không có quyền hoặc tin đã bị xóa trước đó.',
-                            type: 'warning'
-                        });
-                        return;
-                    }
-
-                    // Xóa ảnh trên Cloudinary hoặc Supabase storage nếu có
-                    const images = room.media_contact?.images;
-                    if (images && images.length > 0) {
-                        const pathsToDelete = [];
-                        for (const img of images) {
-                            if (img.url) {
-                                if (img.url.includes("res.cloudinary.com")) {
-                                    await deleteFromCloudinary(img.url);
-                                } else {
-                                    const parts = img.url.split('/room_media/');
-                                    if (parts.length > 1) {
-                                        const path = parts[1].split('?')[0];
-                                        if (path.startsWith(`${user.id}/`)) {
-                                            pathsToDelete.push(path);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (pathsToDelete.length > 0) {
-                            const { error: storageError } = await deleteRoomMedia(pathsToDelete);
-
-                            if (storageError) {
-                                console.error('Lỗi khi xóa ảnh từ storage:', storageError);
-                            }
-                        }
-                    }
-
-                    setRooms(rooms.filter(r => r.id !== room.id));
-
-                    addNotification('Xóa tin đăng thành công!', 'success');
-                } catch (err) {
-                    console.error('Error deleting room:', err);
-                    showModal({ title: 'Lỗi', message: `Có lỗi xảy ra khi xóa tin: ${err.message || 'Vui lòng thử lại!'}`, type: 'error' });
-                }
-            }
-        });
-    };
-
-    useEffect(() => {
-        setActiveTab(initialData?.tab || 'manage_rooms');
-    }, [initialData]);
-
-    useEffect(() => {
-        if (activeTab === 'manage_rooms') {
-            fetchUserRooms();
-        }
-    }, [activeTab, user?.id]);
+    const {
+        activeTab,
+        setActiveTab,
+        editingRoom,
+        setEditingRoom,
+        isCreating,
+        setIsCreating,
+        previewRoom,
+        setPreviewRoom,
+        rooms,
+        loadingRooms,
+        currentPage,
+        setCurrentPage,
+        subTab,
+        setSubTab,
+        handlePublishFromDraft,
+        handleUnpublish,
+        handleMockVerify,
+        handleDeleteRoom,
+        handleDuplicateRoom,
+        renewingRoom,
+        setRenewingRoom,
+        handleRenewRoom,
+        executeRenewal
+    } = useDashboard(user, initialData);
 
     const TAB_GROUPS = [
         {
@@ -201,7 +39,6 @@ export default function DashboardPage({ user, navigate, initialData }) {
             tabs: [
                 { id: 'manage_rooms', label: 'Quản lý tin đăng', icon: 'check-square' },
                 { id: 'post_room', label: 'Đăng / Sửa tin', icon: 'edit' },
-                // Thêm các tab khác trong tương lai như: Thống kê...
             ]
         }
     ];
@@ -270,260 +107,24 @@ export default function DashboardPage({ user, navigate, initialData }) {
 
                             {/* ---- TAB: MANAGE ROOMS ---- */}
                             {activeTab === 'manage_rooms' && (
-                                <div className="animate-fade-in">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-9 h-9 rounded-full flex items-center justify-center bg-amber-100 text-amber-600">
-                                            <AppIcon name="check-square" size={18} />
-                                        </div>
-                                        <h2
-                                            className="text-lg font-bold text-stone-900"
-                                            style={{ fontFamily: 'var(--font-heading)' }}
-                                        >
-                                            Quản lý tin đăng
-                                        </h2>
-                                    </div>
-                                    {/* Horizontal Tab Bar */}
-                                    <div className="flex border-b border-stone-200 mb-6 overflow-x-auto whitespace-nowrap">
-                                        <button
-                                            onClick={() => { setSubTab('verified'); setCurrentPage(1); }}
-                                            className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'verified' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
-                                        >
-                                            Tin đã kiểm duyệt
-                                        </button>
-                                        <button
-                                            onClick={() => { setSubTab('published'); setCurrentPage(1); }}
-                                            className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'published' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
-                                        >
-                                            Tin đã công khai
-                                        </button>
-                                        <button
-                                            onClick={() => { setSubTab('draft'); setCurrentPage(1); }}
-                                            className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'draft' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
-                                        >
-                                            Tin nháp
-                                        </button>
-                                    </div>
-
-                                    {loadingRooms ? (
-                                        <div className="text-center py-20 text-stone-500">Đang tải dữ liệu...</div>
-                                    ) : (() => {
-                                        const filteredRooms = rooms.filter(room => {
-                                            if (subTab === 'draft') {
-                                                return room.status === 'draft' || room.status === 'hidden';
-                                            }
-                                            if (subTab === 'verified') {
-                                                return room.status === 'available' && room.is_verified;
-                                            }
-                                            return room.status === 'available' && !room.is_verified;
-                                        });
-
-                                        if (filteredRooms.length === 0) {
-                                            return (
-                                                <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
-                                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 text-stone-300">
-                                                        <AppIcon name="home" size={32} />
-                                                    </div>
-                                                    <h3 className="text-lg font-bold text-stone-900 mb-2">
-                                                        {subTab === 'draft' ? 'Bạn chưa có bản nháp nào' :
-                                                            subTab === 'verified' ? 'Bạn chưa có tin nào được kiểm duyệt' :
-                                                                'Bạn chưa có tin đăng nào được công khai'}
-                                                    </h3>
-                                                    <p className="text-stone-500 text-sm max-w-sm px-6 mb-6">
-                                                        {subTab === 'draft' ? 'Các bản nháp sẽ xuất hiện ở đây khi bạn lưu tin.' :
-                                                            subTab === 'verified' ? 'Tin đăng của bạn sau khi được kiểm duyệt sẽ xuất hiện ở đây.' :
-                                                                'Bắt đầu tiếp cận khách hàng tiềm năng bằng cách đăng tin cho thuê phòng của bạn.'}
-                                                    </p>
-                                                    {subTab === 'draft' && (
-                                                        <button
-                                                            onClick={() => {
-                                                                setIsCreating(true);
-                                                                setEditingRoom(null);
-                                                                setActiveTab('post_room');
-                                                            }}
-                                                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2.5 px-6 rounded-full transition-colors cursor-pointer border-none shadow-lg shadow-amber-500/20"
-                                                        >
-                                                            Đăng tin ngay
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            );
-                                        }
-
-                                        return (
-                                            <div className="space-y-4">
-                                                {filteredRooms.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((room) => (
-                                                    <div key={room.id} className="flex flex-col p-4 border border-stone-100 rounded-xl hover:border-amber-300 transition-all bg-white group gap-3">
-                                                        {/* Nội dung bên trên */}
-                                                        <div className="flex flex-col md:flex-row gap-4">
-                                                            {/* Thumbnail */}
-                                                            <div className="w-full md:w-32 h-32 md:h-24 rounded-lg bg-stone-100 overflow-hidden shrink-0 relative">
-                                                                {room.media_contact?.images?.[0]?.url ? (
-                                                                    <img
-                                                                        src={room.media_contact.images[0].url}
-                                                                        alt={room.title}
-                                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                                        onError={(e) => { e.currentTarget.src = `../public/images/placeholder.png`; }}
-                                                                    />
-                                                                ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center text-stone-300">
-                                                                        <AppIcon name="home" size={24} />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Info */}
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="mb-1">
-                                                                    <h4 className="font-bold text-stone-900 text-[1rem] line-clamp-1 group-hover:text-amber-600 transition-colors">
-                                                                        {room.title}
-                                                                    </h4>
-                                                                </div>
-                                                                <div className="flex items-center gap-1.5 text-stone-500 text-[0.8rem] mb-1">
-                                                                    <AppIcon name="location" size={12} />
-                                                                    <span className="truncate">
-                                                                        {[room.address, room.ward, room.district].filter(Boolean).join(', ') || 'Chưa cập nhật'}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="text-amber-600 font-bold text-[0.9rem]">
-                                                                    {room.price_monthly === 0 ? 'Chưa cập nhật giá' : formatPrice(room.price_monthly)}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Action Bar bên dưới */}
-                                                        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-stone-100 pt-3">
-                                                            {/* Badges bên trái */}
-                                                            <div className="flex items-center gap-1.5">
-                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase ${room.status === 'available' ? 'bg-green-50 text-green-600' :
-                                                                    room.status === 'hidden' ? 'bg-amber-50 text-amber-600' :
-                                                                        room.status === 'expired' ? 'bg-red-50 text-red-600' :
-                                                                            'bg-stone-50 text-stone-500'
-                                                                    }`}>
-                                                                    {room.status === 'available' ? 'Đã công khai' :
-                                                                        room.status === 'hidden' ? 'Đã ẩn' :
-                                                                            room.status === 'expired' ? 'Hết hạn' :
-                                                                                room.status === 'draft' ? 'Bản nháp' :
-                                                                                    room.status}
-                                                                </span>
-                                                                {room.is_verified && room.status === 'available' && (
-                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase bg-blue-50 text-blue-600">
-                                                                        Đã kiểm duyệt
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Buttons bên phải */}
-                                                            <div className="flex flex-wrap items-center gap-2">
-                                                                <button
-                                                                    onClick={() => setPreviewRoom(mapSupabaseRoom(room))}
-                                                                    className="flex items-center gap-1 px-3 py-1.5 border border-stone-200 rounded-full text-[0.75rem] font-bold text-stone-600 hover:bg-stone-50 hover:text-stone-900 cursor-pointer transition-colors"
-                                                                >
-                                                                    <AppIcon name="eye" size={12} />
-                                                                    Xem trước
-                                                                </button>
-
-                                                                {subTab === 'published' && (
-                                                                    <button
-                                                                        onClick={() => handleMockVerify(room)}
-                                                                        className="flex items-center gap-1 px-3 py-1.5 border border-blue-200 bg-blue-50 rounded-full text-[0.75rem] font-bold text-blue-600 hover:bg-blue-100 cursor-pointer transition-colors"
-                                                                    >
-                                                                        <AppIcon name="verified" size={12} strokeWidth={2.5} />
-                                                                        Duyệt tin (Mock)
-                                                                    </button>
-                                                                )}
-
-                                                                {subTab === 'published' || subTab === 'verified' ? (
-                                                                    <button
-                                                                        onClick={() => handleUnpublish(room)}
-                                                                        className="flex items-center gap-1 px-3 py-1.5 border border-amber-200 bg-amber-50 rounded-full text-[0.75rem] font-bold text-amber-600 hover:bg-amber-100 cursor-pointer transition-colors"
-                                                                    >
-                                                                        <AppIcon name="eye-off" size={12} />
-                                                                        Gỡ công khai
-                                                                    </button>
-                                                                ) : (
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setEditingRoom(room);
-                                                                            setIsCreating(false);
-                                                                            setActiveTab('post_room');
-                                                                        }}
-                                                                        className="flex items-center gap-1 px-3 py-1.5 border border-stone-200 rounded-full text-[0.75rem] font-bold text-stone-600 hover:bg-stone-50 hover:text-stone-900 cursor-pointer transition-colors"
-                                                                    >
-                                                                        <AppIcon name="edit" size={12} />
-                                                                        Sửa
-                                                                    </button>
-                                                                )}
-
-                                                                {subTab === 'draft' && (
-                                                                    <>
-                                                                        <button
-                                                                            onClick={() => handlePublishFromDraft(room)}
-                                                                            className="flex items-center gap-1 px-3 py-1.5 border border-green-200 bg-green-50 rounded-full text-[0.75rem] font-bold text-green-600 hover:bg-green-100 cursor-pointer transition-colors"
-                                                                        >
-                                                                            <AppIcon name="check" size={12} />
-                                                                            Công khai
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => handleDeleteRoom(room)}
-                                                                            className="flex items-center gap-1 px-3 py-1.5 border border-red-100 bg-red-50 rounded-full text-[0.75rem] font-bold text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
-                                                                        >
-                                                                            <AppIcon name="trash" size={12} />
-                                                                            Xóa
-                                                                        </button>
-                                                                    </>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-
-                                                {/* Pagination */}
-                                                {Math.ceil(filteredRooms.length / ITEMS_PER_PAGE) > 1 && (
-                                                    <div className="flex items-center justify-center gap-2 mt-6">
-                                                        <button
-                                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                                            disabled={currentPage === 1}
-                                                            className="w-8 h-8 flex items-center justify-center rounded-full border border-stone-200 text-stone-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 transition-colors cursor-pointer"
-                                                        >
-                                                            <AppIcon name="chevronLeft" size={12} strokeWidth={3.5} />
-                                                        </button>
-
-                                                        {(() => {
-                                                            const totalPages = Math.ceil(filteredRooms.length / ITEMS_PER_PAGE);
-                                                            let startPage = Math.max(1, currentPage - 5);
-                                                            let endPage = Math.min(totalPages, startPage + 9);
-                                                            if (endPage - startPage < 9) {
-                                                                startPage = Math.max(1, endPage - 9);
-                                                            }
-                                                            const pages = [];
-                                                            for (let i = startPage; i <= endPage; i++) {
-                                                                pages.push(i);
-                                                            }
-                                                            return pages.map((pageNum) => (
-                                                                <button
-                                                                    key={pageNum}
-                                                                    onClick={() => setCurrentPage(pageNum)}
-                                                                    className={`w-8 h-8 flex items-center justify-center rounded-full border text-sm font-bold transition-colors cursor-pointer ${currentPage === pageNum ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-stone-200 text-stone-600 hover:bg-stone-50'
-                                                                        }`}
-                                                                >
-                                                                    {pageNum}
-                                                                </button>
-                                                            ));
-                                                        })()}
-
-                                                        <button
-                                                            onClick={() => setCurrentPage(prev => Math.min(Math.ceil(filteredRooms.length / ITEMS_PER_PAGE), prev + 1))}
-                                                            disabled={currentPage === Math.ceil(filteredRooms.length / ITEMS_PER_PAGE)}
-                                                            className="w-8 h-8 flex items-center justify-center rounded-full border border-stone-200 text-stone-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-50 transition-colors cursor-pointer"
-                                                        >
-                                                            <AppIcon name="chevronRight" size={12} strokeWidth={3.5} />
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })()}
-                                </div>
+                                <ManageRoomsTab
+                                    rooms={rooms}
+                                    loadingRooms={loadingRooms}
+                                    currentPage={currentPage}
+                                    setCurrentPage={setCurrentPage}
+                                    subTab={subTab}
+                                    setSubTab={setSubTab}
+                                    handlePublishFromDraft={handlePublishFromDraft}
+                                    handleUnpublish={handleUnpublish}
+                                    handleMockVerify={handleMockVerify}
+                                    handleDeleteRoom={handleDeleteRoom}
+                                    handleDuplicateRoom={handleDuplicateRoom}
+                                    setPreviewRoom={setPreviewRoom}
+                                    setEditingRoom={setEditingRoom}
+                                    setIsCreating={setIsCreating}
+                                    setActiveTab={setActiveTab}
+                                    handleRenewRoom={handleRenewRoom}
+                                />
                             )}
 
                             {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}
@@ -579,6 +180,145 @@ export default function DashboardPage({ user, navigate, initialData }) {
                     />
                 </div>
             )}
+            <AnimatePresence>
+                {renewingRoom && (
+                    <RenewPostModal
+                        room={renewingRoom}
+                        onClose={() => setRenewingRoom(null)}
+                        onConfirm={(days) => executeRenewal(renewingRoom, days)}
+                    />
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
+
+/* ============================================
+   RenewPostModal Component - Premium design
+   ============================================ */
+function RenewPostModal({ room, onClose, onConfirm }) {
+    const [selectedDays, setSelectedDays] = useState(15);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const RENEW_OPTIONS = [
+        { days: 7, label: '7 Ngày', price: 'Miễn phí' },
+        { days: 15, label: '15 Ngày', price: 'Miễn phí', popular: true },
+        { days: 30, label: '30 Ngày', price: 'Miễn phí' }
+    ];
+
+    const getNewExpiryDate = () => {
+        const date = new Date();
+        date.setDate(date.getDate() + selectedDays);
+        return date.toLocaleDateString('vi-VN');
+    };
+
+    const handleConfirm = async () => {
+        setIsSubmitting(true);
+        await onConfirm(selectedDays);
+        setIsSubmitting(false);
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+                className="absolute inset-0 bg-stone-900/60 backdrop-blur-xs"
+            />
+
+            {/* Modal Body */}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md border border-stone-100 p-6 md:p-8 overflow-hidden z-10"
+            >
+                <div className="flex items-center justify-between border-b border-stone-100 pb-4 mb-6">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                            <AppIcon name="calendar" size={18} />
+                        </div>
+                        <h3 className="text-lg font-bold text-stone-900 font-heading">Gia hạn tin đăng</h3>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="text-stone-400 hover:text-stone-600 transition-colors border-none bg-transparent cursor-pointer p-1"
+                    >
+                        <AppIcon name="plus" size={18} className="rotate-45" />
+                    </button>
+                </div>
+
+                <div className="space-y-4 mb-6">
+                    <p className="text-sm text-stone-600 leading-relaxed">
+                        Bạn đang gia hạn hiển thị cho tin trọ: <br />
+                        <span className="font-bold text-stone-900">"{room.title}"</span>
+                    </p>
+
+                    <div>
+                        <label className="block text-[0.7rem] font-bold text-stone-400 uppercase tracking-wider mb-2.5">Chọn gói gia hạn hiển thị</label>
+                        <div className="grid grid-cols-3 gap-3">
+                            {RENEW_OPTIONS.map((opt) => (
+                                <button
+                                    key={opt.days}
+                                    type="button"
+                                    onClick={() => setSelectedDays(opt.days)}
+                                    className={`relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                                        selectedDays === opt.days
+                                            ? 'border-amber-500 bg-amber-50/50 text-amber-900'
+                                            : 'border-stone-200 hover:border-stone-300 bg-white text-stone-600'
+                                    }`}
+                                >
+                                    {opt.popular && (
+                                        <span className="absolute -top-2.5 bg-amber-500 text-white text-[0.55rem] font-bold px-1.5 py-0.5 rounded-full border border-white shadow-xs">
+                                            Phổ biến
+                                        </span>
+                                    )}
+                                    <span className="text-sm font-black tracking-tight">{opt.label}</span>
+                                    <span className="text-[0.65rem] text-stone-400 font-medium mt-1 uppercase">{opt.price}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-stone-50 border border-stone-100 rounded-xl p-4 space-y-2">
+                        <div className="flex justify-between text-xs text-stone-500">
+                            <span>Thời hạn mới:</span>
+                            <span className="font-bold text-stone-800">{getNewExpiryDate()}</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-stone-500">
+                            <span>Trạng thái sau gia hạn:</span>
+                            <span className="font-bold text-green-600 uppercase">Hoạt động (Còn phòng)</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-2 text-stone-500 text-[0.7rem] leading-relaxed bg-amber-50/40 p-3 rounded-lg border border-amber-100/50">
+                        <AppIcon name="verified" size={14} className="text-amber-600 shrink-0 mt-0.5" />
+                        <span>💡 Lưu ý: Hệ thống hỗ trợ gia hạn hoàn toàn miễn phí. Tin đăng của bạn sẽ lập tức hiển thị công khai trở lại trên trang chủ.</span>
+                    </div>
+                </div>
+
+                <div className="flex gap-3">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 py-3 border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors font-bold text-sm rounded-xl cursor-pointer bg-white"
+                    >
+                        Hủy
+                    </button>
+                    <button
+                        type="button"
+                        disabled={isSubmitting}
+                        onClick={handleConfirm}
+                        className="flex-1 py-3 bg-amber-500 text-white hover:bg-amber-600 transition-colors font-bold text-sm rounded-xl cursor-pointer border-none shadow-lg shadow-amber-500/25 flex items-center justify-center gap-1.5"
+                    >
+                        {isSubmitting ? 'Đang xử lý...' : 'Xác nhận gia hạn'}
+                    </button>
+                </div>
+            </motion.div>
         </div>
     );
 }

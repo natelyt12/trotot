@@ -1,4 +1,4 @@
-import { deleteCloudinaryImage } from '../data/rooms.js';
+import { deleteCloudinaryImage } from '../services/roomService.js';
 
 /**
  * Nén ảnh sử dụng HTML5 Canvas

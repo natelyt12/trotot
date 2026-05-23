@@ -13,8 +13,9 @@ export default function RoomCard({ room, onClick, style }) {
     const { isFavorite, toggleFavorite } = useFavorites();
     const { showModal } = useModal();
     
-    const mainImage = media_contact.images?.[0]?.url || `https://picsum.photos/seed/${room.listing_id}/600/400`;
-    const isAvailable = metadata.status === 'available';
+    const hasImage = media_contact.images?.[0]?.url;
+    const isExpired = metadata.status === 'expired' || (room.available_until && new Date(room.available_until) < new Date());
+    const isAvailable = metadata.status === 'available' && !isExpired;
     const mediaCount = (media_contact.images?.length || 0) + (media_contact.video_urls?.length || 0);
     const hasVideo = media_contact.video_urls?.length > 0;
 
@@ -43,14 +44,21 @@ export default function RoomCard({ room, onClick, style }) {
             aria-label={`Xem chi tiết ${basic_info.title}`}
         >
             {/* Image */}
-            <div className="relative overflow-hidden w-[130px] sm:w-full shrink-0 sm:h-[200px]">
-                <img
-                    src={mainImage}
-                    alt={basic_info.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
-                    loading="lazy"
-                    onError={(e) => { e.currentTarget.src = `../public/images/placeholder.png`; }}
-                />
+            <div className="relative overflow-hidden w-[130px] sm:w-full shrink-0 sm:h-[200px] bg-stone-100 flex items-center justify-center">
+                {hasImage ? (
+                    <img
+                        src={media_contact.images[0].url}
+                        alt={basic_info.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.src = `../public/images/placeholder.png`; }}
+                    />
+                ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-stone-400 gap-1 bg-stone-100">
+                        <AppIcon name="home" size={28} className="text-stone-300" />
+                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Không có ảnh</span>
+                    </div>
+                )}
 
                 {/* Favorite Button */}
                 <button
@@ -75,11 +83,11 @@ export default function RoomCard({ room, onClick, style }) {
                     <span
                         className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full w-fit text-[0.7rem] font-semibold ${isAvailable
                             ? 'bg-green-100 text-green-700'
-                            : metadata.status === 'expired' ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'
+                            : isExpired ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'
                             }`}
                     >
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isAvailable ? 'bg-green-600' : metadata.status === 'expired' ? 'bg-red-600' : 'bg-stone-600'}`} />
-                        {isAvailable ? 'Còn phòng' : metadata.status === 'expired' ? 'Đã hết hạn' : metadata.status}
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isAvailable ? 'bg-green-600' : isExpired ? 'bg-red-600' : 'bg-stone-600'}`} />
+                        {isAvailable ? 'Còn phòng' : isExpired ? 'Đã hết hạn' : metadata.status === 'draft' ? 'Bản nháp' : metadata.status}
                     </span>
 
                     {metadata.is_verified && (

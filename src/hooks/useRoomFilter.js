@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { mapSupabaseRoom } from '../utils/roomMapper.js';
 import { UNIVERSITIES } from '../constants/universities.js';
-import { getFilteredRooms, getDistinctCities } from '../data/rooms.js';
+import { getFilteredRooms, getDistinctCities } from '../services/roomService.js';
+
 
 
 const DEFAULT_FILTERS = {

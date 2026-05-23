@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchTrigger from "../search/SearchTrigger.jsx";
 import { useRoomFilterContext } from "../../context/RoomFilterContext.jsx";
+import AppIcon from "../common/AppIcon.jsx";
 
 export default function Header({ currentPage, navigate, user, onSearchClick }) {
     const { filters, getLocationDisplayText } = useRoomFilterContext();
@@ -118,39 +119,10 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                         <div className="h-6 w-px bg-stone-100 hidden md:block" />
 
                         {user ? (
-                            <>
-                                {["landlord", "agent"].includes(user.user_metadata?.role) && (
-                                    <div className="hidden lg:flex items-center gap-2 mr-2">
-                                        <button
-                                            onClick={() => navigate("dashboard", { tab: "post_room" })}
-                                            className="bg-amber-100 hover:bg-amber-200 text-amber-700 text-sm font-bold h-10 px-4 rounded-xl cursor-pointer border-none transition-colors flex items-center gap-2"
-                                        >
-                                            <svg
-                                                width="16"
-                                                height="16"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                            </svg>
-                                            Đăng tin
-                                        </button>
-                                        <button
-                                            onClick={() => navigate("dashboard")}
-                                            className="bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-bold h-10 px-4 rounded-xl cursor-pointer border-none transition-colors"
-                                        >
-                                            Bảng điều khiển
-                                        </button>
-                                    </div>
-                                )}
+                            <div className="relative group flex items-center">
                                 <button
                                     onClick={() => navigate("profile")}
-                                    className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1.5 px-3 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors"
+                                    className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1.5 px-3 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors z-10"
                                 >
                                     <div className="text-right">
                                         <div className="text-sm font-bold text-stone-900 leading-tight truncate max-w-[120px]">
@@ -171,7 +143,38 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         {!user.user_metadata?.avatar_url && (user.user_metadata?.full_name || "U").charAt(0).toUpperCase()}
                                     </div>
                                 </button>
-                            </>
+
+                                {/* Dropdown menu for Desktop */}
+                                <div className="absolute right-0 top-full pt-2 w-48 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                                    <div className="bg-white border border-stone-200 rounded-xl shadow-lg p-1.5 space-y-1">
+                                        <button
+                                            onClick={() => navigate("profile")}
+                                            className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                        >
+                                            <AppIcon name="user" size={16} />
+                                            <span>Trang cá nhân</span>
+                                        </button>
+                                        {["landlord", "agent"].includes(user.user_metadata?.role) && (
+                                            <>
+                                                <button
+                                                    onClick={() => navigate("dashboard", { tab: "post_room" })}
+                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                >
+                                                    <AppIcon name="plus" size={16} />
+                                                    <span>Đăng tin mới</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => navigate("dashboard")}
+                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                >
+                                                    <AppIcon name="check-square" size={16} />
+                                                    <span>Bảng điều khiển</span>
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         ) : (
                             <button
                                 onClick={() => navigate("login")}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { signUp, checkNameExists, checkPhoneExists } from '../data/auth.js';
+import { signUp, checkNameExists, checkPhoneExists } from '../services/authService.js';
 import VerificationForm from '../components/auth/VerificationForm.jsx';
 import { useModal } from '../context/ModalContext';
 

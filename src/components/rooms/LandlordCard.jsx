@@ -1,0 +1,166 @@
+import React from 'react';
+import AppIcon from '../common/AppIcon.jsx';
+import { formatPrice, formatArea, formatDeposit } from '../../utils/formatters.js';
+
+export default function LandlordCard({
+    room,
+    user,
+    previewMode,
+    showPhone,
+    setShowPhone,
+    showModal,
+    navigate,
+    isExpired
+}) {
+    const computedExpired = isExpired !== undefined 
+        ? isExpired 
+        : (room.metadata?.status === 'expired' || room.status === 'expired' || (room.available_until && new Date(room.available_until) < new Date()));
+
+    const { basic_info, monthly_costs, media_contact } = room;
+
+    const formatPhone = (phone) => {
+        if (!phone || phone === 'Chưa cập nhật' || phone === 'Đang cập nhật') return phone;
+        const cleaned = phone.replace(/\D/g, '');
+        if (cleaned.length === 10) return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(7)}`;
+        return phone;
+    };
+
+    return (
+        <div className="flex flex-col h-full relative">
+            <div className="lg:sticky lg:top-[96px] z-10 bg-white border border-stone-200 rounded-xl overflow-hidden">
+                {/* Price Section */}
+                <div className="p-6 border-b border-stone-100 bg-white">
+                    <div className="text-[1.8rem] text-amber-600! font-bold tracking-tight font-heading">
+                        {formatPrice(basic_info.price_monthly)}
+                    </div>
+                    <div className="text-[0.85rem] text-stone-400 mt-1">
+                        {formatArea(basic_info.area_sqm)} • Đặt cọc: {formatDeposit(monthly_costs.deposit_amount)}
+                    </div>
+                    {/* Listing ID & Copy */}
+                    <div className="flex items-center justify-between bg-stone-50 rounded-md p-2 px-3 my-4 border border-stone-100">
+                        <span className="text-[0.75rem] text-stone-500 font-medium uppercase tracking-wider">Mã tin: {room.listing_id}</span>
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText(room.listing_id);
+                            }}
+                            className="p-1.5 hover:bg-stone-200 rounded-md transition-colors text-stone-400 hover:text-amber-600 cursor-pointer border-none bg-transparent"
+                            title="Sao chép mã tin"
+                        >
+                            <AppIcon name="copy" size={14} />
+                        </button>
+                    </div>
+
+                    {/* Owner info inside price section */}
+                    <p className="text-[0.8rem] text-stone-400 mb-2 font-medium">Thông tin người đăng:</p>
+                    <div className="flex items-center gap-3 mb-6">
+                        {(previewMode && user ? user.user_metadata?.avatar_url : media_contact.contact.avatar) ? (
+                            <img
+                                src={previewMode && user ? user.user_metadata?.avatar_url : media_contact.contact.avatar}
+                                alt={previewMode && user ? user.user_metadata?.full_name : media_contact.contact.name}
+                                className="w-10 h-10 rounded-full object-cover border border-stone-200"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center shrink-0">
+                                <span className="text-white font-bold text-sm">
+                                    {(previewMode && user ? user.user_metadata?.full_name : media_contact.contact.name)?.charAt(0) || 'U'}
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex-1">
+                            <p className="font-bold text-sm text-stone-900 leading-tight mb-1">
+                                {previewMode && user ? user.user_metadata?.full_name : media_contact.contact.name}
+                            </p>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold ${(previewMode ? 'landlord' : media_contact.contact.role) === 'landlord' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
+                                {(previewMode ? 'landlord' : media_contact.contact.role) === 'landlord' ? 'Bên cho thuê' : 'Môi giới'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2.5">
+                        <button
+                            disabled={previewMode}
+                            onClick={previewMode ? undefined : () => {
+                                if (user) {
+                                    setShowPhone(true);
+                                } else {
+                                    showModal({
+                                        title: 'Yêu cầu đăng nhập',
+                                        message: 'Vui lòng đăng nhập để xem thông tin liên hệ',
+                                        type: 'info',
+                                        confirmText: 'Đăng nhập',
+                                        onConfirm: () => navigate('login')
+                                    });
+                                }
+                            }}
+                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-bold ${previewMode ? 'bg-stone-300 cursor-not-allowed' : 'cursor-pointer bg-amber-500 hover:bg-amber-600'}`}
+                        >
+                            <AppIcon name="phone" size={20} strokeWidth={2.5} />
+                            <span>{previewMode ? formatPhone(media_contact.contact.phone) : showPhone ? formatPhone(media_contact.contact.phone) : 'Liên hệ ngay'}</span>
+                        </button>
+
+                        <button
+                            disabled={previewMode}
+                            onClick={previewMode ? undefined : () => {
+                                if (user) {
+                                    setShowPhone(true);
+                                } else {
+                                    showModal({
+                                        title: 'Yêu cầu đăng nhập',
+                                        message: 'Vui lòng đăng nhập để xem thông tin liên hệ',
+                                        type: 'info',
+                                        confirmText: 'Đăng nhập',
+                                        onConfirm: () => navigate('login')
+                                    });
+                                }
+                            }}
+                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white transition-colors duration-200 border-none font-bold ${previewMode ? 'bg-stone-300 cursor-not-allowed' : 'bg-[#0068ff] hover:bg-[#005ae0] cursor-pointer'}`}
+                        >
+                            <AppIcon name="messages" size={20} strokeWidth={2.5} />
+                            <span>Nhắn tin qua Zalo</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Safety tips section */}
+                <div className="p-6 bg-amber-50/30">
+                    <div className="flex gap-2 items-start text-amber-600">
+                        <AppIcon name="alert" size={16} className="mt-0.5" />
+                        <div>
+                            <p className="font-bold text-amber-900 text-[0.82rem] mb-1 font-heading">Lưu ý an toàn</p>
+                            <p className="text-amber-700 text-[0.78rem] leading-relaxed">
+                                Không chuyển tiền trước khi xem phòng trực tiếp. Kiểm tra kỹ hợp đồng thuê trọ.
+                            </p>
+                            {!previewMode && (
+                                <button
+                                    onClick={() => showModal({
+                                        title: 'Thông báo',
+                                        message: 'Tính năng Báo cáo tin đăng đang được phát triển.',
+                                        type: 'info'
+                                    })}
+                                    className="mt-2 text-[0.78rem] text-amber-600 font-bold hover:text-amber-700 underline cursor-pointer border-none bg-transparent p-0 block"
+                                >
+                                    Báo cáo tin đăng
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Expired alert section */}
+                {computedExpired && (
+                    <div className="p-6 bg-red-50 border-t border-red-100">
+                        <div className="flex gap-2 items-start text-red-600">
+                            <AppIcon name="alert" size={16} className="mt-0.5" />
+                            <div>
+                                <p className="font-bold text-red-950 text-[0.82rem] mb-1 font-heading">Tin đăng đã hết hạn</p>
+                                <p className="text-red-700 text-[0.78rem] leading-relaxed">
+                                    Tin đăng này đã quá hạn hiển thị. Vui lòng liên hệ bên cho thuê để xác nhận lại thông tin phòng trống.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

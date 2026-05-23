@@ -11,7 +11,6 @@ export default function LocationWizardModal({ isOpen, onClose }) {
     const [step, setStep] = useState('uni');
 
     // Internal state for the wizard
-    const [tempUni, setTempUni] = useState('');
     const [tempCity, setTempCity] = useState('');
     const [tempDistrict, setTempDistrict] = useState('');
 
@@ -31,7 +30,6 @@ export default function LocationWizardModal({ isOpen, onClose }) {
     // Reset wizard when closed
     const handleClose = () => {
         setStep('uni');
-        setTempUni('');
         setTempCity('');
         setTempDistrict('');
         setSearchQuery('');
@@ -236,11 +234,10 @@ export default function LocationWizardModal({ isOpen, onClose }) {
                                     <button
                                         onClick={() => {
                                             setStep('uni');
-                                            setTempUni('');
                                             setTempCity('');
                                             setTempDistrict('');
                                             setSearchQuery('');
-                                            onComplete({ university: '', city: '', district: '', ward: '' });
+                                            updateFilter({ university: '', city: '', district: '', ward: '', search: '' });
                                         }}
                                         className="bg-transparent border-none text-amber-600 text-sm font-semibold cursor-pointer hover:text-amber-700 transition-colors duration-200"
                                     >

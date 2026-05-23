@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { getUserFavorites, addUserFavorite, removeUserFavorite } from "../data/favorites";
+import { getUserFavorites, addUserFavorite, removeUserFavorite } from "../services/favoriteService";
 
 const FavoritesContext = createContext();
 
