@@ -56,6 +56,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
     };
 
     const roleLabel = (role) => {
+        if (role === "admin") return "Quản trị viên";
         if (role === "landlord") return "Bên cho thuê";
         return "Người thuê";
     };
@@ -171,6 +172,15 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                                 </button>
                                             </>
                                         )}
+                                        {user && (
+                                            <button
+                                                onClick={() => navigate("admin")}
+                                                className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                            >
+                                                <AppIcon name="settings" size={16} />
+                                                <span>Trang quản trị (Test)</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -263,7 +273,6 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                         )}
                     </div>
 
-                    {/* Nav links */}
                     {user && user.user_metadata?.role === "landlord" && (
                         <>
                             <button
@@ -298,6 +307,17 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                             {link.label}
                         </button>
                     ))}
+                    {user && (
+                        <button
+                            onClick={() => {
+                                navigate("admin");
+                                setMobileOpen(false);
+                            }}
+                            className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-stone-900 transition-colors duration-200"
+                        >
+                            Trang quản trị (Test)
+                        </button>
+                    )}
                 </div>
             )}
         </header>

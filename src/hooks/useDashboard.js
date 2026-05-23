@@ -37,13 +37,19 @@ export const useDashboard = (user, initialData) => {
 
     useEffect(() => {
         if (initialData?.tab) {
-            setActiveTab(initialData.tab);
+            const timer = setTimeout(() => {
+                setActiveTab(prev => prev !== initialData.tab ? initialData.tab : prev);
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [initialData]);
 
     useEffect(() => {
         if (activeTab === 'manage_rooms') {
-            fetchUserRooms();
+            const timer = setTimeout(() => {
+                fetchUserRooms();
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [activeTab, fetchUserRooms]);
 
@@ -74,7 +80,6 @@ export const useDashboard = (user, initialData) => {
 
                     setRooms(prev => prev.map(r => r.id === room.id ? { ...r, status: 'available' } : r));
                     addNotification('Tin đăng của bạn đã được gửi và đang chờ duyệt!', 'success');
-                    setSubTab('verified'); // Chuyển qua tab kiểm duyệt để thấy tin
                 } catch (err) {
                     console.error("Lỗi khi công khai:", err);
                     showModal({ title: 'Lỗi', message: 'Có lỗi xảy ra, không thể công khai tin.', type: 'error' });

@@ -17,7 +17,53 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     const { showModal, showProgress, updateProgress, hideProgress } = useModal();
     const { addNotification } = useNotification();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [initialFormState, setInitialFormState] = useState(null);
+    const [initialFormState, setInitialFormState] = useState(() => {
+        if (!roomToEdit) {
+            const defaultForm = {
+                title: "",
+                room_type: "room",
+                status: "draft",
+                price_monthly: "",
+                area_sqm: "",
+                city: "Thành phố Hà Nội",
+                district: "",
+                ward: "",
+                address: "",
+                monthly_costs: {
+                    deposit_amount: "",
+                    electricity: { price: 3800, unit: "kWh" },
+                    water: { price: 30000, unit: "m3" },
+                    internet: 100000,
+                    parking_fee: 0,
+                    extra_services: [],
+                },
+                room_features: {
+                    counts: { bedrooms: 1, bathrooms: 1, beds: 1, capacity: 2 },
+                    bathroom_type: "private",
+                    kitchen_type: "private",
+                    amenities: [],
+                },
+                rules_utilities: {
+                    is_shared_with_host: false,
+                    curfew: "none",
+                    gender_preference: "all",
+                    is_pet_allowed: true,
+                    laundry_type: "private",
+                },
+                media_contact: {
+                    images: [],
+                    video_urls: [],
+                    description: "",
+                    google_map_url: "",
+                },
+            };
+            return {
+                form: JSON.stringify(defaultForm),
+                images: JSON.stringify([])
+            };
+        }
+        return null;
+    });
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     // --- STATE CHO FORM ---
@@ -149,14 +195,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
         });
     }, [roomToEdit]);
 
-    useEffect(() => {
-        if (!roomToEdit && !initialFormState) {
-            setInitialFormState({
-                form: JSON.stringify(formData),
-                images: JSON.stringify([])
-            });
-        }
-    }, [roomToEdit, initialFormState]);
+
 
     const isDirty = (() => {
         if (!initialFormState) return false;

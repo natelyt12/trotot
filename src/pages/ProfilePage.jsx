@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useModal } from '../context/ModalContext';
 import { useNotification } from '../context/NotificationContext';
 import { signIn, signOut } from '../services/authService.js';
@@ -49,9 +50,11 @@ export default function ProfilePage({ user, navigate, initialData }) {
     const [activeTab, setActiveTab] = useState(initialData?.tab || 'info');
     const [showVerification, setShowVerification] = useState(false);
 
+    const oldRole = user?.user_metadata?.role || 'tenant';
+
 
     // Fetch latest profile from database
-    const fetchProfile = async () => {
+    const fetchProfile = useCallback(async () => {
         if (!user) return;
         try {
             const { data, error } = await getUserProfile(user.id);
@@ -67,27 +70,43 @@ export default function ProfilePage({ user, navigate, initialData }) {
         } catch (err) {
             console.error('Error fetching profile:', err);
         }
-    };
+    }, [user]);
 
     // Sync formData when user prop is available or changes
     useEffect(() => {
         if (user) {
             // Initial sync from auth metadata
-            setFormData({
-                full_name: user.user_metadata?.full_name || '',
-                role: user.user_metadata?.role || 'tenant',
-                avatar_url: user.user_metadata?.avatar_url || '',
-                phone: user.user_metadata?.phone || '',
-            });
-            // Fetch fresh data from profiles table
-            fetchProfile();
+            const metaName = user.user_metadata?.full_name || '';
+            const metaRole = user.user_metadata?.role || 'tenant';
+            const metaAvatar = user.user_metadata?.avatar_url || '';
+            const metaPhone = user.user_metadata?.phone || '';
+
+            const timer = setTimeout(() => {
+                setFormData(prev => {
+                    if (prev.full_name !== metaName || prev.role !== metaRole || prev.avatar_url !== metaAvatar || prev.phone !== metaPhone) {
+                        return {
+                            full_name: metaName,
+                            role: metaRole,
+                            avatar_url: metaAvatar,
+                            phone: metaPhone
+                        };
+                    }
+                    return prev;
+                });
+                // Fetch fresh data from profiles table
+                fetchProfile();
+            }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [user]);
+    }, [user, fetchProfile]);
 
     useEffect(() => {
         // Only sync activeTab if initialData?.tab is explicitly specified
         if (initialData?.tab) {
-            setActiveTab(initialData.tab);
+            const timer = setTimeout(() => {
+                setActiveTab(prev => prev !== initialData.tab ? initialData.tab : prev);
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [initialData]);
 
@@ -127,7 +146,10 @@ export default function ProfilePage({ user, navigate, initialData }) {
             };
             fetchSavedRooms();
         } else if (activeTab === 'favorites' && favorites.length === 0) {
-            setSavedRooms([]);
+            const timer = setTimeout(() => {
+                setSavedRooms(prev => prev.length > 0 ? [] : prev);
+            }, 0);
+            return () => clearTimeout(timer);
         }
     }, [activeTab, favorites]);
 
@@ -208,6 +230,7 @@ export default function ProfilePage({ user, navigate, initialData }) {
             } else {
                 addNotification('Cập nhật thông tin thành công!', 'success');
             }
+            await fetchProfile();
         } catch (err) {
             addNotification(err.message, 'error');
         } finally {
@@ -232,36 +255,47 @@ export default function ProfilePage({ user, navigate, initialData }) {
             return;
         }
 
-        const oldRole = user?.user_metadata?.role || 'tenant';
         const newRole = formData.role;
 
-        // Always show confirmation modal first
-        showModal({
-            title: 'Xác nhận thay đổi',
-            message: 'Bạn có chắc chắn muốn lưu các thay đổi đối với thông tin cá nhân của mình không?',
-            type: 'warning',
-            confirmText: 'Xác nhận',
-            cancelText: 'Hủy',
-            onConfirm: () => {
-                if (oldRole === 'tenant' && newRole === 'landlord') {
-                    // Trigger KYC flow in ProfilePage
+        if (oldRole === 'tenant' && newRole === 'landlord') {
+            // Chuyển từ người thuê -> bên cho thuê -> yêu cầu KYC
+            showModal({
+                title: 'Nâng cấp Chủ nhà (KYC)',
+                message: 'Để chuyển đổi vai trò sang Bên cho thuê (Chủ nhà), bạn cần hoàn tất biểu mẫu xác minh danh tính (KYC). Bạn có muốn bắt đầu xác minh ngay bây giờ?',
+                type: 'warning',
+                confirmText: 'Bắt đầu xác minh',
+                cancelText: 'Hủy bỏ',
+                onConfirm: () => {
                     setShowVerification(true);
-                } else if (newRole === 'tenant' && oldRole === 'landlord') {
-                    // Trigger role downgrade warning confirmation
-                    showModal({
-                        title: 'Xác nhận chuyển vai trò',
-                        message: 'Nếu bạn chuyển về Người thuê, tất cả tin đăng hiện tại của bạn sẽ bị tạm ẩn (chuyển về trạng thái Nháp). Bạn có chắc chắn muốn tiếp tục?',
-                        type: 'warning',
-                        confirmText: 'Xác nhận',
-                        cancelText: 'Hủy',
-                        onConfirm: () => performUpdate(true)
-                    });
-                } else {
-                    // Standard update
-                    performUpdate(false);
+                },
+                onCancel: () => {
+                    setFormData(prev => ({ ...prev, role: oldRole }));
                 }
-            }
-        });
+            });
+        } else if (oldRole === 'landlord' && newRole === 'tenant') {
+            // Chuyển từ bên cho thuê -> người thuê -> ẩn tin đăng (Nháp)
+            showModal({
+                title: 'Cảnh báo chuyển vai trò',
+                message: 'Khi chuyển về vai trò Người thuê, toàn bộ tin đăng của bạn trên hệ thống sẽ tự động chuyển thành bản nháp (tạm ẩn khỏi trang tìm kiếm) và bạn không thể quản lý tin đăng nữa. Bạn có chắc chắn muốn chuyển đổi?',
+                type: 'error',
+                confirmText: 'Xác nhận chuyển đổi',
+                cancelText: 'Hủy bỏ',
+                onConfirm: () => performUpdate(true),
+                onCancel: () => {
+                    setFormData(prev => ({ ...prev, role: oldRole }));
+                }
+            });
+        } else {
+            // Cập nhật thông tin thông thường
+            showModal({
+                title: 'Xác nhận thay đổi',
+                message: 'Bạn có chắc chắn muốn lưu các thay đổi đối với thông tin cá nhân của mình không?',
+                type: 'warning',
+                confirmText: 'Xác nhận',
+                cancelText: 'Hủy',
+                onConfirm: () => performUpdate(false)
+            });
+        }
     };
 
     const handleAvatarUpload = async (e) => {
@@ -472,362 +506,406 @@ export default function ProfilePage({ user, navigate, initialData }) {
                     <p className="text-stone-500 text-sm mt-1">Quản lý thông tin cá nhân và cài đặt bảo mật của bạn.</p>
                 </div>
 
-                <div className="bg-white border border-stone-200 rounded-xl overflow-hidden">
-                    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] items-stretch">
+                <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] items-stretch">
 
                         {/* Sidebar */}
-                        <aside className="lg:border-r border-stone-100 bg-stone-50/30">
-                            <div className="p-8 text-center border-b border-stone-100">
-                                {/* Avatar */}
-                                <div
-                                    className="w-24 h-24 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-4xl font-extrabold relative overflow-hidden bg-amber-500 shadow-sm"
-                                    style={formData.avatar_url
-                                        ? { backgroundImage: `url(${formData.avatar_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                                        : {}
-                                    }
-                                >
-                                    {!formData.avatar_url && (formData.full_name || 'U').charAt(0).toUpperCase()}
-
-                                    <label
-                                        className={`absolute inset-0 bg-black/45 flex items-center justify-center cursor-pointer transition-opacity duration-200 text-white text-xs font-semibold ${uploading ? 'opacity-100' : 'opacity-0 hover:opacity-100'}`}
+                        <aside className="lg:border-r border-stone-100 bg-stone-50/30 p-6 flex flex-col justify-between">
+                            <div>
+                                <div className="p-4 text-center border-b border-stone-100 mb-6">
+                                    {/* Avatar */}
+                                    <div
+                                        className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-white text-3xl font-extrabold relative overflow-hidden bg-amber-500 shadow-sm border border-white"
+                                        style={formData.avatar_url
+                                            ? { backgroundImage: `url(${formData.avatar_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                                            : {}
+                                        }
                                     >
-                                        <input
-                                            type="file" accept="image/*"
-                                            onChange={handleAvatarUpload}
-                                            disabled={uploading}
-                                            className="hidden"
-                                        />
-                                        {uploading ? '...' : (
-                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                                                <circle cx="12" cy="13" r="4" />
-                                            </svg>
-                                        )}
-                                    </label>
+                                        {!formData.avatar_url && (formData.full_name || 'U').charAt(0).toUpperCase()}
+
+                                        <label
+                                            className={`absolute inset-0 bg-black/45 flex items-center justify-center cursor-pointer transition-opacity duration-200 text-white text-xs font-semibold ${uploading ? 'opacity-100' : 'opacity-0 hover:opacity-100'}`}
+                                        >
+                                            <input
+                                                type="file" accept="image/*"
+                                                onChange={handleAvatarUpload}
+                                                disabled={uploading}
+                                                className="hidden"
+                                            />
+                                            {uploading ? '...' : (
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                                                    <circle cx="12" cy="13" r="4" />
+                                                </svg>
+                                            )}
+                                        </label>
+                                    </div>
+
+                                    <h3 className="text-base font-bold text-stone-900 mb-0.5 truncate max-w-[180px] mx-auto">
+                                        {formData.full_name || 'Người dùng'}
+                                    </h3>
+                                    <p className="text-[11px] text-stone-400 truncate px-2 font-medium">{user?.email}</p>
                                 </div>
 
-                                <h3 className="text-lg font-bold text-stone-900 mb-0.5">
-                                    {formData.full_name || 'Người dùng'}
-                                </h3>
-                                <p className="text-sm text-stone-400 truncate px-2">{user?.email}</p>
-                            </div>
-
-                            <div className="flex flex-col py-4">
-                                {TAB_GROUPS.map((group) => {
-                                    // Use the actual role from user metadata, not the unsaved formData
-                                    const currentRole = user?.user_metadata?.role || 'tenant';
-                                    if (group.condition && !group.condition(currentRole)) return null;
-                                    return (
-                                        <div key={group.label} className="mb-6 last:mb-0">
-                                            <div className="px-6 py-2 text-[0.68rem] font-black text-stone-400 uppercase tracking-[0.15em] mb-1">
-                                                {group.label}
+                                <div className="space-y-6">
+                                    {TAB_GROUPS.map((group) => {
+                                        // Use the actual role from user metadata, not the unsaved formData
+                                        const currentRole = user?.user_metadata?.role || 'tenant';
+                                        if (group.condition && !group.condition(currentRole)) return null;
+                                        return (
+                                            <div key={group.label} className="space-y-2">
+                                                <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                                    {group.label}
+                                                </div>
+                                                <div className="space-y-1">
+                                                    {group.tabs.map((tab) => {
+                                                        const isActive = activeTab === tab.id;
+                                                        return (
+                                                            <button
+                                                                key={tab.id}
+                                                                onClick={() => setActiveTab(tab.id)}
+                                                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
+                                                                    isActive 
+                                                                        ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20' 
+                                                                        : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                                                }`}
+                                                            >
+                                                                <AppIcon name={tab.icon} size={18} strokeWidth={isActive ? 2.5 : 2} />
+                                                                <span>{tab.label}</span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
-                                            {group.tabs.map((tab) => (
-                                                <button
-                                                    key={tab.id}
-                                                    onClick={() => setActiveTab(tab.id)}
-                                                    className={`flex items-center gap-3 w-full px-6 py-3.5 text-[0.9rem] font-bold cursor-pointer transition-all duration-200 text-left border-none ${activeTab === tab.id
-                                                        ? 'bg-white text-amber-600 border-r-4 border-r-amber-500 shadow-[inset_-1px_0_0_#fff]'
-                                                        : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
-                                                        }`}
-                                                >
-                                                    <AppIcon name={tab.icon} size={18} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
-                                                    {tab.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
 
-                            <div className="mt-auto p-6 border-t border-stone-100">
+                            <div className="mt-8 border-t border-stone-100 pt-5">
                                 {/* Logout */}
                                 <button
                                     onClick={handleLogout}
-                                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-full! border border-red-100 bg-red-50 text-red-600 text-sm font-bold cursor-pointer transition-colors duration-200 hover:bg-red-100"
+                                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-red-100 bg-red-50 text-red-600 text-sm font-bold cursor-pointer transition-colors duration-200 hover:bg-red-100"
                                 >
-                                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                                         <polyline points="16 17 21 12 16 7" />
                                         <line x1="21" y1="12" x2="9" y2="12" />
                                     </svg>
-                                    Đăng xuất
+                                    <span>Đăng xuất</span>
                                 </button>
                             </div>
                         </aside>
 
                         {/* Content panel */}
                         <main className="p-6 md:p-10 min-h-[500px] bg-white">
+                            <AnimatePresence mode="wait">
 
 
-                            {/* ---- TAB: INFO ---- */}
-                            {activeTab === 'info' && (
-                                <div className="animate-fade-in">
-                                    <TabHeader icon="user" title="Thông tin cá nhân" />
+                                {/* ---- TAB: INFO ---- */}
+                                {activeTab === 'info' && (
+                                    <motion.div
+                                        key="info"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <TabHeader icon="user" title="Thông tin cá nhân" />
 
-                                    {showVerification ? (
-                                        <div className="max-w-md mx-auto bg-white border border-stone-200 rounded-2xl p-6 md:p-8">
-                                            <VerificationForm
-                                                role={formData.role}
-                                                loading={loading}
-                                                onBack={() => setShowVerification(false)}
-                                                onSubmit={() => {
-                                                    performUpdate(false);
-                                                    setShowVerification(false);
-                                                }}
-                                            />
+                                        {showVerification ? (
+                                            <div className="max-w-md mx-auto bg-white border border-stone-200 rounded-2xl p-6 md:p-8">
+                                                <VerificationForm
+                                                    role={formData.role}
+                                                    loading={loading}
+                                                    submitText="Xác nhận & Nâng cấp"
+                                                    onBack={() => {
+                                                        setShowVerification(false);
+                                                        setFormData(prev => ({ ...prev, role: oldRole }));
+                                                    }}
+                                                    onSubmit={() => {
+                                                        performUpdate(false);
+                                                        setShowVerification(false);
+                                                    }}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <form onSubmit={handleUpdateProfile} className="flex flex-col gap-6">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                    <Field label="Tên người dùng" required>
+                                                        <input
+                                                            type="text"
+                                                            className={inputCls}
+                                                            value={formData.full_name}
+                                                            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                                            placeholder="Nhập họ tên của bạn"
+                                                            required
+                                                        />
+                                                    </Field>
+                                                    <Field label="Email (Cố định)">
+                                                        <input
+                                                            type="text"
+                                                            className={`${inputCls} bg-stone-50 text-stone-500 cursor-not-allowed`}
+                                                            value={user?.email || ''}
+                                                            disabled
+                                                        />
+                                                    </Field>
+                                                    <Field label="Số điện thoại" required>
+                                                        <input
+                                                            type="tel"
+                                                            className={inputCls}
+                                                            value={formData.phone}
+                                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                                            placeholder="09xx xxx xxx"
+                                                            required
+                                                        />
+                                                    </Field>
+                                                </div>
+
+                                                <Field label="Vai trò của bạn">
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                        {[
+                                                            { id: 'tenant', label: 'Người thuê' },
+                                                            { id: 'landlord', label: 'Bên cho thuê' },
+                                                        ].map((opt) => (
+                                                            <button
+                                                                key={opt.id}
+                                                                type="button"
+                                                                onClick={() => setFormData({ ...formData, role: opt.id })}
+                                                                className={`py-3 rounded-lg border-2 font-bold text-sm cursor-pointer transition-all duration-200 ${formData.role === opt.id
+                                                                    ? 'border-amber-500 bg-amber-50 text-amber-700'
+                                                                    : 'border-stone-100 bg-white text-stone-500 hover:bg-stone-50 hover:border-stone-200'
+                                                                    }`}
+                                                            >
+                                                                {opt.label}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </Field>
+
+                                                <div className="pt-4 flex justify-end">
+                                                    <button
+                                                        type="submit"
+                                                        disabled={loading}
+                                                        className="bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold px-10 py-3 rounded-full! cursor-pointer border-none transition-colors duration-200 shadow-md shadow-amber-200"
+                                                    >
+                                                        {loading ? 'Đang cập nhật...' : 'Lưu thay đổi'}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        )}
+                                    </motion.div>
+                                )}
+
+                                {/* ---- TAB: FAVORITES ---- */}
+                                {activeTab === 'favorites' && (
+                                    <motion.div
+                                        key="favorites"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <TabHeader icon="heart" title="Tin đăng đã lưu" />
+                                        <div className="mt-6">
+                                            {loadingSaved || savedRooms.length > 0 ? (
+                                                <RoomGrid
+                                                    rooms={savedRooms}
+                                                    isLoading={loadingSaved}
+                                                    onRoomClick={(room) => navigate('room-detail', { ...room, fromProfile: true, originTab: 'favorites' })}
+                                                />
+                                            ) : (
+                                                <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl">
+                                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
+                                                        <AppIcon name="heart" size={32} />
+                                                    </div>
+                                                    <p className="text-stone-500 font-medium">Bạn chưa lưu tin đăng nào.</p>
+                                                    <button
+                                                        onClick={() => navigate('home')}
+                                                        className="mt-4 bg-amber-500 text-white px-6 py-2 rounded-full! font-bold text-sm hover:bg-amber-600 cursor-pointer border-none"
+                                                    >
+                                                        Khám phá ngay
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <form onSubmit={handleUpdateProfile} className="flex flex-col gap-6">
+                                    </motion.div>
+                                )}
+
+                                {/* ---- TAB: COMMENTED ROOMS ---- */}
+                                {activeTab === 'commented_rooms' && (
+                                    <motion.div
+                                        key="commented_rooms"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <TabHeader icon="messages" title="Phòng đã bình luận" />
+                                        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {loadingCommented ? (
+                                                <div className="col-span-full text-center py-12 text-stone-400">Đang tải dữ liệu...</div>
+                                            ) : commentedRooms.length === 0 ? (
+                                                <div className="col-span-full text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl">
+                                                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
+                                                        <AppIcon name="messages" size={32} />
+                                                    </div>
+                                                    <p className="text-stone-500 font-medium">Bạn chưa bình luận ở phòng nào</p>
+                                                </div>
+                                            ) : (
+                                                commentedRooms.map(({ room, count }) => (
+                                                    <div
+                                                        key={room.id}
+                                                        onClick={() => navigate('room-detail', { ...room, fromProfile: true, originTab: 'commented_rooms' })}
+                                                        className="flex gap-4 p-3 border border-stone-100 rounded-xl hover:border-amber-300 hover:shadow-md transition-all cursor-pointer bg-white group"
+                                                    >
+                                                        {/* Thumbnail */}
+                                                        <div className="w-24 h-24 rounded-lg bg-stone-100 overflow-hidden shrink-0 relative">
+                                                            {room.media_contact?.images?.[0]?.url ? (
+                                                                <img
+                                                                    src={room.media_contact.images[0].url}
+                                                                    alt={room.basic_info.title}
+                                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                                    onError={(e) => { e.currentTarget.src = "/images/placeholder.png"; }}
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-stone-300">
+                                                                    <AppIcon name="home" size={24} />
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Info */}
+                                                        <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
+                                                            <div>
+                                                                <h4 className="font-bold text-stone-900 text-[0.9rem] line-clamp-1 mb-1 group-hover:text-amber-600 transition-colors">
+                                                                    {room.basic_info.title}
+                                                                </h4>
+                                                                <div className="flex items-center gap-1.5 text-stone-500 text-[0.75rem]">
+                                                                    <AppIcon name="location" size={12} />
+                                                                    <span className="truncate">{room.basic_info.district}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center justify-between mt-auto">
+                                                                <span className="font-bold text-amber-600 text-sm">
+                                                                    {formatPrice(room.basic_info.price_monthly)}
+                                                                </span>
+                                                                <span className="inline-flex items-center gap-1 bg-stone-50 px-2 py-0.5 rounded-full text-[0.7rem] font-bold text-stone-400">
+                                                                    <AppIcon name="messages" size={12} />
+                                                                    {count}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+
+
+                                {/* ---- TAB: PASSWORD ---- */}
+                                {activeTab === 'password' && (
+                                    <motion.div
+                                        key="password"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <TabHeader icon="lock" title="Đổi mật khẩu" />
+
+                                        <form onSubmit={handleChangePassword} className="flex flex-col gap-6">
+                                            <Field label="Mật khẩu cũ" required>
+                                                <input
+                                                    type="password"
+                                                    className={inputCls}
+                                                    value={passwordData.oldPassword}
+                                                    onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                                                    placeholder="Nhập mật khẩu hiện tại"
+                                                    required
+                                                />
+                                            </Field>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <Field label="Tên người dùng" required>
+                                                <Field label="Mật khẩu mới" required>
                                                     <input
-                                                        type="text"
+                                                        type="password"
                                                         className={inputCls}
-                                                        value={formData.full_name}
-                                                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                                                        placeholder="Nhập họ tên của bạn"
+                                                        value={passwordData.newPassword}
+                                                        onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                                                        placeholder="••••••••"
                                                         required
                                                     />
                                                 </Field>
-                                                <Field label="Email (Cố định)">
+                                                <Field label="Xác nhận mật khẩu mới" required>
                                                     <input
-                                                        type="text"
-                                                        className={`${inputCls} bg-stone-50 text-stone-500 cursor-not-allowed`}
-                                                        value={user?.email || ''}
-                                                        disabled
-                                                    />
-                                                </Field>
-                                                <Field label="Số điện thoại" required>
-                                                    <input
-                                                        type="tel"
+                                                        type="password"
                                                         className={inputCls}
-                                                        value={formData.phone}
-                                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                        placeholder="09xx xxx xxx"
+                                                        value={passwordData.confirmPassword}
+                                                        onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                                                        placeholder="••••••••"
                                                         required
                                                     />
                                                 </Field>
                                             </div>
-
-                                            <Field label="Vai trò của bạn">
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                    {[
-                                                        { id: 'tenant', label: 'Người thuê' },
-                                                        { id: 'landlord', label: 'Bên cho thuê' },
-                                                    ].map((opt) => (
-                                                        <button
-                                                            key={opt.id}
-                                                            type="button"
-                                                            onClick={() => setFormData({ ...formData, role: opt.id })}
-                                                            className={`py-3 rounded-lg border-2 font-bold text-sm cursor-pointer transition-all duration-200 ${formData.role === opt.id
-                                                                ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                                                : 'border-stone-100 bg-white text-stone-500 hover:bg-stone-50 hover:border-stone-200'
-                                                                }`}
-                                                        >
-                                                            {opt.label}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </Field>
-
-                                            <div className="pt-4 flex justify-end">
+                                            <div className="flex justify-end pt-2">
                                                 <button
                                                     type="submit"
-                                                    disabled={loading}
+                                                    disabled={passwordLoading}
                                                     className="bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold px-10 py-3 rounded-full! cursor-pointer border-none transition-colors duration-200 shadow-md shadow-amber-200"
                                                 >
-                                                    {loading ? 'Đang cập nhật...' : 'Lưu thay đổi'}
+                                                    {passwordLoading ? 'Đang xử lý...' : 'Cập nhật mật khẩu'}
                                                 </button>
                                             </div>
                                         </form>
-                                    )}
-                                </div>
-                            )}
+                                    </motion.div>
+                                )}
 
-                            {/* ---- TAB: FAVORITES ---- */}
-                            {activeTab === 'favorites' && (
-                                <div className="animate-fade-in">
-                                    <TabHeader icon="heart" title="Tin đăng đã lưu" />
-                                    <div className="mt-6">
-                                        {loadingSaved || savedRooms.length > 0 ? (
-                                            <RoomGrid
-                                                rooms={savedRooms}
-                                                isLoading={loadingSaved}
-                                                onRoomClick={(room) => navigate('room-detail', { ...room, fromProfile: true, originTab: 'favorites' })}
-                                            />
-                                        ) : (
-                                            <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl">
-                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
-                                                    <AppIcon name="heart" size={32} />
+                                {/* ---- TAB: DANGER ---- */}
+                                {activeTab === 'danger' && (
+                                    <motion.div
+                                        key="danger"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <TabHeader icon="trash" title="Vùng nguy hiểm" danger />
+
+                                        <div className="p-6 bg-red-50 border border-red-100 rounded-2xl">
+                                            <div className="flex items-center gap-3 mb-4 text-red-700">
+                                                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                                    <AppIcon name="alert" size={20} />
                                                 </div>
-                                                <p className="text-stone-500 font-medium">Bạn chưa lưu tin đăng nào.</p>
-                                                <button
-                                                    onClick={() => navigate('home')}
-                                                    className="mt-4 bg-amber-500 text-white px-6 py-2 rounded-full! font-bold text-sm hover:bg-amber-600 cursor-pointer border-none"
-                                                >
-                                                    Khám phá ngay
-                                                </button>
+                                                <h3 className="text-lg font-bold">Xóa tài khoản vĩnh viễn</h3>
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
+                                            <p className="text-sm text-stone-600 mb-6 leading-relaxed">
+                                                Khi bạn xóa tài khoản, mọi dữ liệu liên quan bao gồm các tin đăng phòng, tin nhắn và lịch sử giao dịch sẽ bị xóa vĩnh viễn. Thao tác này <b>không thể hoàn tác</b>.
+                                            </p>
 
-                            {/* ---- TAB: COMMENTED ROOMS ---- */}
-                            {activeTab === 'commented_rooms' && (
-                                <div className="animate-fade-in">
-                                    <TabHeader icon="messages" title="Phòng đã bình luận" />
-                                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        {loadingCommented ? (
-                                            <div className="col-span-full text-center py-12 text-stone-400">Đang tải dữ liệu...</div>
-                                        ) : commentedRooms.length === 0 ? (
-                                            <div className="col-span-full text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl">
-                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
-                                                    <AppIcon name="messages" size={32} />
-                                                </div>
-                                                <p className="text-stone-500 font-medium">Bạn chưa bình luận ở phòng nào</p>
-                                            </div>
-                                        ) : (
-                                            commentedRooms.map(({ room, count }) => (
-                                                <div
-                                                    key={room.id}
-                                                    onClick={() => navigate('room-detail', { ...room, fromProfile: true, originTab: 'commented_rooms' })}
-                                                    className="flex gap-4 p-3 border border-stone-100 rounded-xl hover:border-amber-300 hover:shadow-md transition-all cursor-pointer bg-white group"
-                                                >
-                                                    {/* Thumbnail */}
-                                                    <div className="w-24 h-24 rounded-lg bg-stone-100 overflow-hidden shrink-0 relative">
-                                                        {room.media_contact?.images?.[0]?.url ? (
-                                                            <img
-                                                                src={room.media_contact.images[0].url}
-                                                                alt={room.basic_info.title}
-                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                                                onError={(e) => { e.currentTarget.src = "/images/placeholder.png"; }}
-                                                            />
-                                                        ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-stone-300">
-                                                                <AppIcon name="home" size={24} />
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Info */}
-                                                    <div className="flex-1 flex flex-col justify-between min-w-0 py-1">
-                                                        <div>
-                                                            <h4 className="font-bold text-stone-900 text-[0.9rem] line-clamp-1 mb-1 group-hover:text-amber-600 transition-colors">
-                                                                {room.basic_info.title}
-                                                            </h4>
-                                                            <div className="flex items-center gap-1.5 text-stone-500 text-[0.75rem]">
-                                                                <AppIcon name="location" size={12} />
-                                                                <span className="truncate">{room.basic_info.district}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center justify-between mt-auto">
-                                                            <span className="font-bold text-amber-600 text-sm">
-                                                                {formatPrice(room.basic_info.price_monthly)}
-                                                            </span>
-                                                            <span className="inline-flex items-center gap-1 bg-stone-50 px-2 py-0.5 rounded-full text-[0.7rem] font-bold text-stone-400">
-                                                                <AppIcon name="messages" size={12} />
-                                                                {count}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-
-                            {/* ---- TAB: PASSWORD ---- */}
-                            {activeTab === 'password' && (
-                                <div className="animate-fade-in">
-                                    <TabHeader icon="lock" title="Đổi mật khẩu" />
-
-                                    <form onSubmit={handleChangePassword} className="flex flex-col gap-6">
-                                        <Field label="Mật khẩu cũ" required>
-                                            <input
-                                                type="password"
-                                                className={inputCls}
-                                                value={passwordData.oldPassword}
-                                                onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
-                                                placeholder="Nhập mật khẩu hiện tại"
-                                                required
-                                            />
-                                        </Field>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <Field label="Mật khẩu mới" required>
+                                            <Field label="Nhập mật khẩu của bạn để xác nhận" required>
                                                 <input
                                                     type="password"
-                                                    className={inputCls}
-                                                    value={passwordData.newPassword}
-                                                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                                                    placeholder="••••••••"
+                                                    className={`${inputCls} border-red-200 focus:border-red-400`}
+                                                    value={deletePassword}
+                                                    onChange={(e) => setDeletePassword(e.target.value)}
+                                                    placeholder="Mật khẩu của bạn"
                                                     required
                                                 />
                                             </Field>
-                                            <Field label="Xác nhận mật khẩu mới" required>
-                                                <input
-                                                    type="password"
-                                                    className={inputCls}
-                                                    value={passwordData.confirmPassword}
-                                                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                                                    placeholder="••••••••"
-                                                    required
-                                                />
-                                            </Field>
-                                        </div>
-                                        <div className="flex justify-end pt-2">
+
                                             <button
-                                                type="submit"
-                                                disabled={passwordLoading}
-                                                className="bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold px-10 py-3 rounded-full! cursor-pointer border-none transition-colors duration-200 shadow-md shadow-amber-200"
+                                                onClick={handleDeleteAccount}
+                                                disabled={!deletePassword || loading}
+                                                className="mt-6 w-full sm:w-auto bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold py-3 px-10 rounded-full! cursor-pointer border-none transition-colors duration-200"
                                             >
-                                                {passwordLoading ? 'Đang xử lý...' : 'Cập nhật mật khẩu'}
+                                                {loading ? 'Đang xử lý...' : 'Xác nhận xóa tài khoản'}
                                             </button>
                                         </div>
-                                    </form>
-                                </div>
-                            )}
-
-                            {/* ---- TAB: DANGER ---- */}
-                            {activeTab === 'danger' && (
-                                <div className="animate-fade-in">
-                                    <TabHeader icon="trash" title="Vùng nguy hiểm" danger />
-
-                                    <div className="p-6 bg-red-50 border border-red-100 rounded-2xl">
-                                        <div className="flex items-center gap-3 mb-4 text-red-700">
-                                            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                                <AppIcon name="alert" size={20} />
-                                            </div>
-                                            <h3 className="text-lg font-bold">Xóa tài khoản vĩnh viễn</h3>
-                                        </div>
-                                        <p className="text-sm text-stone-600 mb-6 leading-relaxed">
-                                            Khi bạn xóa tài khoản, mọi dữ liệu liên quan bao gồm các tin đăng phòng, tin nhắn và lịch sử giao dịch sẽ bị xóa vĩnh viễn. Thao tác này <b>không thể hoàn tác</b>.
-                                        </p>
-
-                                        <Field label="Nhập mật khẩu của bạn để xác nhận" required>
-                                            <input
-                                                type="password"
-                                                className={`${inputCls} border-red-200 focus:border-red-400`}
-                                                value={deletePassword}
-                                                onChange={(e) => setDeletePassword(e.target.value)}
-                                                placeholder="Mật khẩu của bạn"
-                                                required
-                                            />
-                                        </Field>
-
-                                        <button
-                                            onClick={handleDeleteAccount}
-                                            disabled={!deletePassword || loading}
-                                            className="mt-6 w-full sm:w-auto bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold py-3 px-10 rounded-full! cursor-pointer border-none transition-colors duration-200"
-                                        >
-                                            {loading ? 'Đang xử lý...' : 'Xác nhận xóa tài khoản'}
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </main>
                     </div>
                 </div>

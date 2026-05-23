@@ -12,6 +12,7 @@ export const ModalProvider = ({ children }) => {
         message: "",
         type: "info", // 'info', 'success', 'error', 'warning'
         onConfirm: null,
+        onCancel: null,
         confirmText: "Đóng",
         cancelText: null,
     });
@@ -24,7 +25,7 @@ export const ModalProvider = ({ children }) => {
 
     /**
      * showModal - Hiển thị thông báo thay thế alert/confirm
-     * @param {Object} config - { title, message, type, onConfirm, confirmText, cancelText }
+     * @param {Object} config - { title, message, type, onConfirm, onCancel, confirmText, cancelText }
      */
     const showModal = useCallback((config) => {
         setModalConfig({
@@ -33,6 +34,7 @@ export const ModalProvider = ({ children }) => {
             message: config.message || "",
             type: config.type || "info",
             onConfirm: config.onConfirm || null,
+            onCancel: config.onCancel || null,
             confirmText: config.confirmText || "Đóng",
             cancelText: config.cancelText || null,
         });

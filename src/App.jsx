@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 import { mapSupabaseRoom } from './utils/roomMapper.js';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { useModal } from './context/ModalContext.jsx';
@@ -61,6 +62,24 @@ export default function App() {
             return;
         }
 
+        if (page === 'admin') {
+            if (!user) {
+                navigate('login');
+                return;
+            }
+            // TẠM THỜI: Cho phép mọi user đã đăng nhập để dễ test thử
+            /*
+            if (user.user_metadata?.role !== 'admin') {
+                showModal({
+                    title: "Từ chối truy cập",
+                    message: "Bạn không có quyền quản trị viên để truy cập trang này.",
+                    type: "error"
+                });
+                return;
+            }
+            */
+        }
+
         // Draft Check for Room Detail
         if (page === 'room-detail' && data?.status === 'draft') {
             showModal({
@@ -103,7 +122,7 @@ export default function App() {
                 // --- SLUG ROUTING LOGIC (Cập nhật URL tức thời khi cửa đã đóng) ---
                 if (targetPage === 'home') {
                     window.history.pushState(null, '', '/');
-                } else if (['login', 'register', 'profile', 'dashboard'].includes(targetPage)) {
+                } else if (['login', 'register', 'profile', 'dashboard', 'admin'].includes(targetPage)) {
                     window.history.pushState(null, '', `/${targetPage}`);
                 }
 
@@ -152,7 +171,7 @@ export default function App() {
                 window.history.pushState(null, '', `/${targetData.slug}`);
             } else if (targetPage === 'home') {
                 window.history.pushState(null, '', '/');
-            } else if (['login', 'register', 'profile', 'dashboard'].includes(targetPage)) {
+            } else if (['login', 'register', 'profile', 'dashboard', 'admin'].includes(targetPage)) {
                 window.history.pushState(null, '', `/${targetPage}`);
             }
 
@@ -177,12 +196,29 @@ export default function App() {
         return () => subscription.unsubscribe();
     }, []);
 
-    // Authentication Protection for /profile and /dashboard
+    // Authentication Protection for /profile, /dashboard, and /admin
     useEffect(() => {
-        if (authLoaded && ['profile', 'dashboard'].includes(currentPage) && !user) {
-            navigate('login');
+        if (authLoaded) {
+            if (['profile', 'dashboard'].includes(currentPage) && !user) {
+                navigate('login');
+            } else if (currentPage === 'admin') {
+                if (!user) {
+                    navigate('login');
+                }
+                // TẠM THỜI: Cho phép mọi user đã đăng nhập để dễ test thử
+                /*
+                else if (user.user_metadata?.role !== 'admin') {
+                    showModal({
+                        title: "Từ chối truy cập",
+                        message: "Bạn không có quyền quản trị viên để truy cập trang này.",
+                        type: "error"
+                    });
+                    navigate('home');
+                }
+                */
+            }
         }
-    }, [authLoaded, user, currentPage]);
+    }, [authLoaded, user, currentPage, showModal]);
 
     // Xử lý tải URL ban đầu và các nút Back/Forward của trình duyệt
     useEffect(() => {
@@ -196,7 +232,7 @@ export default function App() {
                     return;
                 }
 
-                if (['login', 'register', 'profile', 'dashboard'].includes(path)) {
+                if (['login', 'register', 'profile', 'dashboard', 'admin'].includes(path)) {
                     setCurrentPage(path);
                     setPageData(null);
                     return;
@@ -237,7 +273,7 @@ export default function App() {
             };
 
             // Xác định xem trang mới (target) hoặc trang hiện tại (current) có phải là room-detail không
-            const isTargetRoomDetail = !['', 'login', 'register', 'profile', 'dashboard'].includes(path);
+            const isTargetRoomDetail = !['', 'login', 'register', 'profile', 'dashboard', 'admin'].includes(path);
             const isCurrentRoomDetail = currentPage === 'room-detail';
 
             // Nếu đây là popstate (Back/Forward trình duyệt) và không phải lần tải đầu tiên, và không liên quan đến chi tiết phòng
@@ -309,7 +345,7 @@ export default function App() {
 
                     <main>
                         {/* Base Layer: HomePage remains mounted to preserve scroll/filters */}
-                        <div className={(showLayout && !['profile', 'dashboard'].includes(currentPage) && !(currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
+                        <div className={(showLayout && !['profile', 'dashboard', 'admin'].includes(currentPage) && !(currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
                             <HomePage
                                 navigate={navigate}
                                 user={user}
@@ -326,6 +362,11 @@ export default function App() {
                         {/* Dashboard Layer */}
                         <div className={currentPage === 'dashboard' ? 'block' : 'hidden'}>
                             <DashboardPage user={user} navigate={navigate} initialData={pageData} />
+                        </div>
+
+                        {/* Admin Layer */}
+                        <div className={currentPage === 'admin' ? 'block' : 'hidden'}>
+                            <AdminPage user={user} navigate={navigate} />
                         </div>
 
                         {/* Overlay Layer: Room Detail as a popup */}

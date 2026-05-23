@@ -91,8 +91,9 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
         lastIncrementedRoomId.current = room.id;
 
+        const initialViews = room.metadata?.total_views || 0;
         const incrementViews = async () => {
-            const { data, error } = await incrementRoomViews(room.id, room.metadata?.total_views || 0);
+            const { data, error } = await incrementRoomViews(room.id, initialViews);
             if (!error && data) {
                 setViews(data.total_views);
             }
@@ -100,7 +101,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
         incrementViews();
         // Only run once per room.id to prevent infinite loops and double increments
-    }, [room?.id, previewMode]);
+    }, [room?.id, previewMode, room.metadata?.total_views]);
 
 
     if (!room) {

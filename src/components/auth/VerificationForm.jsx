@@ -6,7 +6,7 @@
  * @param {Function} props.onBack - Go back to step 1
  * @param {boolean} props.loading - Submission loading state
  */
-export default function VerificationForm({ onSubmit, onBack, loading }) {
+export default function VerificationForm({ onSubmit, onBack, loading, submitText = 'Hoàn tất & Đăng ký' }) {
     const labelCls = "block text-sm font-semibold text-stone-700 mb-1.5";
 
     return (
@@ -51,7 +51,7 @@ export default function VerificationForm({ onSubmit, onBack, loading }) {
                     disabled={loading}
                     className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-bold py-3 rounded-full cursor-pointer border-none transition-colors shadow-lg shadow-amber-200"
                 >
-                    {loading ? 'Đang gửi hồ sơ...' : 'Hoàn tất & Đăng ký'}
+                    {loading ? 'Đang gửi hồ sơ...' : submitText}
                 </button>
                 <button
                     onClick={onBack}

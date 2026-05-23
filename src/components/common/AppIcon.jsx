@@ -51,7 +51,8 @@ import {
     TbMinus,
     TbFileText,
     TbCalendar,
-    TbRefresh
+    TbRefresh,
+    TbSettings
 } from 'react-icons/tb';
 import { PiWashingMachine } from "react-icons/pi";
 
@@ -123,6 +124,7 @@ const ICON_MAP = {
     'file-text': TbFileText,
     calendar: TbCalendar,
     reload: TbRefresh,
+    settings: TbSettings,
 };
 
 export default function AppIcon({ name, size = 18, color = 'currentColor', strokeWidth = 2, style, className, ...props }) {

@@ -71,100 +71,120 @@ export default function DashboardPage({ user, navigate, initialData }) {
                     <p className="text-stone-500 text-sm mt-1">Quản lý tin đăng và thông tin thuê phòng của bạn.</p>
                 </div>
 
-                <div className="bg-white border border-stone-200 rounded-xl overflow-hidden">
-                    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] items-stretch">
+                <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] items-stretch min-h-[500px]">
 
                         {/* Sidebar */}
-                        <aside className="lg:border-r border-stone-100 bg-stone-50/30">
-                            <div className="flex flex-col py-4">
-                                {TAB_GROUPS.map((group) => {
-                                    return (
-                                        <div key={group.label} className="mb-6 last:mb-0">
-                                            <div className="px-6 py-2 text-[0.68rem] font-black text-stone-400 uppercase tracking-[0.15em] mb-1">
-                                                {group.label}
-                                            </div>
-                                            {group.tabs.map((tab) => (
-                                                <button
-                                                    key={tab.id}
-                                                    onClick={() => setActiveTab(tab.id)}
-                                                    className={`flex items-center gap-3 w-full px-6 py-3.5 text-[0.9rem] font-bold cursor-pointer transition-all duration-200 text-left border-none ${activeTab === tab.id
-                                                        ? 'bg-white text-amber-600 border-r-4 border-r-amber-500 shadow-[inset_-1px_0_0_#fff]'
-                                                        : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
-                                                        }`}
-                                                >
-                                                    <AppIcon name={tab.icon} size={18} strokeWidth={activeTab === tab.id ? 2.5 : 2} />
-                                                    {tab.label}
-                                                </button>
-                                            ))}
+                        <aside className="lg:border-r border-stone-100 bg-stone-50/30 p-6 flex flex-col justify-between">
+                            <div className="space-y-6">
+                                {TAB_GROUPS.map((group) => (
+                                    <div key={group.label} className="space-y-2">
+                                        <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                            {group.label}
                                         </div>
-                                    );
-                                })}
+                                        <div className="space-y-1">
+                                            {group.tabs.map((tab) => {
+                                                const isActive = activeTab === tab.id;
+                                                return (
+                                                    <button
+                                                        key={tab.id}
+                                                        onClick={() => setActiveTab(tab.id)}
+                                                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
+                                                            isActive 
+                                                                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20' 
+                                                                : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                                        }`}
+                                                    >
+                                                        <AppIcon name={tab.icon} size={18} strokeWidth={isActive ? 2.5 : 2} />
+                                                        <span>{tab.label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </aside>
 
                         {/* Content panel */}
-                        <main className="p-6 md:p-10 min-h-[500px] bg-white min-w-0">
-
-                            {/* ---- TAB: MANAGE ROOMS ---- */}
-                            {activeTab === 'manage_rooms' && (
-                                <ManageRoomsTab
-                                    rooms={rooms}
-                                    loadingRooms={loadingRooms}
-                                    currentPage={currentPage}
-                                    setCurrentPage={setCurrentPage}
-                                    subTab={subTab}
-                                    setSubTab={setSubTab}
-                                    handlePublishFromDraft={handlePublishFromDraft}
-                                    handleUnpublish={handleUnpublish}
-                                    handleMockVerify={handleMockVerify}
-                                    handleDeleteRoom={handleDeleteRoom}
-                                    handleDuplicateRoom={handleDuplicateRoom}
-                                    setPreviewRoom={setPreviewRoom}
-                                    setEditingRoom={setEditingRoom}
-                                    setIsCreating={setIsCreating}
-                                    setActiveTab={setActiveTab}
-                                    handleRenewRoom={handleRenewRoom}
-                                />
-                            )}
-
-                            {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}
-                            {activeTab === 'post_room' && (
-                                <div className="animate-fade-in">
-                                    {!editingRoom && !isCreating ? (
-                                        <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
-                                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 text-stone-300">
-                                                <AppIcon name="edit" size={32} />
-                                            </div>
-                                            <h3 className="text-lg font-bold text-stone-900 mb-2">Không có yêu cầu chỉnh sửa tin đăng nào</h3>
-                                            <p className="text-stone-500 text-sm max-w-sm px-6 mb-6">
-                                                Bạn có thể chọn một tin đăng để chỉnh sửa từ danh sách, hoặc bạn có thể{' '}
-                                                <button
-                                                    onClick={() => setIsCreating(true)}
-                                                    className="text-amber-600 font-bold hover:text-amber-700 cursor-pointer bg-transparent border-none p-0 inline"
-                                                >
-                                                    tạo tin đăng mới
-                                                </button>
-                                            </p>
-                                        </div>
-                                    ) : (
-                                        <RoomPostForm
-                                            user={user}
-                                            roomToEdit={editingRoom}
-                                            onClear={() => {
-                                                setEditingRoom(null);
-                                                setIsCreating(false);
-                                                setActiveTab('manage_rooms');
-                                            }}
-                                            onSuccess={() => {
-                                                setEditingRoom(null);
-                                                setIsCreating(false);
-                                                setActiveTab('manage_rooms');
-                                            }}
+                        <main className="p-6 md:p-10 bg-white min-w-0">
+                            <AnimatePresence mode="wait">
+                                
+                                {/* ---- TAB: MANAGE ROOMS ---- */}
+                                {activeTab === 'manage_rooms' && (
+                                    <motion.div
+                                        key="manage_rooms"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <ManageRoomsTab
+                                            rooms={rooms}
+                                            loadingRooms={loadingRooms}
+                                            currentPage={currentPage}
+                                            setCurrentPage={setCurrentPage}
+                                            subTab={subTab}
+                                            setSubTab={setSubTab}
+                                            handlePublishFromDraft={handlePublishFromDraft}
+                                            handleUnpublish={handleUnpublish}
+                                            handleMockVerify={handleMockVerify}
+                                            handleDeleteRoom={handleDeleteRoom}
+                                            handleDuplicateRoom={handleDuplicateRoom}
+                                            setPreviewRoom={setPreviewRoom}
+                                            setEditingRoom={setEditingRoom}
+                                            setIsCreating={setIsCreating}
+                                            setActiveTab={setActiveTab}
+                                            handleRenewRoom={handleRenewRoom}
                                         />
-                                    )}
-                                </div>
-                            )}
+                                    </motion.div>
+                                )}
 
+                                {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}
+                                {activeTab === 'post_room' && (
+                                    <motion.div
+                                        key="post_room"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        {!editingRoom && !isCreating ? (
+                                            <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
+                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
+                                                    <AppIcon name="edit" size={32} />
+                                                </div>
+                                                <h3 className="text-lg font-bold text-stone-900 mb-2">Không có yêu cầu chỉnh sửa tin đăng nào</h3>
+                                                <p className="text-stone-500 text-sm max-w-sm px-6 mb-6">
+                                                    Bạn có thể chọn một tin đăng để chỉnh sửa từ danh sách, hoặc bạn có thể{' '}
+                                                    <button
+                                                        onClick={() => setIsCreating(true)}
+                                                        className="text-amber-600 font-bold hover:text-amber-700 cursor-pointer bg-transparent border-none p-0 inline"
+                                                    >
+                                                        tạo tin đăng mới
+                                                    </button>
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <RoomPostForm
+                                                user={user}
+                                                roomToEdit={editingRoom}
+                                                onClear={() => {
+                                                    setEditingRoom(null);
+                                                    setIsCreating(false);
+                                                    setActiveTab('manage_rooms');
+                                                }}
+                                                onSuccess={() => {
+                                                    setEditingRoom(null);
+                                                    setIsCreating(false);
+                                                    setActiveTab('manage_rooms');
+                                                }}
+                                            />
+                                        )}
+                                    </motion.div>
+                                )}
+
+                            </AnimatePresence>
                         </main>
                     </div>
                 </div>

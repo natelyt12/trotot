@@ -33,6 +33,11 @@ export default function GlobalModal({ config, onClose }) {
         onClose();
     };
 
+    const handleCancel = () => {
+        if (config.onCancel) config.onCancel();
+        onClose();
+    };
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -44,7 +49,7 @@ export default function GlobalModal({ config, onClose }) {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
                         className="absolute inset-0 bg-stone-900/60"
-                        onClick={onClose}
+                        onClick={handleCancel}
                     />
 
                     {/* Modal Content - Slide up with expoOut */}
@@ -88,7 +93,7 @@ export default function GlobalModal({ config, onClose }) {
 
                                 {cancelText && (
                                     <button
-                                        onClick={onClose}
+                                        onClick={handleCancel}
                                         className="w-full py-3.5 rounded-xl font-bold text-sm text-stone-600 bg-stone-50 hover:bg-stone-100 transition-all cursor-pointer border-none"
                                     >
                                         {cancelText}
