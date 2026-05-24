@@ -27,37 +27,40 @@
 
 ---
 
-## 🛠️ Công nghệ sử dụng
+## 🛠️ Công nghệ sử dụng (Detailed Tech Stack)
 
-### Giao diện người dùng (`Frontend`)
+Dưới đây là mô tả chi tiết toàn bộ các công nghệ, thư viện và công cụ được điều phối hoạt động trong dự án TroTot:
 
-| Công nghệ | Vai trò |
-|-----------|---------|
-| **React 19** | Thư viện xây dựng giao diện, mỗi thành phần là một "mảnh" màn hình độc lập |
-| **Vite 8** | Công cụ chạy ứng dụng khi lập trình và đóng gói khi phát hành |
-| **TailwindCSS 4** | Bộ công cụ tạo giao diện — tô màu, căn chỉnh bố cục qua class CSS |
-| **Framer Motion 12** | Thư viện tạo hiệu ứng chuyển động và animation |
-| **React Icons 5** | Bộ icon dùng trong giao diện |
+### 1. Giao diện người dùng (`Frontend Core & Styling`)
 
-### Dữ liệu & đăng nhập (`Backend` — dùng dịch vụ Supabase)
+| Công nghệ / Thư viện | Phiên bản | Vai trò & Mô tả chi tiết |
+|:---|:---|:---|
+| **React** | `^19.2.4` | Thư viện cốt lõi để xây dựng giao diện người dùng theo kiến trúc Component (Thành phần). Phiên bản React 19 mang lại hiệu năng tối ưu, quản lý State mượt mà và tận dụng tối đa hook hiện đại. |
+| **Vite** | `^8.0.4` | Build tool và Development server siêu nhanh thế hệ mới thay thế cho CRA. Đảm bảo Hot Module Replacement (HMR) tức thì trong quá trình phát triển và đóng gói bundle cực kỳ gọn nhẹ khi deploy. |
+| **TailwindCSS** | `^4.2.2` | Framework utility-first CSS để xây dựng giao diện nhanh chóng, đồng bộ hệ thống design token (colors, spacing, shadows). Phiên bản 4.x mang lại hiệu năng biên dịch tối ưu vượt trội. |
+| **@tailwindcss/vite** | `^4.2.2` | Plugin tích hợp sâu TailwindCSS trực tiếp vào luồng xử lý của Vite, giúp quá trình hot-reload và build CSS diễn ra nhanh chóng, trơn tru. |
+| **Framer Motion** | `^12.38.0` | Thư viện diễn hoạt (animation) cao cấp. Được sử dụng để xây dựng hiệu ứng "cửa trượt" chuyển trang mượt mà, hiệu ứng mở rộng chi tiết tin đăng (overlay modal slide-up/down) và hiệu ứng chuyển động vi mô (micro-interactions). |
+| **React Icons** | `^5.6.0` | Bộ thư viện tích hợp hàng ngàn icon từ các nguồn nổi tiếng (như Lucide, Tabler, Heroicons). Trong dự án, hệ thống icon được gói gọn và phân phối tập trung qua component `AppIcon`. |
 
-| Thành phần | Vai trò |
-|------------|---------|
-| **Xác thực** (`Auth`) | Quản lý đăng nhập bằng email và mật khẩu, cấp phiên làm việc |
-| **Cơ sở dữ liệu** (`PostgreSQL`) | Lưu trữ thông tin phòng, người dùng, bình luận, danh sách yêu thích |
-| **Kho lưu trữ file** (`Storage`) | Lưu ảnh phòng và ảnh đại diện người dùng |
+### 2. Dữ liệu, Xác thực & Lưu trữ (`Backend & Infrastructure`)
 
-### Lưu trữ hình ảnh
+| Thành phần Dịch vụ | Công nghệ sử dụng | Vai trò & Mô tả chi tiết |
+|:---|:---|:---|
+| **Dịch vụ Backend (BaaS)** | **Supabase** | Nền tảng Cloud BaaS mã nguồn mở mạnh mẽ, đóng vai trò là xương sống phía Backend cho ứng dụng, cung cấp sẵn các API RESTful bảo mật cao thông qua cơ chế RLS (Row Level Security). |
+| **Thư viện Client SDK** | **@supabase/supabase-js** `^2.104.0` | SDK chính thức để kết nối Frontend trực tiếp với dịch vụ Supabase để truy vấn DB, lắng nghe Auth State và thao tác Storage. |
+| **Cơ sở dữ liệu** | **PostgreSQL (v15+)** | Lưu trữ toàn bộ dữ liệu có cấu trúc của ứng dụng (`profiles`, `rooms`, `comments`, `favorites`). Sử dụng các tính năng nâng cao như **Database Views** (`rooms_view` tự động tính toán hết hạn tin đăng theo thời gian thực) và RLS bảo mật ở mức dòng. |
+| **Xác thực người dùng** | **Supabase Auth** | Quản lý đăng ký, đăng nhập bảo mật bằng Email/Password, cấp phát phiên làm việc (Session) JWT, quản lý phân quyền User Metadata (Tenant / Landlord / Admin). |
+| **Kho lưu trữ tệp tin** | **Supabase Storage / Cloudinary** | Lưu trữ tệp tin tĩnh. Ảnh đại diện và ảnh phòng trọ được tải lên và phân phối thông qua Supabase Storage bucket (`room_media`, `user_avatar`) làm phương án dự phòng. |
+| **Tối ưu hóa hình ảnh** | **Cloudinary Service** | Dịch vụ đám mây tối ưu ảnh hàng đầu. Được tích hợp để nén, tự động căn chỉnh và phân phối hình ảnh phòng trọ/avatar chất lượng cao với băng thông tiết kiệm nhất thông qua API Edge Function. |
 
-| Công nghệ | Vai trò |
-|-----------|---------|
-| **Cloudinary** | Dịch vụ tải lên và tối ưu ảnh phòng, ảnh đại diện _(nếu không cấu hình, ảnh sẽ được lưu trên Supabase Storage)_ |
+### 3. Công cụ kiểm soát mã nguồn & Triển khai (`DevOps & Tooling`)
 
-### Triển khai & phát hành (`Deployment`)
-
-| Công nghệ | Vai trò |
-|-----------|---------|
-| **Vercel** | Nền tảng đăng ứng dụng lên mạng, tự động cập nhật khi có thay đổi code |
+| Công cụ / Nền tảng | Vai trò & Mô tả chi tiết |
+|:---|:---|:---|
+| **Vercel** | Nền tảng lưu trữ và triển khai Frontend tự động (CI/CD) đồng bộ trực tiếp với kho mã nguồn Git. |
+| **ESLint** (`^9.39.4`) | Công cụ phân tích mã tĩnh để tự động kiểm tra cú pháp, chuẩn hóa code style và cảnh báo lỗi logic trong quá trình code. |
+| **Dotenv** (`^17.4.2`) | Thư viện quản lý các biến môi trường bí mật (`VITE_SUPABASE_URL`, `VITE_CLOUDINARY_CLOUD_NAME`...) an toàn trong file `.env`. |
+| **Autoprefixer & PostCSS** | Các thư viện tiền xử lý CSS giúp tự động thêm các vendor prefix (như `-webkit-`, `-moz-`) để đảm bảo giao diện hiển thị tương thích hoàn hảo trên mọi trình duyệt (Safari, Chrome, Firefox). |
 
 ---
 

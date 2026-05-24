@@ -14,7 +14,7 @@ export default function LandlordCard({
 }) {
     const computedExpired = isExpired !== undefined 
         ? isExpired 
-        : (room.metadata?.status === 'expired' || room.status === 'expired' || (room.available_until && new Date(room.available_until) < new Date()));
+        : (room.metadata?.status === 'expired' || room.status === 'expired');
 
     const { basic_info, monthly_costs, media_contact } = room;
 

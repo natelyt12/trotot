@@ -109,7 +109,7 @@ export default function PublicProfilePage({ userId, navigate }) {
     return (
         <div className="min-h-screen bg-stone-50 pt-20 pb-20">
             <div className="max-w-4xl mx-auto px-4 sm:px-6">
-                
+
                 {/* Back Button */}
                 <button
                     onClick={() => navigate('back')}
@@ -123,7 +123,7 @@ export default function PublicProfilePage({ userId, navigate }) {
                 <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 relative overflow-hidden mb-8">
                     {/* Top background accent */}
                     <div className="absolute top-0 inset-x-0 h-2 bg-linear-to-r from-amber-500 to-orange-500" />
-                    
+
                     {/* Avatar */}
                     <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full! border-4 border-stone-100 overflow-hidden bg-stone-100 shrink-0">
                         {avatar_url ? (
@@ -158,13 +158,13 @@ export default function PublicProfilePage({ userId, navigate }) {
                             </div>
                         </div>
 
-                        {/* Phone contact */}
+                        {/* Phone & Zalo contact */}
                         {phone && (
-                            <div className="mt-2 flex flex-col sm:flex-row items-center gap-3">
+                            <div className="mt-2 flex flex-wrap items-center gap-3 justify-center sm:justify-start">
                                 {showPhone ? (
                                     <a
                                         href={`tel:${phone}`}
-                                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl! px-5 py-2.5 cursor-pointer text-sm font-bold transition-all shadow-xs border-none select-all"
+                                        className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white rounded-full! px-6 py-2.5 cursor-pointer text-sm font-bold transition-all shadow-xs border-none select-all"
                                     >
                                         <AppIcon name="phone" size={16} />
                                         <span>{phone}</span>
@@ -172,12 +172,21 @@ export default function PublicProfilePage({ userId, navigate }) {
                                 ) : (
                                     <button
                                         onClick={() => setShowPhone(true)}
-                                        className="flex items-center gap-2 bg-stone-950 hover:bg-stone-900 text-white rounded-xl! px-5 py-2.5 cursor-pointer text-sm font-bold transition-all border-none"
+                                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-full! px-6 py-2.5 cursor-pointer text-sm font-bold transition-all border-none shadow-xs"
                                     >
                                         <AppIcon name="phone" size={16} />
                                         <span>Hiện số điện thoại liên hệ</span>
                                     </button>
                                 )}
+
+                                <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 bg-[#0068ff] hover:bg-[#005ad9] text-white rounded-full! px-6 py-2.5 cursor-pointer text-sm font-bold transition-all border-none shadow-xs"
+                                >
+                                    <AppIcon name="message-circle" size={16} />
+                                    <span>Liên hệ Zalo</span>
+                                </a>
                             </div>
                         )}
                     </div>

@@ -24,7 +24,7 @@ export default function ManageRoomsTab({
     const ITEMS_PER_PAGE = 10;
 
     const filteredRooms = rooms.filter(room => {
-        const isExpired = room.status === 'expired' || (room.available_until && new Date(room.available_until) < new Date());
+        const isExpired = room.status === 'expired';
         
         if (subTab === 'expired') {
             return isExpired;
@@ -128,7 +128,7 @@ export default function ManageRoomsTab({
                 return (
                     <div className="space-y-4">
                         {filteredRooms.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((room) => {
-                            const isExpired = room.status === 'expired' || (room.available_until && new Date(room.available_until) < new Date());
+                            const isExpired = room.status === 'expired';
                             return (
                                 <div key={room.id} className="flex flex-col p-4 border border-stone-100 rounded-xl hover:border-amber-300 transition-all bg-white group gap-3">
                                 {/* Nội dung bên trên */}

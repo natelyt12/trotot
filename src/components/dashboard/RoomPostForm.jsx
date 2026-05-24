@@ -766,14 +766,20 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 <FormSection title="Thông tin cơ bản" icon="home">
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-[0.7rem] font-bold text-stone-400 uppercase mb-1.5 tracking-tight">Tiêu đề tin đăng *</label>
+                            <div className="flex justify-between items-baseline mb-1.5">
+                                <label className="block text-[0.7rem] font-bold text-stone-400 uppercase tracking-tight">Tiêu đề tin đăng *</label>
+                                <span className={`text-[0.65rem] font-bold ${(formData.title || '').length >= 40 ? 'text-red-500 font-extrabold' : 'text-stone-400 font-medium'}`}>
+                                    {(formData.title || '').length} / 40
+                                </span>
+                            </div>
                             <input
                                 type="text"
                                 required
-                                placeholder="VD: Phòng trọ ban công, gần ĐH Bách Khoa..."
+                                maxLength={40}
+                                placeholder="VD: Phòng trọ ban công, gần ĐH Bách Khoa... (Tối đa 40 ký tự)"
                                 className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 transition-all text-sm font-medium"
                                 value={formData.title}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value.slice(0, 40) })}
                             />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -989,11 +995,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                             {/* Tiền cọc - Row riêng */}
                             <div>
-                                <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền cọc * (Tối thiểu 500k)</label>
+                                <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền cọc * (Tối thiểu 100k)</label>
                                 <input
                                     type="number"
                                     required
-                                    min="500000"
+                                    min="100000"
                                     max="500000000"
                                     className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-bold text-stone-700 focus:border-amber-500 outline-none transition-colors"
                                     value={formData.monthly_costs.deposit_amount}

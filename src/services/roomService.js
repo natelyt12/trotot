@@ -9,7 +9,7 @@ import { mapSupabaseRoom } from '../utils/roomMapper.js';
 export const getRoomById = async (id) => {
     try {
         const { data, error } = await supabase
-            .from('rooms')
+            .from('rooms_view')
             .select('*, profiles(*)')
             .eq('listing_id', id)
             .single();
@@ -33,7 +33,7 @@ export const getRoomById = async (id) => {
 export const getUserRooms = async (userId) => {
     try {
         const { data, error } = await supabase
-            .from('rooms')
+            .from('rooms_view')
             .select('*, profiles!user_id(full_name, phone, avatar_url, role)')
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
@@ -222,14 +222,10 @@ export const incrementRoomViews = async (roomId, currentViews) => {
  */
 export const getFilteredRooms = async (filters, targetPage, itemsPerPage = 18) => {
     try {
-        const now = new Date().toISOString();
-
         let query = supabase
-            .from('rooms')
+            .from('rooms_view')
             .select('*, profiles(*)', { count: 'exact' })
-            .eq('status', 'available')
-            // Bug #12: Ẩn tin hết hạn – chỉ lấy tin còn hạn hoặc không có ngày hết hạn
-            .or(`available_until.gt.${now},available_until.is.null`);
+            .eq('status', 'available');
 
         // Apply Filters
         if (filters.city) query = query.eq('city', filters.city);
@@ -296,7 +292,7 @@ export const getDistinctCities = async () => {
             return { data, error: null };
         }
         // Fallback to direct query
-        const { data: rooms, error } = await supabase.from('rooms').select('city').limit(1000);
+        const { data: rooms, error } = await supabase.from('rooms_view').select('city').limit(1000);
         if (error) throw error;
         const cities = [...new Set(rooms.map(r => r.city))].filter(Boolean).sort();
         return { data: cities, error: null };
@@ -370,7 +366,7 @@ export const deleteCloudinaryImage = async (publicId) => {
 export const getRoomsByIds = async (ids) => {
     try {
         const { data, error } = await supabase
-            .from('rooms')
+            .from('rooms_view')
             .select('*, profiles(*)')
             .in('id', ids);
         return { data, error };
@@ -393,7 +389,7 @@ export const getActiveUserRooms = async (userId, targetPage = 0, itemsPerPage = 
         const to = from + itemsPerPage - 1;
 
         const { data, error, count } = await supabase
-            .from('rooms')
+            .from('rooms_view')
             .select('*, profiles!user_id(full_name, phone, avatar_url, role)', { count: 'exact' })
             .eq('user_id', userId)
             .eq('status', 'available')

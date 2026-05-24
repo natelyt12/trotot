@@ -14,7 +14,7 @@ export default function RoomCard({ room, onClick, style }) {
     const { showModal } = useModal();
     
     const hasImage = media_contact.images?.[0]?.url;
-    const isExpired = metadata.status === 'expired' || (room.available_until && new Date(room.available_until) < new Date());
+    const isExpired = metadata.status === 'expired';
     const isAvailable = metadata.status === 'available' && !isExpired;
     const mediaCount = (media_contact.images?.length || 0) + (media_contact.video_urls?.length || 0);
     const hasVideo = media_contact.video_urls?.length > 0;

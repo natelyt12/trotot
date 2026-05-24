@@ -28,12 +28,12 @@ export const validateRoomData = (room, options = {}) => {
         errors.push("Thiếu địa chỉ đầy đủ (Tỉnh, Huyện, Xã, Số nhà)");
     }
 
-    // 5. Tiền đặt cọc (từ 500.000đ trở lên)
+    // 5. Tiền đặt cọc (từ 100.000đ trở lên)
     const deposit = typeof room.monthly_costs?.deposit_amount === 'string'
         ? parseFloat(room.monthly_costs.deposit_amount)
         : room.monthly_costs?.deposit_amount;
-    if (!deposit || deposit < 500000) {
-        errors.push("Tiền cọc phải từ 500.000đ trở lên");
+    if (!deposit || deposit < 100000) {
+        errors.push("Tiền cọc phải từ 100.000đ trở lên");
     }
 
     // 6. Hình ảnh thực tế (tối thiểu 1 ảnh)

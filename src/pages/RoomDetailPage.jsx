@@ -137,7 +137,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
             ? media_contact.images.map(img => ({ type: 'image', url: typeof img === 'string' ? img : img.url }))
             : [{ type: 'placeholder' }])
     ];
-    const isExpired = metadata.status === 'expired' || (resolvedRoom.available_until && new Date(resolvedRoom.available_until) < new Date());
+    const isExpired = metadata.status === 'expired';
     const isAvailable = metadata.status === 'available' && !isExpired;
 
 

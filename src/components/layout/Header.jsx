@@ -3,9 +3,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import SearchTrigger from "../search/SearchTrigger.jsx";
 import { useRoomFilterContext } from "../../context/RoomFilterContext.jsx";
 import AppIcon from "../common/AppIcon.jsx";
+import { useModal } from "../../context/ModalContext.jsx";
+import { signOut } from "../../services/authService.js";
 
 export default function Header({ currentPage, navigate, user, onSearchClick }) {
     const { filters, getLocationDisplayText } = useRoomFilterContext();
+    const { showModal } = useModal();
+
+    const handleLogout = () => {
+        showModal({
+            title: "Xác nhận đăng xuất",
+            message: "Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?",
+            type: "warning",
+            confirmText: "Đăng xuất",
+            cancelText: "Hủy",
+            onConfirm: async () => {
+                await signOut();
+                navigate("home");
+            }
+        });
+    };
     const searchDisplayText = getLocationDisplayText();
     const isSearchFilled = filters.city || filters.university;
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -180,6 +197,18 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                                 <span>Trang quản trị (Test)</span>
                                             </button>
                                         )}
+                                        <div className="h-px bg-stone-100 my-1.5" />
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer border-none bg-transparent"
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                                <polyline points="16 17 21 12 16 7" />
+                                                <line x1="21" y1="12" x2="9" y2="12" />
+                                            </svg>
+                                            <span>Đăng xuất</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -315,6 +344,17 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                             className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-stone-900 transition-colors duration-200"
                         >
                             Trang quản trị (Test)
+                        </button>
+                    )}
+                    {user && (
+                        <button
+                            onClick={() => {
+                                handleLogout();
+                                setMobileOpen(false);
+                            }}
+                            className="block w-full text-left bg-transparent border-none py-3 px-1 text-red-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-red-700 transition-colors duration-200"
+                        >
+                            Đăng xuất
                         </button>
                     )}
                 </div>

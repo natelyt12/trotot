@@ -282,7 +282,7 @@ export default function App() {
                     const slug = path.slice(6); // 'rooms/'.length === 6
                     try {
                         const { data: room, error } = await supabase
-                            .from('rooms')
+                            .from('rooms_view')
                             .select('*, profiles(*)')
                             .eq('slug', slug)
                             .single();
@@ -319,7 +319,7 @@ export default function App() {
                 // Chúng ta sẽ fetch và redirect sang /rooms/{slug}
                 try {
                     const { data: room, error } = await supabase
-                        .from('rooms')
+                        .from('rooms_view')
                         .select('*, profiles(*)')
                         .eq('slug', path)
                         .single();
