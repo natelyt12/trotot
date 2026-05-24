@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trọ Tốt - Xuất Ảnh Logo Thống Nhất</title>
+    <!-- Load Google Fonts matching the app -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Lexend:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #f4f4f5;
+            color: #18181b;
+            padding: 2.5rem 1.5rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #09090b;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: #71717a;
+            font-size: 0.95rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 2rem 0 1rem;
+            color: #27272a;
+            border-left: 4px solid #f59e0b;
+            padding-left: 0.75rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .logo-box {
+            border: 1px solid #e4e4e7;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box-header {
+            padding: 0.75rem 1rem;
+            background-color: #fafafa;
+            border-bottom: 1px solid #e4e4e7;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #52525b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Checkered transparent background or solid dark background */
+        .preview-area {
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 1.5rem;
+        }
+
+        .preview-area.light {
+            background-color: #ffffff;
+            /* subtle grid patterns showing transparency */
+            background-image: radial-gradient(#e4e4e7 1px, transparent 1px);
+            background-size: 12px 12px;
+        }
+
+        .preview-area.dark {
+            background-color: #0f172a;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 12px 12px;
+        }
+
+        /* EXACT STYLING FROM APP */
+        .logo-nav-style {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            /* w-8 h-8 & font sizes */
+            user-select: none;
+        }
+
+        .logo-nav-style img {
+            width: 2rem;
+            /* w-8 -> 32px */
+            height: 2rem;
+            object-fit: contain;
+            border-radius: 0.375rem;
+            /* rounded-md */
+        }
+
+        .logo-nav-style .text-tro {
+            font-family: 'Lexend', sans-serif;
+            font-weight: 600;
+            font-size: 1.25rem;
+            letter-spacing: -0.025em;
+        }
+
+        .logo-nav-style .text-tot {
+            font-family: 'Dancing Script', cursive;
+            font-weight: 700;
+            font-size: 1.45rem;
+            margin-left: 0.125rem;
+        }
+
+        /* Login Page Style (Vertical) */
+        .logo-login-style {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            user-select: none;
+        }
+
+        .logo-login-style img {
+            width: 3.5rem;
+            /* w-14 -> 56px */
+            height: 3.5rem;
+            object-fit: contain;
+            border-radius: 0.5rem;
+            /* rounded-lg */
+        }
+
+        .logo-login-style .text-tro {
+            font-family: 'Lexend', sans-serif;
+            font-weight: 600;
+            font-size: 2rem;
+            letter-spacing: -0.025em;
+            line-height: 1;
+        }
+
+        .logo-login-style .text-tot {
+            font-family: 'Dancing Script', cursive;
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-left: 0.25rem;
+            line-height: 1;
+        }
+
+        /* Colors */
+        .light .text-tro {
+            color: #1c1917;
+            /* stone-900 / dark text */
+        }
+
+        .light .text-tot {
+            color: #f59e0b;
+            /* amber-500 */
+        }
+
+        .dark .text-tro {
+            color: #ffffff;
+            /* white text */
+        }
+
+        .dark .text-tot {
+            color: #fbbf24;
+            /* amber-400 */
+        }
+
+        .box-actions {
+            padding: 1rem;
+            border-top: 1px solid #e4e4e7;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-download {
+            background-color: #f59e0b;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-family: 'Lexend', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-download:hover {
+            background-color: #d97706;
+        }
+
+        .btn-download svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .tip-box {
+            background-color: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: #b45309;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Trọ Tốt - Kết Hợp Ảnh & Chữ Logo</h1>
+            <p>Sắp xếp ảnh logo gốc (/logo.png) và chữ HTML thành các tổ hợp thống nhất. Nhấp vào các nút bên dưới để
+                tải trực tiếp ảnh PNG trong suốt có độ phân giải cao!</p>
+        </header>
+
+        <!-- SECTION 1: HORIZONTAL (NAVBAR) -->
+        <h2 class="section-title">1. Dạng nằm Ngang (Horizontal - Giống Navbar)</h2>
+        <div class="grid">
+            <!-- Light Horizontal -->
+            <div class="logo-box">
+                <div class="box-header">
+                    <span>Nền Sáng (Light Background)</span>
+                    <span>Tỷ lệ Nav</span>
+                </div>
+                <div class="preview-area light" id="nav-light-preview">
+                    <div class="logo-nav-style light">
+                        <img src="/logo.png" alt="Trọ Tốt Logo" />
+                        <span class="flex items-baseline">
+                            <span class="text-tro">Trọ</span>
+                            <span class="text-tot">Tốt</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="box-actions">
+                    <button class="btn-download" onclick="downloadPNG('horizontal', 'light')">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                        </svg>
+                        Tải ảnh PNG trong suốt (Nav Sáng)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dark Horizontal -->
+            <div class="logo-box">
+                <div class="box-header">
+                    <span>Nền Tối (Dark Background)</span>
+                    <span>Tỷ lệ Nav</span>
+                </div>
+                <div class="preview-area dark" id="nav-dark-preview">
+                    <div class="logo-nav-style dark">
+                        <img src="/logo.png" alt="Trọ Tốt Logo" />
+                        <span class="flex items-baseline">
+                            <span class="text-tro">Trọ</span>
+                            <span class="text-tot">Tốt</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="box-actions">
+                    <button class="btn-download" onclick="downloadPNG('horizontal', 'dark')">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                        </svg>
+                        Tải ảnh PNG trong suốt (Nav Tối)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: VERTICAL (LOGIN PAGE) -->
+        <h2 class="section-title">2. Dạng nằm Dọc (Vertical - Giống Trang Đăng Nhập)</h2>
+        <div class="grid">
+            <!-- Light Vertical -->
+            <div class="logo-box">
+                <div class="box-header">
+                    <span>Nền Sáng (Light Background)</span>
+                    <span>Tỷ lệ Login</span>
+                </div>
+                <div class="preview-area light" id="login-light-preview">
+                    <div class="logo-login-style light">
+                        <img src="/logo.png" alt="Trọ Tốt Logo" />
+                        <span class="flex items-baseline">
+                            <span class="text-tro">Trọ</span>
+                            <span class="text-tot">Tốt</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="box-actions">
+                    <button class="btn-download" onclick="downloadPNG('vertical', 'light')">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                        </svg>
+                        Tải ảnh PNG trong suốt (Login Sáng)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dark Vertical -->
+            <div class="logo-box">
+                <div class="box-header">
+                    <span>Nền Tối (Dark Background)</span>
+                    <span>Tỷ lệ Login</span>
+                </div>
+                <div class="preview-area dark" id="login-dark-preview">
+                    <div class="logo-login-style dark">
+                        <img src="/logo.png" alt="Trọ Tốt Logo" />
+                        <span class="flex items-baseline">
+                            <span class="text-tro">Trọ</span>
+                            <span class="text-tot">Tốt</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="box-actions">
+                    <button class="btn-download" onclick="downloadPNG('vertical', 'dark')">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                        </svg>
+                        Tải ảnh PNG trong suốt (Login Tối)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tip-box">
+            <strong>💡 Tips:</strong> Tệp ảnh PNG được tải xuống sẽ có <strong>nền trong suốt (Transparent)</strong>
+            và được vẽ ở độ phân giải gấp đôi (High-res 2x) để đảm bảo hình ảnh cực kỳ sắc nét khi sử dụng làm biểu
+            tượng, favicons hoặc chèn lại trực tiếp vào ứng dụng
+        </div>
+    </div>
+
+    <!-- Script to export combined canvas PNGs -->
+    <script>
+        function downloadPNG(layout, theme) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const isVertical = layout === 'vertical';
+            const isDark = theme === 'dark';
+
+            // Set high resolution sizes for crisp rendering (scale 2x)
+            const scale = 2;
+            const baseWidth = isVertical ? 360 : 420;
+            const baseHeight = isVertical ? 320 : 160;
+
+            canvas.width = baseWidth * scale;
+            canvas.height = baseHeight * scale;
+
+            // Clear to transparent
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Scale rendering contexts
+            ctx.scale(scale, scale);
+
+            // Load base image
+            const img = new Image();
+            img.src = '/logo.png';
+            img.onload = function () {
+                if (isVertical) {
+                    // Draw logo centered on top
+                    const imgSize = 96; // w-14 on canvas is large and clean
+                    const imgX = (baseWidth - imgSize) / 2;
+                    const imgY = 50;
+                    ctx.drawImage(img, imgX, imgY, imgSize, imgSize);
+
+                    // Setup text drawing configurations
+                    ctx.textBaseline = 'alphabetic';
+
+                    // Measure and draw "Trọ" and "Tốt" side-by-side centered below
+                    const troText = 'Trọ';
+                    const totText = 'Tốt';
+
+                    ctx.font = '600 48px Lexend';
+                    const troWidth = ctx.measureText(troText).width;
+
+                    ctx.font = '700 60px "Dancing Script"';
+                    const totWidth = ctx.measureText(totText).width;
+
+                    const gap = 6;
+                    const totalTextWidth = troWidth + totWidth + gap;
+                    const startX = (baseWidth - totalTextWidth) / 2;
+                    const textY = 210; // y position for text base line
+
+                    // Draw "Trọ"
+                    ctx.font = '600 48px Lexend';
+                    ctx.fillStyle = isDark ? '#ffffff' : '#1c1917';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(troText, startX, textY);
+
+                    // Draw "Tốt" (handwritten script offset is slightly different)
+                    ctx.font = '700 60px "Dancing Script"';
+                    ctx.fillStyle = isDark ? '#fbbf24' : '#f59e0b';
+                    ctx.fillText(totText, startX + troWidth + gap, textY + 4);
+                } else {
+                    // Horizontal layout
+                    const imgSize = 56; // larger navbar scale
+                    const imgY = (baseHeight - imgSize) / 2;
+                    const textGap = 16;
+
+                    // First we measure total width to center it in the exported image
+                    const troText = 'Trọ';
+                    const totText = 'Tốt';
+
+                    ctx.font = '600 32px Lexend';
+                    const troWidth = ctx.measureText(troText).width;
+
+                    ctx.font = '700 40px "Dancing Script"';
+                    const totWidth = ctx.measureText(totText).width;
+
+                    const innerGap = 4;
+                    const totalContentWidth = imgSize + textGap + troWidth + innerGap + totWidth;
+                    const startX = (baseWidth - totalContentWidth) / 2;
+
+                    // Draw logo
+                    ctx.drawImage(img, startX, imgY, imgSize, imgSize);
+
+                    // Draw text
+                    const textX = startX + imgSize + textGap;
+                    const textY = (baseHeight / 2) + 10; // offset centering
+
+                    ctx.textBaseline = 'alphabetic';
+
+                    // Draw "Trọ"
+                    ctx.font = '600 32px Lexend';
+                    ctx.fillStyle = isDark ? '#ffffff' : '#1c1917';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(troText, textX, textY);
+
+                    // Draw "Tốt"
+                    ctx.font = '700 40px "Dancing Script"';
+                    ctx.fillStyle = isDark ? '#fbbf24' : '#f59e0b';
+                    ctx.fillText(totText, textX + troWidth + innerGap, textY + 2);
+                }
+
+                // Export and trigger download
+                const link = document.createElement('a');
+                link.download = `logo-trotot-combined-${layout}-${theme}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+        }
+    </script>
+</body>
+
+</html>
