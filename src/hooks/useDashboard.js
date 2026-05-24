@@ -17,7 +17,7 @@ export const useDashboard = (user, initialData) => {
     const [rooms, setRooms] = useState([]);
     const [loadingRooms, setLoadingRooms] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [subTab, setSubTab] = useState('verified');
+    const [subTab, setSubTab] = useState('pending_verification');
     const [renewingRoom, setRenewingRoom] = useState(null);
 
     const fetchUserRooms = useCallback(async () => {
@@ -121,7 +121,7 @@ export const useDashboard = (user, initialData) => {
             if (error) throw error;
 
             setRooms(prev => prev.map(r => r.id === room.id ? { ...r, is_verified: true } : r));
-            addNotification('Đã duyệt tin đăng thành công! (Mockup)', 'success');
+            addNotification('Đã xác thực tin đăng thành công! (Mockup)', 'success');
         } catch (err) {
             console.error('Error verifying room:', err);
             showModal({ title: 'Lỗi', message: 'Không thể duyệt tin đăng.', type: 'error' });
@@ -256,7 +256,7 @@ export const useDashboard = (user, initialData) => {
 
             addNotification('Gia hạn tin đăng thành công!', 'success');
             setRenewingRoom(null);
-            setSubTab('verified');
+            setSubTab('pending_verification');
         } catch (err) {
             console.error('Error renewing room:', err);
             showModal({ title: 'Lỗi', message: 'Không thể gia hạn tin đăng. Vui lòng thử lại!', type: 'error' });

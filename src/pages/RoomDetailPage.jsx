@@ -61,17 +61,24 @@ const getEmbedUrl = (url) => {
    RoomDetailPage – Full listing details
    ============================================ */
 export default function RoomDetailPage({ room, navigate, user, onClose, previewMode }) {
+    // Robust parsing in case room is wrapped in an object
+    const resolvedRoom = (room && !room.basic_info && room.room) ? room.room : room;
+
+    const fromDashboard = room?.fromDashboard || resolvedRoom?.fromDashboard;
+    const fromProfile = room?.fromProfile || resolvedRoom?.fromProfile;
+    const originTab = room?.originTab || resolvedRoom?.originTab;
+
     const { showModal } = useModal();
     const { isFavorite, toggleFavorite } = useFavorites();
     const [activeImage, setActiveImage] = useState(0);
     const [showPhone, setShowPhone] = useState(false);
-    const [views, setViews] = useState(room?.metadata?.total_views || 0);
+    const [views, setViews] = useState(resolvedRoom?.metadata?.total_views || 0);
     const lastIncrementedRoomId = useRef(null);
 
-    const favorited = isFavorite(room?.id);
+    const favorited = isFavorite(resolvedRoom?.id);
 
     const handleToggleFavorite = async () => {
-        const result = await toggleFavorite(room?.id);
+        const result = await toggleFavorite(resolvedRoom?.id);
         if (result?.error === 'login_required') {
             showModal({
                 title: 'Thông báo',
@@ -87,24 +94,24 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
     // Increment views on mount
     useEffect(() => {
-        if (!room?.id || previewMode || lastIncrementedRoomId.current === room.id) return;
+        if (!resolvedRoom?.id || previewMode || lastIncrementedRoomId.current === resolvedRoom.id) return;
 
-        lastIncrementedRoomId.current = room.id;
+        lastIncrementedRoomId.current = resolvedRoom.id;
 
-        const initialViews = room.metadata?.total_views || 0;
+        const initialViews = resolvedRoom.metadata?.total_views || 0;
         const incrementViews = async () => {
-            const { data, error } = await incrementRoomViews(room.id, initialViews);
+            const { data, error } = await incrementRoomViews(resolvedRoom.id, initialViews);
             if (!error && data) {
                 setViews(data.total_views);
             }
         };
 
         incrementViews();
-        // Only run once per room.id to prevent infinite loops and double increments
-    }, [room?.id, previewMode, room.metadata?.total_views]);
+        // Only run once per resolvedRoom.id to prevent infinite loops and double increments
+    }, [resolvedRoom?.id, previewMode, resolvedRoom?.metadata?.total_views]);
 
 
-    if (!room) {
+    if (!resolvedRoom) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <p className="text-stone-500">Không tìm thấy phòng này.</p>
@@ -112,7 +119,14 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
         );
     }
 
-    const { basic_info, monthly_costs, room_features, rules_utilities, media_contact, metadata } = room;
+    const { 
+        basic_info = {}, 
+        monthly_costs = { extra_services: [] }, 
+        room_features = { counts: {}, amenities: [] }, 
+        rules_utilities = {}, 
+        media_contact = { video_urls: [], images: [] }, 
+        metadata = {} 
+    } = resolvedRoom;
     const videos = Array.isArray(media_contact.video_urls)
         ? media_contact.video_urls
         : (media_contact.video_url ? [media_contact.video_url] : []);
@@ -123,7 +137,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
             ? media_contact.images.map(img => ({ type: 'image', url: typeof img === 'string' ? img : img.url }))
             : [{ type: 'placeholder' }])
     ];
-    const isExpired = metadata.status === 'expired' || (room.available_until && new Date(room.available_until) < new Date());
+    const isExpired = metadata.status === 'expired' || (resolvedRoom.available_until && new Date(resolvedRoom.available_until) < new Date());
     const isAvailable = metadata.status === 'available' && !isExpired;
 
 
@@ -142,10 +156,12 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                         onClick={() => {
                             if (onClose) {
                                 onClose();
-                            } else if (room?.fromDashboard) {
+                            } else if (fromDashboard) {
                                 navigate('dashboard');
+                            } else if (resolvedRoom?.fromPublicProfile) {
+                                navigate('public-profile', { userId: resolvedRoom?.publicProfileUserId });
                             } else {
-                                navigate(room?.fromProfile ? 'profile' : 'home', room?.fromProfile ? { tab: room?.originTab || 'info' } : undefined);
+                                navigate(fromProfile ? 'profile' : 'home', fromProfile ? { tab: originTab || 'info' } : undefined);
                             }
                         }}
                         className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
@@ -303,9 +319,9 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         <span>Cập nhật: {formatDate(metadata.updated_at)}</span>
                                     </div>
 
-                                    <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
+                                     <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
                                         <AppIcon name="calendar" size={16} />
-                                        <span>Hết hạn: {room.available_until ? formatDate(room.available_until) : 'Không xác định'}</span>
+                                        <span>Hết hạn: {resolvedRoom.available_until ? formatDate(resolvedRoom.available_until) : 'Không xác định'}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2 text-stone-500 text-[0.925rem] mb-6">
@@ -358,7 +374,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                 </div>
 
                                 <div className="mt-3 text-[0.8rem] text-stone-400">
-                                    Đăng ngày: {formatDate(metadata.created_at)} • Hết hạn: {room.available_until ? formatDate(room.available_until) : 'Không xác định'} • ID: {room.listing_id}
+                                    Đăng ngày: {formatDate(metadata.created_at)} • Hết hạn: {resolvedRoom.available_until ? formatDate(resolvedRoom.available_until) : 'Không xác định'} • ID: {resolvedRoom.listing_id}
                                 </div>
                             </div>
 
@@ -459,12 +475,12 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                             </div>
 
                             {/* Comments */}
-                            <CommentSection room={room} user={user} navigate={navigate} isGridMode={true} previewMode={previewMode} />
+                            <CommentSection room={resolvedRoom} user={user} navigate={navigate} isGridMode={true} previewMode={previewMode} />
                         </div>
 
                         {/* ---- RIGHT COLUMN: Contact sidebar ---- */}
                         <LandlordCard
-                            room={room}
+                            room={resolvedRoom}
                             user={user}
                             previewMode={previewMode}
                             showPhone={showPhone}

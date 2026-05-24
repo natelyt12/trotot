@@ -10,7 +10,6 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
     const [newComment, setNewComment] = useState("");
     const [loadingComments, setLoadingComments] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    const [lastCommentTime, setLastCommentTime] = useState(0);
     const [activeMenuId, setActiveMenuId] = useState(null);
     const [replyTo, setReplyTo] = useState(null); // { commentId, parentId, userName }
     const [replyContent, setReplyContent] = useState("");
@@ -78,11 +77,28 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
         }
         if (!newComment.trim()) return;
 
+        // Bug #9: Rate limit 5 comments / 5 phút per user
+        const QUOTA_KEY = `comment_quota_${user.id}`;
+        const MAX_COMMENTS = 5;
+        const WINDOW_MS = 5 * 60 * 1000; // 5 phút
         const now = Date.now();
-        if (now - lastCommentTime < 60000) {
+        let quota = { count: 0, windowStart: now };
+        try {
+            const stored = localStorage.getItem(QUOTA_KEY);
+            if (stored) quota = JSON.parse(stored);
+        } catch { /* ignore */ }
+
+        // Reset window nếu đã qua 5 phút
+        if (now - quota.windowStart >= WINDOW_MS) {
+            quota = { count: 0, windowStart: now };
+        }
+
+        if (quota.count >= MAX_COMMENTS) {
+            const remainingMs = WINDOW_MS - (now - quota.windowStart);
+            const remainingMin = Math.ceil(remainingMs / 60000);
             showModal({
                 title: "Chậm lại một chút",
-                message: "Vui lòng đợi 1 phút trước khi gửi bình luận tiếp theo.",
+                message: `Bạn đã gửi ${MAX_COMMENTS} bình luận. Vui lòng đợi thêm ${remainingMin} phút trước khi gửi tiếp.`,
                 type: "warning",
             });
             return;
@@ -103,7 +119,9 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                 const newObj = { ...data, profiles: profileData, likeCount: 0, dislikeCount: 0, userVote: null, replies: [] };
                 setComments([newObj, ...comments]);
                 setNewComment("");
-                setLastCommentTime(now);
+                // Cập nhật quota
+                quota.count += 1;
+                localStorage.setItem(QUOTA_KEY, JSON.stringify(quota));
             }
         } catch (err) {
             console.error("Error submitting comment:", err);
@@ -120,11 +138,27 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
     const handleReplySubmit = async () => {
         if (!user || !replyContent.trim() || !replyTo) return;
 
+        // Bug #9: Rate limit 5 comments / 5 phút per user (chung quota với comment chính)
+        const QUOTA_KEY = `comment_quota_${user.id}`;
+        const MAX_COMMENTS = 5;
+        const WINDOW_MS = 5 * 60 * 1000;
         const now = Date.now();
-        if (now - lastCommentTime < 60000) {
+        let quota = { count: 0, windowStart: now };
+        try {
+            const stored = localStorage.getItem(QUOTA_KEY);
+            if (stored) quota = JSON.parse(stored);
+        } catch { /* ignore */ }
+
+        if (now - quota.windowStart >= WINDOW_MS) {
+            quota = { count: 0, windowStart: now };
+        }
+
+        if (quota.count >= MAX_COMMENTS) {
+            const remainingMs = WINDOW_MS - (now - quota.windowStart);
+            const remainingMin = Math.ceil(remainingMs / 60000);
             showModal({
                 title: "Chậm lại một chút",
-                message: "Vui lòng đợi 1 phút trước khi gửi phản hồi tiếp theo.",
+                message: `Bạn đã gửi ${MAX_COMMENTS} bình luận. Vui lòng đợi thêm ${remainingMin} phút trước khi gửi tiếp.`,
                 type: "warning",
             });
             return;
@@ -156,7 +190,9 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
             );
             setReplyContent("");
             setReplyTo(null);
-            setLastCommentTime(now);
+            // Cập nhật quota
+            quota.count += 1;
+            localStorage.setItem(QUOTA_KEY, JSON.stringify(quota));
         } catch (err) {
             console.error("Error submitting reply:", err);
         } finally {
@@ -391,6 +427,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                     }
                                 }}
                                 previewMode={previewMode}
+                                navigate={navigate}
                             />
 
                             {/* Inline Reply Input */}
@@ -482,6 +519,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                                 setReplyContent("");
                                             }}
                                             previewMode={previewMode}
+                                            navigate={navigate}
                                         />
                                     ))}
                                 </div>
@@ -512,6 +550,7 @@ function CommentItem({
     setEditingTag,
     onUpdate,
     previewMode,
+    navigate,
 }) {
     const isDeletedUser = !comment.profiles;
     const displayName = isDeletedUser ? "Người dùng đã xóa" : comment.profiles.full_name || "Người dùng";
@@ -539,9 +578,10 @@ function CommentItem({
     }
 
     return (
-        <div className="flex gap-4 group relative">
+        <div className="flex gap-4 group relative animate-fade-in">
             <div
-                className={`${isReply ? "w-8 h-8" : "w-10 h-10"} rounded-full flex items-center justify-center font-bold text-white ${isReply ? "text-xs" : "text-sm"} shrink-0 overflow-hidden ${isDeletedUser ? "bg-stone-300" : "bg-amber-500"}`}
+                onClick={() => !isDeletedUser && navigate && navigate('public-profile', { userId: comment.user_id })}
+                className={`${isReply ? "w-8 h-8" : "w-10 h-10"} rounded-full flex items-center justify-center font-bold text-white ${isReply ? "text-xs" : "text-sm"} shrink-0 overflow-hidden ${isDeletedUser ? "bg-stone-300" : "bg-amber-500 hover:opacity-85 cursor-pointer transition-opacity"}`}
                 style={avatarUrl ? { backgroundImage: `url(${avatarUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}
             >
                 {!avatarUrl && initial}
@@ -550,7 +590,8 @@ function CommentItem({
                 <div className="flex justify-between items-start mb-0.5">
                     <div>
                         <h4
-                            className={`${isReply ? "text-[0.85rem]" : "text-[0.9rem]"} font-bold ${isDeletedUser ? "text-stone-400 italic" : "text-stone-900"}`}
+                            onClick={() => !isDeletedUser && navigate && navigate('public-profile', { userId: comment.user_id })}
+                            className={`${isReply ? "text-[0.85rem]" : "text-[0.9rem]"} font-bold ${isDeletedUser ? "text-stone-400 italic" : "text-stone-900 hover:text-amber-600 hover:underline cursor-pointer transition-colors"}`}
                         >
                             {displayName}
                         </h4>

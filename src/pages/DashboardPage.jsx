@@ -66,7 +66,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
                         className="text-2xl font-extrabold text-stone-900 tracking-tight"
                         style={{ fontFamily: 'var(--font-heading)' }}
                     >
-                        Bảng điều khiển
+                        Quản lý tin đăng
                     </h1>
                     <p className="text-stone-500 text-sm mt-1">Quản lý tin đăng và thông tin thuê phòng của bạn.</p>
                 </div>

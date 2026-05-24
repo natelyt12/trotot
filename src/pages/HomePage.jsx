@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import RoomFilters from '../components/rooms/RoomFilters.jsx';
 import RoomGrid from '../components/rooms/RoomGrid.jsx';
@@ -10,7 +10,7 @@ import { useRoomFilterContext } from '../context/RoomFilterContext.jsx';
    HomePage – Listing + search + filters
    Flat design, amber palette
    ============================================ */
-export default function HomePage({ navigate, user, onSearchClick }) {
+export default function HomePage({ navigate, user, onSearchClick, currentPage }) {
     const filterState = useRoomFilterContext();
     const {
         filters,
@@ -27,8 +27,23 @@ export default function HomePage({ navigate, user, onSearchClick }) {
         loadMore,
         error,
         highlightedField,
-        getLocationDisplayText
+        getLocationDisplayText,
+        refetch,
     } = filterState;
+
+    const isFirstMount = useRef(true);
+
+    // Bug #2: Refetch dữ liệu mỗi khi user navigate trở lại HomePage (sau lần đầu mount)
+    useEffect(() => {
+        if (isFirstMount.current) {
+            isFirstMount.current = false;
+            return;
+        }
+        if (currentPage === 'home') {
+            refetch();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentPage]);
 
     const cities = getAvailableCities();
 
@@ -207,6 +222,7 @@ export default function HomePage({ navigate, user, onSearchClick }) {
                             activeFilterCount={activeFilterCount}
                             highlightedField={highlightedField}
                             refetch={filterState.refetch}
+                            navigate={navigate}
                         />
                     </div>
 

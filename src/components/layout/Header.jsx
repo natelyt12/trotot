@@ -15,7 +15,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
         const handleScroll = () => {
             const isHome = currentPage === "home";
             const isMobile = window.innerWidth < 768; // md breakpoint
-            const isExcludedPage = ["profile", "dashboard", "room-detail"].includes(currentPage);
+            const isExcludedPage = ["profile", "dashboard", "room-detail", "public-profile"].includes(currentPage);
 
             if (isExcludedPage) {
                 setShowSearch(false);
@@ -121,7 +121,6 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                         {user ? (
                             <div className="relative group flex items-center">
                                 <button
-                                    onClick={() => navigate("profile")}
                                     className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1.5 px-3 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors z-10"
                                 >
                                     <div className="text-right">
@@ -168,7 +167,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                                     className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                                 >
                                                     <AppIcon name="check-square" size={16} />
-                                                    <span>Bảng điều khiển</span>
+                                                    <span>Quản lý tin đăng</span>
                                                 </button>
                                             </>
                                         )}
@@ -291,7 +290,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                 }}
                                 className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-medium cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
                             >
-                                Bảng điều khiển
+                                Quản lý tin đăng
                             </button>
                         </>
                     )}

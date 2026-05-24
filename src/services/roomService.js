@@ -222,10 +222,14 @@ export const incrementRoomViews = async (roomId, currentViews) => {
  */
 export const getFilteredRooms = async (filters, targetPage, itemsPerPage = 18) => {
     try {
+        const now = new Date().toISOString();
+
         let query = supabase
             .from('rooms')
             .select('*, profiles(*)', { count: 'exact' })
-            .eq('status', 'available');
+            .eq('status', 'available')
+            // Bug #12: Ẩn tin hết hạn – chỉ lấy tin còn hạn hoặc không có ngày hết hạn
+            .or(`available_until.gt.${now},available_until.is.null`);
 
         // Apply Filters
         if (filters.city) query = query.eq('city', filters.city);
@@ -240,6 +244,9 @@ export const getFilteredRooms = async (filters, targetPage, itemsPerPage = 18) =
 
         if (filters.verifiedOnly) query = query.eq('is_verified', true);
 
+        // Bug #4: Thêm filter loại hình bất động sản
+        if (filters.roomType) query = query.eq('room_type', filters.roomType);
+
         if (filters.bathroomType) {
             query = query.contains('room_features', { bathroom_type: filters.bathroomType });
         }
@@ -252,7 +259,7 @@ export const getFilteredRooms = async (filters, targetPage, itemsPerPage = 18) =
             query = query.ilike('title', `%${filters.search}%`);
         }
 
-        // Sorting
+        // Sorting: ưu tiên verified trước, sau đó sort theo tiêu chí người dùng chọn
         const sortMap = {
             'price_asc': { column: 'price_monthly', ascending: true },
             'price_desc': { column: 'price_monthly', ascending: false },
@@ -260,7 +267,10 @@ export const getFilteredRooms = async (filters, targetPage, itemsPerPage = 18) =
             'newest': { column: 'created_at', ascending: false },
         };
         const sort = sortMap[filters.sortBy] || sortMap.newest;
-        query = query.order(sort.column, { ascending: sort.ascending });
+        // Verified rooms first, then by chosen sort
+        query = query
+            .order('is_verified', { ascending: false })
+            .order(sort.column, { ascending: sort.ascending });
 
         // Pagination
         const from = targetPage * itemsPerPage;
@@ -370,5 +380,28 @@ export const getRoomsByIds = async (ids) => {
     }
 };
 
+/**
+ * Fetches available (active) rooms owned by a specific user for public profile (paginated)
+ * @param {string} userId 
+ * @param {number} targetPage 
+ * @param {number} itemsPerPage 
+ * @returns {Promise<{data: any, error: any, count: number}>}
+ */
+export const getActiveUserRooms = async (userId, targetPage = 0, itemsPerPage = 6) => {
+    try {
+        const from = targetPage * itemsPerPage;
+        const to = from + itemsPerPage - 1;
 
-
+        const { data, error, count } = await supabase
+            .from('rooms')
+            .select('*, profiles!user_id(full_name, phone, avatar_url, role)', { count: 'exact' })
+            .eq('user_id', userId)
+            .eq('status', 'available')
+            .order('created_at', { ascending: false })
+            .range(from, to);
+        return { data, error, count };
+    } catch (err) {
+        console.error('Error fetching active user rooms:', err);
+        return { data: null, error: err, count: 0 };
+    }
+};

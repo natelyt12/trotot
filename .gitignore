@@ -39,3 +39,4 @@ vite.config.ts.timestamp-*
 
 # Testing
 coverage
+prompt.txt

@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { PROVINCE } from '../../constants/province.js';
-import { AMENITIES, PRICE_RANGES, AREA_RANGES } from '../../constants/constants.js';
+import { AMENITIES, PRICE_RANGES, AREA_RANGES, ROOM_TYPES } from '../../constants/constants.js';
 import { UNIVERSITIES } from '../../constants/universities.js';
 import AppIcon from '../common/AppIcon.jsx';
+import { getRoomById } from '../../services/roomService.js';
 
 /* ============================================
    RoomFilters Component
@@ -16,7 +18,8 @@ export default function RoomFilters({
     activeFilterCount,
     highlightedField,
     isMobileMode = false,
-    refetch
+    refetch,
+    navigate,
 }) {
     const selectedProvince = PROVINCE.find(p => p.name === filters.city);
     const districts = selectedProvince ? selectedProvince.districts : [];
@@ -27,6 +30,29 @@ export default function RoomFilters({
     const getHighlightStyles = (field) => {
         if (highlightedField !== field) return "";
         return "ring-2 ring-amber-500 border-amber-500 bg-amber-50/30";
+    };
+
+    const [listingIdInput, setListingIdInput] = useState('');
+    const [listingIdLoading, setListingIdLoading] = useState(false);
+    const [listingIdError, setListingIdError] = useState('');
+
+    const handleListingIdSearch = async () => {
+        const trimmed = listingIdInput.trim();
+        if (!trimmed) return;
+        setListingIdLoading(true);
+        setListingIdError('');
+        try {
+            const room = await getRoomById(trimmed);
+            if (room && navigate) {
+                navigate('room-detail', room);
+            } else {
+                setListingIdError('Không tìm thấy tin đăng với mã này.');
+            }
+        } catch {
+            setListingIdError('Có lỗi xảy ra, vui lòng thử lại.');
+        } finally {
+            setListingIdLoading(false);
+        }
     };
 
     return (
@@ -63,7 +89,34 @@ export default function RoomFilters({
                     )}
                 </div>
             )}
-            
+
+            {/* Bug #7: Tìm kiếm theo Mã tin */}
+            <div>
+                <p className="text-[0.82rem] font-bold text-stone-700 m-0 mb-2" style={{ fontFamily: 'var(--font-heading)' }}>Tìm theo mã tin</p>
+                <div className="grid grid-cols-[1fr_42px] gap-2 w-full">
+                    <input
+                        id="filter-listing-id"
+                        type="text"
+                        value={listingIdInput}
+                        onChange={(e) => { setListingIdInput(e.target.value); setListingIdError(''); }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleListingIdSearch()}
+                        placeholder="Nhập mã... (VD: TT-12345)"
+                        className="min-w-0 w-full bg-white border border-stone-200 pl-3 pr-3 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300"
+                        aria-label="Tìm kiếm theo mã tin đăng"
+                    />
+                    <button
+                        onClick={handleListingIdSearch}
+                        disabled={listingIdLoading || !listingIdInput.trim()}
+                        className="w-full h-[38px] bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    >
+                        {listingIdLoading ? <AppIcon name="reload" size={14} className="animate-spin" /> : <AppIcon name="search" size={14} />}
+                    </button>
+                </div>
+                {listingIdError && (
+                    <p className="text-red-500 text-[0.75rem] mt-1">{listingIdError}</p>
+                )}
+            </div>
+
             {/* Reload Data Button */}
             <button
                 onClick={() => refetch && refetch()}
@@ -233,6 +286,24 @@ export default function RoomFilters({
                                 }}
                             >
                                 {range.label}
+                            </FilterButton>
+                        );
+                    })}
+                </div>
+            </FilterSection>
+
+            {/* Bug #4: Room type filter */}
+            <FilterSection title="Loại hình">
+                <div className="flex flex-col gap-1.5">
+                    {Object.entries(ROOM_TYPES).map(([value, label]) => {
+                        const isActive = filters.roomType === value;
+                        return (
+                            <FilterButton
+                                key={value}
+                                isActive={isActive}
+                                onClick={() => updateFilter('roomType', isActive ? '' : value)}
+                            >
+                                {label}
                             </FilterButton>
                         );
                     })}

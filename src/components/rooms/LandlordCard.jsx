@@ -52,7 +52,10 @@ export default function LandlordCard({
 
                     {/* Owner info inside price section */}
                     <p className="text-[0.8rem] text-stone-400 mb-2 font-medium">Thông tin người đăng:</p>
-                    <div className="flex items-center gap-3 mb-6">
+                    <div 
+                        onClick={previewMode ? undefined : () => navigate && navigate('public-profile', { userId: room.user_id })}
+                        className={`flex items-center gap-3 mb-6 ${previewMode ? '' : 'cursor-pointer hover:opacity-85 transition-opacity group/landlord'}`}
+                    >
                         {(previewMode && user ? user.user_metadata?.avatar_url : media_contact.contact.avatar) ? (
                             <img
                                 src={previewMode && user ? user.user_metadata?.avatar_url : media_contact.contact.avatar}
@@ -67,7 +70,7 @@ export default function LandlordCard({
                             </div>
                         )}
                         <div className="flex-1">
-                            <p className="font-bold text-sm text-stone-900 leading-tight mb-1">
+                            <p className={`font-bold text-sm text-stone-900 leading-tight mb-1 ${previewMode ? '' : 'group-hover/landlord:text-amber-600 group-hover/landlord:underline transition-colors'}`}>
                                 {previewMode && user ? user.user_metadata?.full_name : media_contact.contact.name}
                             </p>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold bg-amber-100 text-amber-800">
@@ -126,20 +129,20 @@ export default function LandlordCard({
                     <div className="flex gap-2 items-start text-amber-600">
                         <AppIcon name="alert" size={16} className="mt-0.5" />
                         <div>
-                            <p className="font-bold text-amber-900 text-[0.82rem] mb-1 font-heading">Lưu ý an toàn</p>
+                            <p className="font-bold text-amber-900 text-[0.82rem] mb-1 font-heading">Lưu ý quan trọng</p>
                             <p className="text-amber-700 text-[0.78rem] leading-relaxed">
-                                Không chuyển tiền trước khi xem phòng trực tiếp. Kiểm tra kỹ hợp đồng thuê trọ.
+                                Mọi thông tin liên quan đến tin đăng này chỉ mang tính chất tham khảo. Nếu bạn thấy rằng tin đăng này không đúng hoặc có dấu hiệu lừa đảo, hãy phản ánh với chúng tôi.
                             </p>
                             {!previewMode && (
                                 <button
                                     onClick={() => showModal({
-                                        title: 'Thông báo',
+                                        title: 'Báo cáo tin đăng',
                                         message: 'Tính năng Báo cáo tin đăng đang được phát triển.',
                                         type: 'info'
                                     })}
                                     className="mt-2 text-[0.78rem] text-amber-600 font-bold hover:text-amber-700 underline cursor-pointer border-none bg-transparent p-0 block"
                                 >
-                                    Báo cáo tin đăng
+                                    Báo cáo tin đăng này
                                 </button>
                             )}
                         </div>

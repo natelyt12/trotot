@@ -4,7 +4,7 @@ import { useModal } from '../context/ModalContext';
 import { useNotification } from '../context/NotificationContext';
 import { signIn, signOut } from '../services/authService.js';
 import { getUserProfile, updateUserProfile, updateUserAuth, uploadAvatar, getAvatarPublicUrl, removeAvatar, deleteUserAccount } from '../services/profileService.js';
-import { getRoomsByIds } from '../services/roomService.js';
+import { getRoomsByIds, getUserRooms, deleteCloudinaryImage } from '../services/roomService.js';
 import { getUserCommentedRooms } from '../services/commentService.js';
 import AppIcon from '../components/common/AppIcon.jsx';
 import { useFavorites } from '../context/FavoritesContext.jsx';
@@ -453,6 +453,35 @@ export default function ProfilePage({ user, navigate, initialData }) {
                         } catch (avatarErr) {
                             console.error('Lỗi khi xóa ảnh đại diện khi xóa tài khoản:', avatarErr);
                         }
+                    }
+
+                    // Bug #1: Xóa tất cả ảnh phòng (Cloudinary) trước khi xóa tài khoản
+                    try {
+                        const { data: userRooms } = await getUserRooms(user.id);
+                        if (userRooms && userRooms.length > 0) {
+                            for (const room of userRooms) {
+                                const images = room.media_contact?.images || [];
+                                for (const img of images) {
+                                    const imgUrl = typeof img === 'string' ? img : img?.url;
+                                    if (imgUrl && imgUrl.includes('res.cloudinary.com')) {
+                                        // Extract public_id từ Cloudinary URL
+                                        // Format: .../upload/v123456/folder/public_id.ext
+                                        const match = imgUrl.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/);
+                                        if (match) {
+                                            const publicId = match[1];
+                                            try {
+                                                await deleteCloudinaryImage(publicId);
+                                            } catch (imgErr) {
+                                                console.error('Lỗi xóa ảnh Cloudinary:', publicId, imgErr);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (roomsErr) {
+                        console.error('Lỗi khi xóa ảnh phòng trước khi xóa tài khoản:', roomsErr);
+                        // Không throw – vẫn tiếp tục xóa tài khoản
                     }
 
                     // 2. Gọi API xóa tài khoản trong DB (Profiles & Auth Users)

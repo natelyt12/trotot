@@ -11,6 +11,7 @@ import RegisterPage from './pages/RegisterPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
+import PublicProfilePage from './pages/PublicProfilePage.jsx';
 import { mapSupabaseRoom } from './utils/roomMapper.js';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { useModal } from './context/ModalContext.jsx';
@@ -36,6 +37,16 @@ function ScrollLock({ isActive }) {
         `}</style>
     );
 }
+
+/**
+ * Standalone router helper to generate paths consistently
+ */
+const getRouteUrl = (page, data) => {
+    if (page === 'home') return '/';
+    if (page === 'room-detail') return data?.slug ? `/rooms/${data.slug}` : '/';
+    if (page === 'public-profile') return `/user/${data?.userId || data?.publicProfileUserId}`;
+    return `/${page}`;
+};
 
 export default function App() {
     const [currentPage, setCurrentPage] = useState('home');
@@ -120,11 +131,7 @@ export default function App() {
                 window.scrollTo({ top: 0, behavior: 'instant' });
 
                 // --- SLUG ROUTING LOGIC (Cập nhật URL tức thời khi cửa đã đóng) ---
-                if (targetPage === 'home') {
-                    window.history.pushState(null, '', '/');
-                } else if (['login', 'register', 'profile', 'dashboard', 'admin'].includes(targetPage)) {
-                    window.history.pushState(null, '', `/${targetPage}`);
-                }
+                window.history.pushState(null, '', getRouteUrl(targetPage, targetData));
 
                 // Giai đoạn 3: Giữ spinner hiển thị thêm 800ms (tăng 0.3s) cho cảm giác tải trang tự nhiên
                 setTimeout(() => {
@@ -143,21 +150,53 @@ export default function App() {
             // Không sử dụng hiệu ứng cửa trượt (ví dụ: trigger xem chi tiết phòng hoặc đóng chi tiết phòng về trang chủ)
             // Khôi phục hoàn toàn cơ chế chuyển động trượt lên/xuống (slide up/down overlay modal) nguyên bản
             if (currentPage === 'room-detail' && targetPage !== 'room-detail') {
-                setIsClosing(true);
-                setTimeout(() => {
-                    setIsClosing(false);
-                    setCurrentPage(targetPage);
-                    setPageData(targetData);
-
-                    // Cuộn lên đầu khi trở về trang chính từ modal chi tiết
-                    if (targetPage !== 'home') {
+                const isTargetAlreadyMounted = (targetPage === 'public-profile' && pageData?.fromPublicProfile) || 
+                                             (targetPage === 'profile' && pageData?.fromProfile);
+                
+                if ((targetPage === 'public-profile' || ['profile', 'dashboard', 'admin'].includes(targetPage)) && !isTargetAlreadyMounted) {
+                    // Cửa trượt đóng lại trực tiếp đè lên room-detail (Giữ nguyên room-detail cho tới khi cửa đóng kín)
+                    setTransitionState({
+                        isTransitioning: true,
+                        stage: 'closing'
+                    });
+                    
+                    setTimeout(() => {
+                        setTransitionState(prev => ({ ...prev, stage: 'closed' }));
+                        
+                        // Khi cửa đã đóng khít hoàn toàn, tháo gỡ modal và chuyển trang ngầm
+                        setCurrentPage(targetPage);
+                        setPageData(targetData);
                         window.scrollTo({ top: 0, behavior: 'instant' });
-                    }
-
-                    // Cập nhật URL
-                    const url = targetPage === 'home' ? '/' : `/${targetPage}`;
-                    window.history.pushState(null, '', url);
-                }, 250); // Khớp thời lượng hoạt ảnh trượt xuống của modal
+                        
+                        window.history.pushState(null, '', getRouteUrl(targetPage, targetData));
+                        
+                        setTimeout(() => {
+                            setTransitionState(prev => ({ ...prev, stage: 'opening' }));
+                            setTimeout(() => {
+                                setTransitionState({
+                                    isTransitioning: false,
+                                    stage: 'idle'
+                                });
+                            }, 700);
+                        }, 800);
+                    }, 700); // 700ms cửa khép lại
+                } else {
+                    // Nếu là đóng bình thường để lộ trang nền đã hiển thị sẵn bên dưới (như homepage, public-profile của chính nó)
+                    setIsClosing(true);
+                    setTimeout(() => {
+                        setIsClosing(false);
+                        setCurrentPage(targetPage);
+                        setPageData(targetData);
+                        
+                        // SỬA BUG 2: Chỉ cuộn lên đầu nếu thực sự chuyển sang trang hoàn toàn mới, 
+                        // KHÔNG cuộn nếu đang hiển thị lại trang nền đang có sẵn ở dưới
+                        if (targetPage !== 'home' && !isTargetAlreadyMounted) {
+                            window.scrollTo({ top: 0, behavior: 'instant' });
+                        }
+                        
+                        window.history.pushState(null, '', getRouteUrl(targetPage, targetData));
+                    }, 250); // Khớp thời lượng hoạt ảnh trượt xuống của modal
+                }
                 return;
             }
 
@@ -167,13 +206,7 @@ export default function App() {
             }
 
             // Cập nhật slug định tuyến
-            if (targetPage === 'room-detail' && targetData?.slug) {
-                window.history.pushState(null, '', `/${targetData.slug}`);
-            } else if (targetPage === 'home') {
-                window.history.pushState(null, '', '/');
-            } else if (['login', 'register', 'profile', 'dashboard', 'admin'].includes(targetPage)) {
-                window.history.pushState(null, '', `/${targetPage}`);
-            }
+            window.history.pushState(null, '', getRouteUrl(targetPage, targetData));
 
             setCurrentPage(targetPage);
             setPageData(targetData);
@@ -238,7 +271,52 @@ export default function App() {
                     return;
                 }
 
-                // Giả định đó là một room slug
+                if (path.startsWith('user/')) {
+                    const userId = path.slice(5); // 'user/'.length === 5
+                    setCurrentPage('public-profile');
+                    setPageData({ userId });
+                    return;
+                }
+
+                if (path.startsWith('rooms/')) {
+                    const slug = path.slice(6); // 'rooms/'.length === 6
+                    try {
+                        const { data: room, error } = await supabase
+                            .from('rooms')
+                            .select('*, profiles(*)')
+                            .eq('slug', slug)
+                            .single();
+
+                        if (room && !error) {
+                            if (room.status === 'draft') {
+                                showModal({
+                                    title: "Thông báo",
+                                    message: "Phòng không tồn tại, có vẻ chủ bài đăng đã gỡ công khai hoặc phòng đã có người thuê",
+                                    type: "warning"
+                                });
+                                setCurrentPage('home');
+                                window.history.pushState(null, '', '/');
+                            } else {
+                                const mappedRoom = mapSupabaseRoom(room);
+                                setCurrentPage('room-detail');
+                                setPageData(mappedRoom);
+                            }
+                        } else {
+                            setCurrentPage('home');
+                            setPageData(null);
+                            window.history.pushState(null, '', '/');
+                        }
+                    } catch (err) {
+                        console.error('Error fetching room by slug:', err);
+                        setCurrentPage('home');
+                        setPageData(null);
+                        window.history.pushState(null, '', '/');
+                    }
+                    return;
+                }
+
+                // Giả định đó là một old room slug (không có tiền tố "rooms/") và không phải các path khác
+                // Chúng ta sẽ fetch và redirect sang /rooms/{slug}
                 try {
                     const { data: room, error } = await supabase
                         .from('rooms')
@@ -257,23 +335,25 @@ export default function App() {
                             window.history.pushState(null, '', '/');
                         } else {
                             const mappedRoom = mapSupabaseRoom(room);
+                            window.history.replaceState(null, '', `/rooms/${room.slug}`);
                             setCurrentPage('room-detail');
                             setPageData(mappedRoom);
                         }
                     } else {
-                        // Fallback về trang chủ nếu không tìm thấy slug
                         setCurrentPage('home');
                         setPageData(null);
+                        window.history.pushState(null, '', '/');
                     }
                 } catch (err) {
                     console.error('Error fetching room by slug:', err);
                     setCurrentPage('home');
                     setPageData(null);
+                    window.history.pushState(null, '', '/');
                 }
             };
 
             // Xác định xem trang mới (target) hoặc trang hiện tại (current) có phải là room-detail không
-            const isTargetRoomDetail = !['', 'login', 'register', 'profile', 'dashboard', 'admin'].includes(path);
+            const isTargetRoomDetail = path.startsWith('rooms/') || (!['', 'login', 'register', 'profile', 'dashboard', 'admin'].includes(path) && !path.startsWith('user/'));
             const isCurrentRoomDetail = currentPage === 'room-detail';
 
             // Nếu đây là popstate (Back/Forward trình duyệt) và không phải lần tải đầu tiên, và không liên quan đến chi tiết phòng
@@ -345,7 +425,7 @@ export default function App() {
 
                     <main>
                         {/* Base Layer: HomePage remains mounted to preserve scroll/filters */}
-                        <div className={(showLayout && !['profile', 'dashboard', 'admin'].includes(currentPage) && !(currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
+                        <div className={(showLayout && !['profile', 'dashboard', 'admin', 'public-profile'].includes(currentPage) && !(currentPage === 'room-detail' && (pageData?.fromProfile || pageData?.fromPublicProfile))) ? 'block' : 'hidden'}>
                             <HomePage
                                 navigate={navigate}
                                 user={user}
@@ -357,6 +437,11 @@ export default function App() {
                         {/* Profile Layer */}
                         <div className={(currentPage === 'profile' || (currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
                             <ProfilePage user={user} navigate={navigate} initialData={pageData} />
+                        </div>
+
+                        {/* Public Profile Layer */}
+                        <div className={(currentPage === 'public-profile' || (currentPage === 'room-detail' && pageData?.fromPublicProfile)) ? 'block' : 'hidden'}>
+                            <PublicProfilePage userId={pageData?.publicProfileUserId || pageData?.userId} navigate={navigate} />
                         </div>
 
                         {/* Dashboard Layer */}

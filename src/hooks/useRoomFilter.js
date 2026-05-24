@@ -17,6 +17,7 @@ const DEFAULT_FILTERS = {
     areaMax: 200,
     amenities: [],
     bathroomType: '',
+    roomType: '',
     verifiedOnly: false,
     sortBy: 'newest', // newest | price_asc | price_desc | area_asc
 };
@@ -150,6 +151,7 @@ export const useRoomFilter = () => {
         if (filters.areaMin > 0 || filters.areaMax < 200) count++;
         if (filters.amenities.length > 0) count++;
         if (filters.bathroomType) count++;
+        if (filters.roomType) count++;
         if (filters.verifiedOnly) count++;
         return count;
     }, [filters]);
