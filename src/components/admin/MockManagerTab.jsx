@@ -3,18 +3,14 @@ import {
     TbRefresh, 
     TbTrash, 
     TbHomeCheck, 
-    TbUserCheck, 
     TbTrendingUp, 
     TbBuildingWarehouse 
 } from 'react-icons/tb';
 
 export default function MockManagerTab({
     mockStats,
-    dummyUsersList,
     onRefreshMockStats,
     onCleanAllMock,
-    onPostMoreRooms,
-    onDeleteUser,
     onLaunchScenario
 }) {
     return (
@@ -43,23 +39,19 @@ export default function MockManagerTab({
             </div>
 
             {/* Mock Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-                <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5">
-                    <div className="text-stone-400 text-xs font-bold uppercase mb-2">Dummy Users</div>
-                    <div className="text-2xl font-black text-stone-900 font-heading">{mockStats.dummyUsers}</div>
-                    <div className="text-[10px] text-stone-400 font-medium mt-1">Chủ trọ & Người thuê mock</div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5">
                     <div className="text-stone-400 text-xs font-bold uppercase mb-2">Dummy Rooms</div>
                     <div className="text-2xl font-black text-stone-900 font-heading">{mockStats.mockRooms}</div>
-                    <div className="text-[10px] text-stone-400 font-medium mt-1">Tin đăng trọ có mã TT-MOCK</div>
+                    <div className="text-[10px] text-stone-400 font-medium mt-1">Tin đăng trọ giả lập (chứa mã TT-MOCK) được gán cho Admin</div>
                 </div>
                 <div className="bg-stone-50 border border-stone-200 rounded-2xl p-5">
-                    <div className="text-stone-400 text-xs font-bold uppercase mb-2">Cơ sở dữ liệu</div>
+                    <div className="text-stone-400 text-xs font-bold uppercase mb-2">Trạng thái Mock Data</div>
                     <div className="text-sm font-extrabold text-amber-600 font-heading flex items-center gap-1.5 mt-2">
                         <span className={`w-2.5 h-2.5 rounded-full ${mockStats.mockRooms > 0 ? 'bg-amber-500 animate-pulse' : 'bg-stone-300'}`}></span>
-                        {mockStats.mockRooms > 0 ? "Đầy đủ Dữ liệu Mock" : "Cơ sở dữ liệu Sạch"}
+                        {mockStats.mockRooms > 0 ? "Đang có dữ liệu giả lập" : "Hệ thống sạch (Chỉ có dữ liệu thật)"}
                     </div>
+                    <div className="text-[10px] text-stone-400 font-medium mt-1">Hỗ trợ dọn dẹp mock data tự động không ảnh hưởng dữ liệu thật</div>
                 </div>
             </div>
 
@@ -68,10 +60,10 @@ export default function MockManagerTab({
                 <h4 className="text-sm font-extrabold text-stone-900 uppercase tracking-wider">Kịch bản Test (Cộng dồn)</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {[
-                        { id: 1, title: "1. Tâm điểm sinh viên", icon: TbHomeCheck, color: "from-blue-500/10 to-indigo-500/10 text-blue-600 border-blue-500/20", desc: "Sinh thêm 5 chủ nhà mới + 40 phòng trọ xung quanh các trường Đại học lớn (Bách Khoa HN, ĐHQG HCM, HUTECH...) để kiểm tra bộ lọc khu vực và gợi ý trọ gần trường." },
-                        { id: 2, title: "2. Chủ trọ VIP", icon: TbUserCheck, color: "from-amber-500/10 to-orange-500/10 text-amber-600 border-amber-500/20", desc: "Sinh thêm 20 phòng trọ gán trực tiếp cho tài khoản ADMIN hiện tại của bạn với đủ mọi trạng thái (Còn phòng, Hết hạn, Bản nháp) để test Dashboard." },
-                        { id: 3, title: "3. Tin hot & Kiểm duyệt", icon: TbTrendingUp, color: "from-emerald-500/10 to-teal-500/10 text-emerald-600 border-emerald-500/20", desc: "Sinh thêm 40 phòng trọ mới (50% tin có lượng view khủng >1000, 50% tin unverified chờ duyệt) để test Admin Tab kiểm duyệt và mục Trọ nổi bật." },
-                        { id: 4, title: "4. Đô thị nở rộ", icon: TbBuildingWarehouse, color: "from-violet-500/10 to-purple-500/10 text-violet-600 border-violet-500/20", desc: "Sinh thêm 10 chủ nhà mới + 100 phòng trọ trải rộng khắp 10 quận của Hà Nội & HCM để test hiệu năng tìm kiếm bản đồ và phân trang." }
+                        { id: 1, title: "1. Kiểm duyệt & Quy mô lớn", icon: TbHomeCheck, color: "from-blue-500/10 to-indigo-500/10 text-blue-600 border-blue-500/20", desc: "Sinh 80 phòng trọ phân bố ở mọi giai đoạn vòng đời tin đăng (20 chờ duyệt, 20 công khai chưa xác thực, 20 đã xác thực, 10 bản nháp, 10 đã hết hạn) để kiểm tra đồng thời cả Dashboard chủ nhà lẫn bảng điều khiển Admin." },
+                        { id: 2, title: "2. Tâm điểm trường Đại học", icon: TbBuildingWarehouse, color: "from-amber-500/10 to-orange-500/10 text-amber-600 border-amber-500/20", desc: "Sinh 40 phòng trọ tập trung 100% tại các khu vực cổng trường Đại học lớn (Bách Khoa, HUTECH, Ngoại Thương, ĐHQG) với mức giá cực rẻ và tiêu đề thân thiện riêng cho sinh viên." },
+                        { id: 3, title: "3. 100 phòng trọ tiêu chuẩn", icon: TbTrendingUp, color: "from-emerald-500/10 to-teal-500/10 text-emerald-600 border-emerald-500/20", desc: "Sinh 100 phòng trọ tiêu chuẩn ngẫu nhiên có mức giá trung bình từ 1.8M đến 7.5M VND phân bố đều khắp Hà Nội & TP.HCM để stress-test các bộ lọc, thanh tìm kiếm và tải phân trang." },
+                        { id: 4, title: "4. Thiên đường Tiện ích & Ẩm thực", icon: TbRefresh, color: "from-violet-500/10 to-purple-500/10 text-violet-600 border-violet-500/20", desc: "KỊCH BẢN SÁNG TẠO: Sinh 30 phòng trọ VIP nằm sát các tổ hợp ăn uống giải trí cực hot (Hồ Tây, Phố đi bộ Bùi Viện, Thảo Điền) với tiện ích cực chill (hồ bơi, ngắm pháo hoa, nuôi thú cưng, tự do 24/7)." }
                     ].map((scenario) => {
                         const Icon = scenario.icon;
                         return (
@@ -97,78 +89,6 @@ export default function MockManagerTab({
                         );
                     })}
                 </div>
-            </div>
-
-            {/* Dummy Users Table */}
-            <div className="space-y-4 pt-4">
-                <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-extrabold text-stone-900 uppercase tracking-wider">Danh sách Dummy Users</h4>
-                    <span className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Tổng cộng: {dummyUsersList.length}</span>
-                </div>
-
-                {dummyUsersList.length === 0 ? (
-                    <div className="text-center py-10 bg-stone-50 border border-dashed border-stone-200 rounded-2xl">
-                        <p className="text-stone-400 text-xs font-bold">Chưa có tài khoản giả lập nào được tạo.</p>
-                        <p className="text-stone-300 text-[10px] mt-0.5">Vui lòng chọn kích hoạt kịch bản ở trên để sinh dữ liệu.</p>
-                    </div>
-                ) : (
-                    <div className="border border-stone-200 rounded-2xl overflow-hidden bg-white">
-                        <div className="max-h-[300px] overflow-y-auto">
-                            <table className="w-full text-left border-collapse text-xs">
-                                <thead>
-                                    <tr className="bg-stone-50 text-stone-400 font-bold border-b border-stone-100 uppercase tracking-wider text-[10px]">
-                                        <th className="p-4">Chủ tài khoản</th>
-                                        <th className="p-4">Số điện thoại</th>
-                                        <th className="p-4">Vai trò</th>
-                                        <th className="p-4 text-center">Tin trọ đăng</th>
-                                        <th className="p-4 text-right">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-stone-100">
-                                    {dummyUsersList.map(usr => (
-                                        <tr key={usr.id} className="hover:bg-stone-50/55 transition-colors">
-                                            <td className="p-4">
-                                                <div className="flex items-center gap-2.5">
-                                                    <img src={usr.avatar_url} className="w-7 h-7 rounded-full object-cover border border-stone-200" alt="avatar" onError={e => { e.currentTarget.src = '/images/placeholder.png'; }} />
-                                                    <div>
-                                                        <div className="font-bold text-stone-800">{usr.full_name?.split('_')[0] || 'Dummy'}</div>
-                                                        <div className="text-[9px] text-stone-400 font-bold font-mono">ID: {usr.full_name?.split('_')[1] || usr.id.slice(0, 8)}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-4 font-bold text-stone-600">{usr.phone}</td>
-                                            <td className="p-4">
-                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${usr.role === 'landlord' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
-                                                    {usr.role === 'landlord' ? 'Chủ trọ' : 'Người thuê'}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 text-center font-bold text-stone-700">{usr.roomsCount} phòng</td>
-                                            <td className="p-4 text-right">
-                                                <div className="flex items-center justify-end gap-2">
-                                                    {usr.role === 'landlord' && (
-                                                        <button
-                                                            onClick={() => onPostMoreRooms(usr.id)}
-                                                            className="bg-amber-50 hover:bg-amber-100 text-amber-700 font-extrabold text-[10px] px-2.5 py-1.5 rounded-lg border border-amber-100 cursor-pointer transition-colors"
-                                                        >
-                                                            +5 Phòng
-                                                        </button>
-                                                    )}
-                                                    <button
-                                                        onClick={() => onDeleteUser(usr.id, usr.full_name?.split('_')[0] || 'Dummy')}
-                                                        className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg cursor-pointer transition-colors border-none"
-                                                        title="Xóa user này"
-                                                    >
-                                                        <TbTrash size={14} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

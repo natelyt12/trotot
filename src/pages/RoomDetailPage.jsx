@@ -1,21 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
-import { useModal } from '../context/ModalContext';
-import { incrementRoomViews } from '../services/roomService';
-import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from '../constants/constants.js';
-import { UNIVERSITIES } from '../constants/universities';
-import {
-    formatPrice,
-    formatArea,
-    formatDate,
-    formatElectricity,
-    formatWater,
-    formatDeposit,
-} from '../utils/formatters.js';
-import AppIcon from '../components/common/AppIcon.jsx';
-import { useFavorites } from '../context/FavoritesContext.jsx';
-import CommentSection from '../components/rooms/CommentSection.jsx';
-import LandlordCard from '../components/rooms/LandlordCard.jsx';
-
+import { useState, useEffect, useRef } from "react";
+import { useModal } from "../context/ModalContext";
+import { incrementRoomViews } from "../services/roomService";
+import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from "../constants/constants.js";
+import { UNIVERSITIES } from "../constants/universities";
+import { formatPrice, formatArea, formatDate, formatElectricity, formatWater, formatDeposit } from "../utils/formatters.js";
+import AppIcon from "../components/common/AppIcon.jsx";
+import { useFavorites } from "../context/FavoritesContext.jsx";
+import CommentSection from "../components/rooms/CommentSection.jsx";
+import LandlordCard from "../components/rooms/LandlordCard.jsx";
 
 /* ============================================
    Helper to parse and extract embeddable video URL for YouTube & TikTok
@@ -23,37 +15,37 @@ import LandlordCard from '../components/rooms/LandlordCard.jsx';
 const getEmbedUrl = (url) => {
     if (!url) return null;
     const trimmed = url.trim();
-    
+
     // 1. YouTube Standard, Mobile, and Shorts
-    if (trimmed.includes('youtube.com') || trimmed.includes('youtu.be')) {
-        let videoId = '';
-        if (trimmed.includes('watch?v=')) {
-            const parts = trimmed.split('watch?v=')[1];
-            videoId = parts.split('&')[0];
-        } else if (trimmed.includes('youtu.be/')) {
-            const parts = trimmed.split('youtu.be/')[1];
-            videoId = parts.split('?')[0];
-        } else if (trimmed.includes('shorts/')) {
-            const parts = trimmed.split('shorts/')[1];
-            videoId = parts.split('?')[0];
-        } else if (trimmed.includes('youtube.com/embed/')) {
+    if (trimmed.includes("youtube.com") || trimmed.includes("youtu.be")) {
+        let videoId = "";
+        if (trimmed.includes("watch?v=")) {
+            const parts = trimmed.split("watch?v=")[1];
+            videoId = parts.split("&")[0];
+        } else if (trimmed.includes("youtu.be/")) {
+            const parts = trimmed.split("youtu.be/")[1];
+            videoId = parts.split("?")[0];
+        } else if (trimmed.includes("shorts/")) {
+            const parts = trimmed.split("shorts/")[1];
+            videoId = parts.split("?")[0];
+        } else if (trimmed.includes("youtube.com/embed/")) {
             return trimmed;
         }
         return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
     }
-    
+
     // 2. TikTok Videos
-    if (trimmed.includes('tiktok.com')) {
-        if (trimmed.includes('/video/')) {
-            const parts = trimmed.split('/video/')[1];
-            const videoId = parts.split('?')[0].split('/')[0];
+    if (trimmed.includes("tiktok.com")) {
+        if (trimmed.includes("/video/")) {
+            const parts = trimmed.split("/video/")[1];
+            const videoId = parts.split("?")[0].split("/")[0];
             return `https://www.tiktok.com/embed/v2/${videoId}`;
         }
-        if (trimmed.includes('tiktok.com/embed/')) {
+        if (trimmed.includes("tiktok.com/embed/")) {
             return trimmed;
         }
     }
-    
+
     return null;
 };
 
@@ -62,7 +54,7 @@ const getEmbedUrl = (url) => {
    ============================================ */
 export default function RoomDetailPage({ room, navigate, user, onClose, previewMode }) {
     // Robust parsing in case room is wrapped in an object
-    const resolvedRoom = (room && !room.basic_info && room.room) ? room.room : room;
+    const resolvedRoom = room && !room.basic_info && room.room ? room.room : room;
 
     const fromDashboard = room?.fromDashboard || resolvedRoom?.fromDashboard;
     const fromProfile = room?.fromProfile || resolvedRoom?.fromProfile;
@@ -79,18 +71,16 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
     const handleToggleFavorite = async () => {
         const result = await toggleFavorite(resolvedRoom?.id);
-        if (result?.error === 'login_required') {
+        if (result?.error === "login_required") {
             showModal({
-                title: 'Thông báo',
-                message: 'Vui lòng đăng nhập để lưu tin!',
-                type: 'warning',
-                confirmText: 'Đăng nhập ngay',
-                onConfirm: () => navigate('login')
+                title: "Thông báo",
+                message: "Vui lòng đăng nhập để lưu tin!",
+                type: "warning",
+                confirmText: "Đăng nhập ngay",
+                onConfirm: () => navigate("login"),
             });
         }
     };
-
-
 
     // Increment views on mount
     useEffect(() => {
@@ -110,7 +100,6 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
         // Only run once per resolvedRoom.id to prevent infinite loops and double increments
     }, [resolvedRoom?.id, previewMode, resolvedRoom?.metadata?.total_views]);
 
-
     if (!resolvedRoom) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -119,28 +108,24 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
         );
     }
 
-    const { 
-        basic_info = {}, 
-        monthly_costs = { extra_services: [] }, 
-        room_features = { counts: {}, amenities: [] }, 
-        rules_utilities = {}, 
-        media_contact = { video_urls: [], images: [] }, 
-        metadata = {} 
+    const {
+        basic_info = {},
+        monthly_costs = { extra_services: [] },
+        room_features = { counts: {}, amenities: [] },
+        rules_utilities = {},
+        media_contact = { video_urls: [], images: [] },
+        metadata = {},
     } = resolvedRoom;
-    const videos = Array.isArray(media_contact.video_urls)
-        ? media_contact.video_urls
-        : (media_contact.video_url ? [media_contact.video_url] : []);
+    const videos = Array.isArray(media_contact.video_urls) ? media_contact.video_urls : media_contact.video_url ? [media_contact.video_url] : [];
 
     const mediaItems = [
-        ...videos.map(url => ({ type: 'video', url })),
-        ...((media_contact.images?.length > 0)
-            ? media_contact.images.map(img => ({ type: 'image', url: typeof img === 'string' ? img : img.url }))
-            : [{ type: 'placeholder' }])
+        ...videos.map((url) => ({ type: "video", url })),
+        ...(media_contact.images?.length > 0
+            ? media_contact.images.map((img) => ({ type: "image", url: typeof img === "string" ? img : img.url }))
+            : [{ type: "placeholder" }]),
     ];
-    const isExpired = metadata.status === 'expired';
-    const isAvailable = metadata.status === 'available' && !isExpired;
-
-
+    const isExpired = metadata.status === "expired";
+    const isAvailable = metadata.status === "available" && !isExpired;
 
     return (
         <div className="min-h-screen bg-stone-50 pt-16 md:pt-20 pb-24 md:pb-0">
@@ -157,11 +142,11 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                             if (onClose) {
                                 onClose();
                             } else if (fromDashboard) {
-                                navigate('dashboard');
+                                navigate("dashboard");
                             } else if (resolvedRoom?.fromPublicProfile) {
-                                navigate('public-profile', { userId: resolvedRoom?.publicProfileUserId });
+                                navigate("public-profile", { userId: resolvedRoom?.publicProfileUserId });
                             } else {
-                                navigate(fromProfile ? 'profile' : 'home', fromProfile ? { tab: originTab || 'info' } : undefined);
+                                navigate(fromProfile ? "profile" : "home", fromProfile ? { tab: originTab || "info" } : undefined);
                             }
                         }}
                         className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
@@ -173,17 +158,15 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                     </button>
                 </div>
 
-
                 <div>
                     <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] items-start gap-6">
                         {/* ---- LEFT COLUMN ---- */}
                         <div className="flex flex-col bg-white border border-stone-200 rounded-xl overflow-hidden">
-
                             {/* Image Gallery */}
                             <div className="bg-white">
                                 {/* Main image / video */}
                                 <div className="relative h-[300px] md:h-[450px] bg-stone-100 flex items-center justify-center">
-                                    {mediaItems[activeImage].type === 'video' ? (
+                                    {mediaItems[activeImage].type === "video" ? (
                                         (() => {
                                             const embedUrl = getEmbedUrl(mediaItems[activeImage].url);
                                             if (embedUrl) {
@@ -198,18 +181,14 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                                 );
                                             } else {
                                                 return (
-                                                    <video
-                                                        controls
-                                                        className="w-full h-full object-contain bg-black"
-                                                        key={mediaItems[activeImage].url}
-                                                    >
+                                                    <video controls className="w-full h-full object-contain bg-black" key={mediaItems[activeImage].url}>
                                                         <source src={mediaItems[activeImage].url} type="video/mp4" />
                                                         Trình duyệt của bạn không hỗ trợ xem video.
                                                     </video>
                                                 );
                                             }
                                         })()
-                                    ) : mediaItems[activeImage].type === 'placeholder' ? (
+                                    ) : mediaItems[activeImage].type === "placeholder" ? (
                                         <div className="w-full h-full bg-stone-100 flex flex-col items-center justify-center text-stone-400 gap-2">
                                             <AppIcon name="home" size={48} className="text-stone-300 animate-pulse" />
                                             <span className="text-sm font-semibold text-stone-400">Tin đăng chưa có hình ảnh</span>
@@ -220,25 +199,32 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                             src={mediaItems[activeImage].url}
                                             alt={`${basic_info.title} - ảnh ${activeImage + 1}`}
                                             className="w-full h-full object-cover animate-fade-in"
-                                            onError={(e) => { e.currentTarget.src = "/images/placeholder.png"; }}
+                                            onError={(e) => {
+                                                e.currentTarget.src = "/images/placeholder.png";
+                                            }}
                                         />
                                     )}
                                     {/* Status badges grouped */}
                                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                                         <span
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold ${isAvailable
-                                                ? 'bg-green-100 text-green-700'
-                                                : isExpired ? 'bg-red-100 text-red-700' : 'bg-stone-100 text-stone-700'
-                                                }`}
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold ${
+                                                isAvailable
+                                                    ? "bg-green-100 text-green-700"
+                                                    : isExpired
+                                                      ? "bg-red-100 text-red-700"
+                                                      : "bg-stone-100 text-stone-700"
+                                            }`}
                                         >
-                                            <span className={`w-2 h-2 rounded-full shrink-0 ${isAvailable ? 'bg-green-600' : isExpired ? 'bg-red-600' : 'bg-stone-600'}`} />
-                                            {isAvailable ? 'Còn phòng' : isExpired ? 'Đã hết hạn' : metadata.status === 'draft' ? 'Bản nháp' : metadata.status}
+                                            <span
+                                                className={`w-2 h-2 rounded-full shrink-0 ${isAvailable ? "bg-green-600" : isExpired ? "bg-red-600" : "bg-stone-600"}`}
+                                            />
+                                            {isAvailable ? "Còn phòng" : isExpired ? "Đã hết hạn" : metadata.status === "draft" ? "Bản nháp" : metadata.status}
                                         </span>
 
                                         {metadata.is_verified && (
                                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold bg-blue-100 text-blue-700">
                                                 <AppIcon name="verified" size={13} strokeWidth={2.5} />
-                                                Đã xác minh
+                                                Đã xác thực
                                             </span>
                                         )}
                                     </div>
@@ -246,13 +232,19 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                     {mediaItems.length > 1 && (
                                         <>
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); setActiveImage(prev => (prev > 0 ? prev - 1 : mediaItems.length - 1)); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveImage((prev) => (prev > 0 ? prev - 1 : mediaItems.length - 1));
+                                                }}
                                                 className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full! bg-black/80 hover:bg-black flex items-center justify-center text-white shadow-md transition-colors z-8 border-none cursor-pointer"
                                             >
                                                 <AppIcon name="chevronLeft" size={20} />
                                             </button>
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); setActiveImage(prev => (prev < mediaItems.length - 1 ? prev + 1 : 0)); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setActiveImage((prev) => (prev < mediaItems.length - 1 ? prev + 1 : 0));
+                                                }}
                                                 className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full! bg-black/80 hover:bg-black flex items-center justify-center text-white shadow-md transition-colors z-10 border-none cursor-pointer"
                                             >
                                                 <AppIcon name="chevronRight" size={20} />
@@ -267,10 +259,10 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                             <button
                                                 key={idx}
                                                 onClick={() => setActiveImage(idx)}
-                                                className={`relative w-[72px] h-[56px] shrink-0 rounded-md overflow-hidden border-2 transition-colors duration-200 cursor-pointer p-0 bg-stone-200 flex items-center justify-center ${activeImage === idx ? 'border-amber-600' : 'border-transparent'}`}
-                                                aria-label={`Xem ${item.type === 'video' ? 'video' : 'ảnh'} ${idx + 1}`}
+                                                className={`relative w-[72px] h-[56px] shrink-0 rounded-md overflow-hidden border-2 transition-colors duration-200 cursor-pointer p-0 bg-stone-200 flex items-center justify-center ${activeImage === idx ? "border-amber-600" : "border-transparent"}`}
+                                                aria-label={`Xem ${item.type === "video" ? "video" : "ảnh"} ${idx + 1}`}
                                             >
-                                                {item.type === 'video' ? (
+                                                {item.type === "video" ? (
                                                     <div className="text-stone-500">
                                                         <AppIcon name="play" size={24} />
                                                     </div>
@@ -285,26 +277,27 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
                             {/* Main Info Section */}
                             <div className="p-6 border-b border-stone-100">
-                                <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 mb-3 leading-tight font-heading">
-                                    {basic_info.title}
-                                </h1>
+                                <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 mb-3 leading-tight font-heading">{basic_info.title}</h1>
 
                                 <div className="flex items-center gap-4 mb-5 flex-wrap">
                                     <button
                                         onClick={previewMode ? undefined : handleToggleFavorite}
                                         disabled={previewMode}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-full! font-bold text-sm transition-all border ${previewMode ? 'opacity-50 cursor-not-allowed bg-stone-100 border-stone-200 text-stone-400' : 'cursor-pointer'} ${!previewMode && favorited
-                                            ? 'bg-red-50 border-red-200 text-red-600'
-                                            : !previewMode ? 'bg-stone-100 border-stone-200 text-stone-600 hover:bg-stone-200' : ''
-                                            }`}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-full! font-bold text-sm transition-all border ${previewMode ? "opacity-50 cursor-not-allowed bg-stone-100 border-stone-200 text-stone-400" : "cursor-pointer"} ${
+                                            !previewMode && favorited
+                                                ? "bg-red-50 border-red-200 text-red-600"
+                                                : !previewMode
+                                                  ? "bg-stone-100 border-stone-200 text-stone-600 hover:bg-stone-200"
+                                                  : ""
+                                        }`}
                                     >
                                         <AppIcon
                                             name="heart"
                                             size={18}
-                                            fill={favorited && !previewMode ? 'currentColor' : 'none'}
-                                            className={favorited && !previewMode ? 'animate-pulse' : ''}
+                                            fill={favorited && !previewMode ? "currentColor" : "none"}
+                                            className={favorited && !previewMode ? "animate-pulse" : ""}
                                         />
-                                        {favorited && !previewMode ? 'Đã lưu tin' : 'Lưu tin'}
+                                        {favorited && !previewMode ? "Đã lưu tin" : "Lưu tin"}
                                     </button>
 
                                     <div className="flex items-center gap-1.5 text-stone-500 text-sm font-medium">
@@ -319,19 +312,18 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         <span>Cập nhật: {formatDate(metadata.updated_at)}</span>
                                     </div>
 
-                                     <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
+                                    <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
                                         <AppIcon name="calendar" size={16} />
-                                        <span>Hết hạn: {resolvedRoom.available_until ? formatDate(resolvedRoom.available_until) : 'Không xác định'}</span>
+                                        <span>Hết hạn: {resolvedRoom.available_until ? formatDate(resolvedRoom.available_until) : "Không xác định"}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2 text-stone-500 text-[0.925rem] mb-6">
                                     <AppIcon name="location" size={18} className="text-stone-400 mt-1" />
                                     <div className="flex flex-col">
-                                        <span className="text-stone-900 font-bold text-[1rem] leading-tight mb-1">
-                                            {basic_info.address}
-                                        </span>
+                                        <span className="text-stone-900 font-bold text-[1rem] leading-tight mb-1">{basic_info.address}</span>
                                         <span className="text-stone-400 text-[0.85rem]">
-                                            {basic_info.ward && `${basic_info.ward}, `}{basic_info.district}, {basic_info.city}
+                                            {basic_info.ward && `${basic_info.ward}, `}
+                                            {basic_info.district}, {basic_info.city}
                                         </span>
                                     </div>
                                 </div>
@@ -339,17 +331,21 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                 {/* Nearby Universities Mapping */}
                                 {(() => {
                                     // Bổ sung logic lọc theo Phường/Xã (ward)
-                                    const nearby = UNIVERSITIES.filter(u => 
-                                        u.city === basic_info.city && 
-                                        u.district === basic_info.district &&
-                                        (!basic_info.ward || u.ward === basic_info.ward)
+                                    const nearby = UNIVERSITIES.filter(
+                                        (u) =>
+                                            u.city === basic_info.city &&
+                                            u.district === basic_info.district &&
+                                            (!basic_info.ward || u.ward === basic_info.ward),
                                     );
 
                                     if (nearby.length === 0) return null;
                                     return (
                                         <div className="flex flex-wrap gap-2 mb-6">
-                                            {nearby.map(u => (
-                                                <span key={u.name} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[0.75rem] font-bold border border-amber-100">
+                                            {nearby.map((u) => (
+                                                <span
+                                                    key={u.name}
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[0.75rem] font-bold border border-amber-100"
+                                                >
                                                     <AppIcon name="verified" size={12} />
                                                     Gần {u.name}
                                                 </span>
@@ -362,19 +358,18 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                     <StatItem icon="price" label="Giá thuê" value={formatPrice(basic_info.price_monthly)} highlight />
                                     <StatItem icon="area" label="Diện tích" value={formatArea(basic_info.area_sqm)} />
                                     <StatItem icon="occupants" label="Tối đa" value={`${room_features.counts.capacity} người`} />
-                                    <StatItem icon="bathroom" label="Vệ sinh" value={BATHROOM_TYPES[room_features.bathroom_type] || 'Khép kín'} />
+                                    <StatItem icon="bathroom" label="Vệ sinh" value={BATHROOM_TYPES[room_features.bathroom_type] || "Khép kín"} />
                                 </div>
 
                                 {/* Description */}
                                 <div className="mt-8">
                                     <SectionTitle icon="photo">Mô tả chi tiết</SectionTitle>
-                                    <div className="mt-4 text-stone-700 leading-relaxed whitespace-pre-line text-[0.95rem]">
-                                        {media_contact.description}
-                                    </div>
+                                    <div className="mt-4 text-stone-700 leading-relaxed whitespace-pre-line text-[0.95rem]">{media_contact.description}</div>
                                 </div>
 
                                 <div className="mt-3 text-[0.8rem] text-stone-400">
-                                    Đăng ngày: {formatDate(metadata.created_at)} • Hết hạn: {resolvedRoom.available_until ? formatDate(resolvedRoom.available_until) : 'Không xác định'} • ID: {resolvedRoom.listing_id}
+                                    Đăng ngày: {formatDate(metadata.created_at)} • Hết hạn:{" "}
+                                    {resolvedRoom.available_until ? formatDate(resolvedRoom.available_until) : "Không xác định"} • ID: {resolvedRoom.listing_id}
                                 </div>
                             </div>
 
@@ -387,24 +382,33 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         <InfoRow label="Tiền cọc" value={formatDeposit(monthly_costs.deposit_amount)} />
                                         <InfoRow label="Tiền điện" value={formatElectricity(monthly_costs.electricity)} />
                                         <InfoRow label="Tiền nước" value={formatWater(monthly_costs.water)} />
-                                        <InfoRow label="Internet" value={
-                                            Number(monthly_costs.internet) > 0
-                                                ? `${new Intl.NumberFormat('vi-VN').format(monthly_costs.internet)} đ/tháng`
-                                                : 'Miễn phí / Đã bao gồm'
-                                        } />
-                                        <InfoRow label="Gửi xe" value={
-                                            Number(monthly_costs.parking_fee) > 0
-                                                ? `${new Intl.NumberFormat('vi-VN').format(monthly_costs.parking_fee)} đ/tháng`
-                                                : 'Miễn phí / Đã bao gồm'
-                                        } />
+                                        <InfoRow
+                                            label="Internet"
+                                            value={
+                                                Number(monthly_costs.internet) > 0
+                                                    ? `${new Intl.NumberFormat("vi-VN").format(monthly_costs.internet)} đ/tháng`
+                                                    : "Miễn phí / Đã bao gồm"
+                                            }
+                                        />
+                                        <InfoRow
+                                            label="Gửi xe"
+                                            value={
+                                                Number(monthly_costs.parking_fee) > 0
+                                                    ? `${new Intl.NumberFormat("vi-VN").format(monthly_costs.parking_fee)} đ/tháng`
+                                                    : "Miễn phí / Đã bao gồm"
+                                            }
+                                        />
 
                                         {monthly_costs.extra_services.length > 0 && (
                                             <div className="pt-2">
                                                 <p className="text-[0.8rem] font-bold text-stone-400 uppercase tracking-wider mb-2">Dịch vụ thêm:</p>
                                                 <div className="flex flex-wrap gap-2">
                                                     {monthly_costs.extra_services.map((s) => (
-                                                        <span key={s.name} className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium">
-                                                            {s.name}: {new Intl.NumberFormat('vi-VN').format(s.price)} đ
+                                                        <span
+                                                            key={s.name}
+                                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium"
+                                                        >
+                                                            {s.name}: {new Intl.NumberFormat("vi-VN").format(s.price)} đ
                                                         </span>
                                                     ))}
                                                 </div>
@@ -419,9 +423,14 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                     <div className="mt-5 space-y-4">
                                         <InfoRow label="Giờ giấc" value={CURFEW_LABELS[rules_utilities.curfew] || rules_utilities.curfew} />
                                         <InfoRow label="Vệ sinh" value={BATHROOM_TYPES[room_features.bathroom_type] || room_features.bathroom_type} />
-                                        <InfoRow label="Thú cưng" value={rules_utilities.is_pet_allowed ? 'Được phép nuôi' : 'Không cho phép'} isStatus ok={rules_utilities.is_pet_allowed} />
+                                        <InfoRow
+                                            label="Thú cưng"
+                                            value={rules_utilities.is_pet_allowed ? "Được phép nuôi" : "Không cho phép"}
+                                            isStatus
+                                            ok={rules_utilities.is_pet_allowed}
+                                        />
                                         <InfoRow label="Giặt đồ" value={LAUNDRY_TYPES[rules_utilities.laundry_type] || rules_utilities.laundry_type} />
-                                        <InfoRow label="Chung chủ" value={rules_utilities.is_shared_with_host ? 'Ở chung với chủ' : 'Không chung chủ'} />
+                                        <InfoRow label="Chung chủ" value={rules_utilities.is_shared_with_host ? "Ở chung với chủ" : "Không chung chủ"} />
                                     </div>
                                 </div>
                             </div>
@@ -435,10 +444,10 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         return (
                                             <div
                                                 key={key}
-                                                className={`flex items-center gap-2 p-2 px-3 rounded-md border transition-all duration-200 ${has ? 'bg-amber-50 border-amber-200 opacity-100' : 'bg-stone-50 border-stone-200 opacity-45'}`}
+                                                className={`flex items-center gap-2 p-2 px-3 rounded-md border transition-all duration-200 ${has ? "bg-amber-50 border-amber-200 opacity-100" : "bg-stone-50 border-stone-200 opacity-45"}`}
                                             >
-                                                <AppIcon name={key} size={16} color={has ? '#d97706' : '#a8a29e'} />
-                                                <span className={`text-[0.85rem] ${has ? 'text-amber-900 font-medium' : 'text-stone-400 font-normal'}`}>
+                                                <AppIcon name={key} size={16} color={has ? "#d97706" : "#a8a29e"} />
+                                                <span className={`text-[0.85rem] ${has ? "text-amber-900 font-medium" : "text-stone-400 font-normal"}`}>
                                                     {label}
                                                 </span>
                                             </div>
@@ -469,7 +478,9 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                             <AppIcon name="location" size={24} />
                                         </div>
                                         <p className="text-amber-900 font-bold mb-1">Bản đồ đang được cập nhật</p>
-                                        <p className="text-amber-700/70 text-sm max-w-[280px]">Vị trí chính xác sẽ được hiển thị khi Bên cho thuê hoàn tất xác minh tọa độ.</p>
+                                        <p className="text-amber-700/70 text-sm max-w-[280px]">
+                                            Vị trí chính xác sẽ được hiển thị khi Bên cho thuê hoàn tất xác thực tọa độ.
+                                        </p>
                                     </div>
                                 )}
                             </div>
@@ -514,9 +525,7 @@ function StatItem({ icon, label, value, highlight }) {
             </div>
             <div className="flex flex-col">
                 <p className="text-[0.72rem] text-stone-400 font-medium uppercase tracking-wider mb-0.5">{label}</p>
-                <p className={`text-[0.9rem] font-bold ${highlight ? 'text-amber-600' : 'text-stone-900'} font-heading`}>
-                    {value}
-                </p>
+                <p className={`text-[0.9rem] font-bold ${highlight ? "text-amber-600" : "text-stone-900"} font-heading`}>{value}</p>
             </div>
         </div>
     );
@@ -526,10 +535,7 @@ function InfoRow({ label, value, isStatus, ok }) {
     return (
         <div className="flex justify-between items-baseline gap-4">
             <span className="text-[0.875rem] text-stone-400 font-medium shrink-0">{label}</span>
-            <span className={`text-[0.925rem] font-bold text-right ${isStatus ? (ok ? 'text-green-600' : 'text-red-600') : 'text-stone-900'}`}>
-                {value}
-            </span>
+            <span className={`text-[0.925rem] font-bold text-right ${isStatus ? (ok ? "text-green-600" : "text-red-600") : "text-stone-900"}`}>{value}</span>
         </div>
     );
 }
-

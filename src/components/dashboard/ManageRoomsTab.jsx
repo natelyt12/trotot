@@ -40,10 +40,10 @@ export default function ManageRoomsTab({
             return room.status === 'available' && room.is_verified;
         }
         if (subTab === 'pending_verification') {
-            return room.status === 'available' && !room.is_verified;
+            return room.status === 'pending';
         }
         if (subTab === 'published') {
-            // Tất cả phòng đã công khai (cả verified và chờ duyệt)
+            // Tất cả phòng đã công khai (cả verified và chưa xác thực)
             return room.status === 'available';
         }
         // default to published available
@@ -198,24 +198,21 @@ export default function ManageRoomsTab({
                                     <div className="flex items-center gap-1.5">
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase ${isExpired ? 'bg-red-50 text-red-600' :
                                             room.status === 'available' ? (
-                                                room.is_verified ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600 border border-amber-100'
+                                                room.is_verified ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600 border border-blue-100'
                                             ) :
-                                                room.status === 'hidden' ? 'bg-amber-50 text-amber-600' :
-                                                    'bg-stone-50 text-stone-500'
+                                                room.status === 'pending' ? 'bg-amber-50 text-amber-600 border border-amber-100' :
+                                                    room.status === 'hidden' ? 'bg-stone-50 text-stone-500' :
+                                                        'bg-stone-50 text-stone-500'
                                             }`}>
                                             {isExpired ? 'Hết hạn' :
                                                 room.status === 'available' ? (
-                                                    room.is_verified ? 'Đã công khai' : 'Đang chờ duyệt'
+                                                    room.is_verified ? 'Đã xác thực' : 'Công khai'
                                                 ) :
-                                                    room.status === 'hidden' ? 'Đã ẩn' :
-                                                        room.status === 'draft' ? 'Bản nháp' :
-                                                            room.status}
+                                                    room.status === 'pending' ? 'Chờ duyệt công khai' :
+                                                        room.status === 'hidden' ? 'Đã ẩn' :
+                                                            room.status === 'draft' ? 'Bản nháp' :
+                                                                room.status}
                                         </span>
-                                        {room.is_verified && room.status === 'available' && (
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase bg-blue-50 text-blue-600">
-                                                Đã xác thực
-                                            </span>
-                                        )}
                                     </div>
 
                                     {/* Buttons bên phải */}

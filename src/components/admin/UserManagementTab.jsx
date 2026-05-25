@@ -4,7 +4,6 @@ import {
     TbSearch, 
     TbUsers, 
     TbPhone, 
-    TbMail, 
     TbTrash 
 } from 'react-icons/tb';
 
@@ -18,8 +17,7 @@ export default function UserManagementTab({
 }) {
     const filteredUsers = allUsers.filter(u =>
         (u.full_name || '').toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-        (u.phone || '').includes(userSearchQuery) ||
-        (u.email || '').toLowerCase().includes(userSearchQuery.toLowerCase())
+        (u.phone || '').includes(userSearchQuery)
     );
 
     return (
@@ -45,7 +43,7 @@ export default function UserManagementTab({
                 <TbSearch size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
                     type="text"
-                    placeholder="Tìm theo tên, số điện thoại hoặc email..."
+                    placeholder="Tìm theo tên hoặc số điện thoại..."
                     value={userSearchQuery}
                     onChange={e => setUserSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 text-sm border border-stone-200 rounded-xl bg-white outline-none focus:border-amber-400 font-medium text-stone-700"
@@ -111,9 +109,9 @@ export default function UserManagementTab({
                                                 </div>
                                             </td>
                                             <td className="p-4 hidden sm:table-cell">
-                                                <div className="space-y-0.5">
-                                                    <div className="font-bold text-stone-600 flex items-center gap-1"><TbPhone size={11} />{usr.phone || '—'}</div>
-                                                    <div className="text-stone-400 flex items-center gap-1 text-[10px]"><TbMail size={10} />{usr.email || '—'}</div>
+                                                <div className="font-bold text-stone-600 flex items-center gap-1">
+                                                    <TbPhone size={11} />
+                                                    {usr.phone || '—'}
                                                 </div>
                                             </td>
                                             <td className="p-4">

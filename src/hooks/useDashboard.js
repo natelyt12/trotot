@@ -6,7 +6,7 @@ import { moveRoomToDraft } from '../utils/roomUtils.js';
 import { deleteFromCloudinary } from '../utils/imageUtils.js';
 import { validateRoomData } from '../utils/validation.js';
 
-export const useDashboard = (user, initialData) => {
+export const useDashboard = (user, initialData, routerPage) => {
     const { showModal } = useModal();
     const { addNotification } = useNotification();
 
@@ -36,13 +36,11 @@ export const useDashboard = (user, initialData) => {
     }, [user?.id]);
 
     useEffect(() => {
-        if (initialData?.tab) {
-            const timer = setTimeout(() => {
-                setActiveTab(prev => prev !== initialData.tab ? initialData.tab : prev);
-            }, 0);
-            return () => clearTimeout(timer);
+        if (routerPage === 'dashboard') {
+            const targetTab = initialData?.tab || 'manage_rooms';
+            setActiveTab(targetTab);
         }
-    }, [initialData]);
+    }, [routerPage, initialData]);
 
     useEffect(() => {
         if (activeTab === 'manage_rooms') {
@@ -78,8 +76,8 @@ export const useDashboard = (user, initialData) => {
                     const { error } = await publishRoom(room.id);
                     if (error) throw error;
 
-                    setRooms(prev => prev.map(r => r.id === room.id ? { ...r, status: 'available' } : r));
-                    addNotification('Tin đăng của bạn đã được gửi và đang chờ duyệt!', 'success');
+                    setRooms(prev => prev.map(r => r.id === room.id ? { ...r, status: 'pending' } : r));
+                    addNotification('Tin đăng của bạn đã được gửi và đang chờ duyệt công khai!', 'success');
                 } catch (err) {
                     console.error("Lỗi khi công khai:", err);
                     showModal({ title: 'Lỗi', message: 'Có lỗi xảy ra, không thể công khai tin.', type: 'error' });

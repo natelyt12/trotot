@@ -35,11 +35,11 @@ flowchart TD
 
 **Các thông báo lỗi:**
 
-| Tình huống | Thông báo hiển thị |
-|---|---|
-| Sai email hoặc mật khẩu | Email hoặc mật khẩu không chính xác. |
-| Chưa xác nhận email | Vui lòng xác thực tài khoản trước khi đăng nhập. |
-| Lỗi khác | Hiển thị mô tả lỗi cụ thể |
+| Tình huống              | Thông báo hiển thị                               |
+| ----------------------- | ------------------------------------------------ |
+| Sai email hoặc mật khẩu | Email hoặc mật khẩu không chính xác.             |
+| Chưa xác nhận email     | Vui lòng xác thực tài khoản trước khi đăng nhập. |
+| Lỗi khác                | Hiển thị mô tả lỗi cụ thể                        |
 
 ---
 
@@ -57,7 +57,7 @@ flowchart TD
         F --> G{Bấm Tạo tài khoản}
 
         G -- Người thuê --> H[Gửi thông tin lên hệ thống]
-        G -- Môi giới hoặc\nBên cho thuê --> I[Chuyển sang Bước 2:\nXác minh danh tính]
+        G -- Môi giới hoặc\nBên cho thuê --> I[Chuyển sang Bước 2:\nxác thực danh tính]
         I --> J[Đọc thông tin KYC\nBấm Xác nhận]
         J --> H
 
@@ -84,14 +84,14 @@ flowchart TD
 
 **Quy tắc nhập thông tin:**
 
-| Trường | Yêu cầu |
-|--------|---------|
-| Tên người dùng | Tối đa 30 ký tự, chỉ dùng chữ cái (có dấu tiếng Việt), số và khoảng trắng |
-| Email | Phải có dấu `@` và đúng định dạng email |
-| Mật khẩu | Tối thiểu 6 ký tự, có ít nhất 1 chữ hoa và 1 chữ số |
-| Xác nhận mật khẩu | Phải giống hệt mật khẩu vừa nhập |
-| Số điện thoại | 10 số, bắt đầu bằng số `0` |
-| Điều khoản | Bắt buộc phải tick vào ô đồng ý |
+| Trường            | Yêu cầu                                                                   |
+| ----------------- | ------------------------------------------------------------------------- |
+| Tên người dùng    | Tối đa 30 ký tự, chỉ dùng chữ cái (có dấu tiếng Việt), số và khoảng trắng |
+| Email             | Phải có dấu `@` và đúng định dạng email                                   |
+| Mật khẩu          | Tối thiểu 6 ký tự, có ít nhất 1 chữ hoa và 1 chữ số                       |
+| Xác nhận mật khẩu | Phải giống hệt mật khẩu vừa nhập                                          |
+| Số điện thoại     | 10 số, bắt đầu bằng số `0`                                                |
+| Điều khoản        | Bắt buộc phải tick vào ô đồng ý                                           |
 
 ---
 

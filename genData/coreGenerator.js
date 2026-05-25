@@ -1,8 +1,8 @@
 import { 
-    makeStudentHubScenario, 
-    makeVipHostScenario, 
-    makeModerationScenario, 
-    makeCitiesExpansionScenario 
+    makeLargeScaleModerationScenario, 
+    makeUniversityStudentHubScenario, 
+    makeOneHundredStandardRoomsScenario, 
+    makePremiumFoodAndLifestyleScenario 
 } from './generators/scenarioGenerator.js';
 
 // Batch size for uploads
@@ -54,17 +54,17 @@ export const runScenario = async (scenarioId, myUserId, supabase, onProgress) =>
         // 1. Khởi tạo kịch bản tương ứng
         onProgress(0, 5, "⚙️ Đang chuẩn bị kịch bản...");
         if (scenarioId === 1) {
-            scenarioName = "Tâm điểm sinh viên";
-            scenarioData = makeStudentHubScenario();
+            scenarioName = "Kiểm duyệt & Quy mô lớn";
+            scenarioData = makeLargeScaleModerationScenario(myUserId);
         } else if (scenarioId === 2) {
-            scenarioName = "Chủ trọ VIP";
-            scenarioData = makeVipHostScenario(myUserId);
+            scenarioName = "Tâm điểm trường Đại học";
+            scenarioData = makeUniversityStudentHubScenario(myUserId);
         } else if (scenarioId === 3) {
-            scenarioName = "Tin hot & Kiểm duyệt";
-            scenarioData = makeModerationScenario();
+            scenarioName = "100 phòng trọ tiêu chuẩn";
+            scenarioData = makeOneHundredStandardRoomsScenario(myUserId);
         } else if (scenarioId === 4) {
-            scenarioName = "Đô thị nở rộ";
-            scenarioData = makeCitiesExpansionScenario();
+            scenarioName = "Thiên đường Tiện ích & Ẩm thực";
+            scenarioData = makePremiumFoodAndLifestyleScenario(myUserId);
         } else {
             throw new Error(`Kịch bản ${scenarioId} không tồn tại.`);
         }

@@ -317,7 +317,7 @@ export default function App() {
 
                         {/* Profile Layer */}
                         <div className={(currentPage === 'profile' || (currentPage === 'room-detail' && pageData?.fromProfile)) ? 'block' : 'hidden'}>
-                            <ProfilePage user={user} navigate={navigate} initialData={pageData} />
+                            <ProfilePage user={user} navigate={navigate} initialData={pageData} currentPage={currentPage} />
                         </div>
 
                         {/* Public Profile Layer */}
@@ -327,7 +327,7 @@ export default function App() {
 
                         {/* Dashboard Layer */}
                         <div className={currentPage === 'dashboard' ? 'block' : 'hidden'}>
-                            <DashboardPage user={user} navigate={navigate} initialData={pageData} />
+                            <DashboardPage user={user} navigate={navigate} initialData={pageData} routerPage={currentPage} />
                         </div>
 
                         {/* Admin Layer */}

@@ -154,7 +154,7 @@ flowchart TD
         D --> E{Kiểm tra thông tin}
         E --> |Mật khẩu mới và xác nhận\nkhông giống nhau| F[Thông báo:\nMật khẩu không khớp]
         E --> |Mật khẩu mới dưới 6 ký tự| G[Thông báo:\nMật khẩu quá ngắn]
-        E --> |Hợp lệ| H[Đăng nhập lại\nbằng mật khẩu hiện tại\nđể xác minh danh tính]
+        E --> |Hợp lệ| H[Đăng nhập lại\nbằng mật khẩu hiện tại\nđể xác thực danh tính]
         H --> |Mật khẩu hiện tại sai| I[Thông báo:\nMật khẩu cũ không chính xác]
         H --> |Đúng| J[Cập nhật\nmật khẩu mới lên hệ thống]
         J --> K[Thông báo nhỏ:\nThay đổi thành công]
@@ -181,7 +181,7 @@ flowchart TD
     end
 
     subgraph SYSTEM["⚙️ Hệ thống"]
-        F --> K[Đăng nhập lại\nbằng mật khẩu vừa nhập\nđể xác minh]
+        F --> K[Đăng nhập lại\nbằng mật khẩu vừa nhập\nđể xác thực]
         K --> |Sai mật khẩu| L[Thông báo:\nMật khẩu xác nhận không đúng]
         K --> |Đúng| M[Gọi hàm xóa\ntoàn bộ dữ liệu\ntrên cơ sở dữ liệu]
         M --> N[Xóa: Hồ sơ · Tin đăng · Bình luận\nDanh sách yêu thích · Tài khoản]

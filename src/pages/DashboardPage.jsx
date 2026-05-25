@@ -6,7 +6,7 @@ import ManageRoomsTab from '../components/dashboard/ManageRoomsTab.jsx';
 import RoomDetailPage from './RoomDetailPage.jsx';
 import { useDashboard } from '../hooks/useDashboard.js';
 
-export default function DashboardPage({ user, navigate, initialData }) {
+export default function DashboardPage({ user, navigate, initialData, routerPage }) {
     const {
         activeTab,
         setActiveTab,
@@ -32,7 +32,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
         setRenewingRoom,
         handleRenewRoom,
         executeRenewal
-    } = useDashboard(user, initialData);
+    } = useDashboard(user, initialData, routerPage);
 
     const TAB_GROUPS = [
         {
@@ -109,17 +109,10 @@ export default function DashboardPage({ user, navigate, initialData }) {
 
                         {/* Content panel */}
                         <main className="p-6 md:p-10 bg-white min-w-0">
-                            <AnimatePresence mode="wait">
                                 
                                 {/* ---- TAB: MANAGE ROOMS ---- */}
                                 {activeTab === 'manage_rooms' && (
-                                    <motion.div
-                                        key="manage_rooms"
-                                        initial={{ opacity: 0, y: 15 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -15 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
+                                    <div>
                                         <ManageRoomsTab
                                             rooms={rooms}
                                             loadingRooms={loadingRooms}
@@ -139,18 +132,12 @@ export default function DashboardPage({ user, navigate, initialData }) {
                                             handleRenewRoom={handleRenewRoom}
                                             onRefresh={fetchUserRooms}
                                         />
-                                    </motion.div>
+                                    </div>
                                 )}
 
                                 {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}
                                 {activeTab === 'post_room' && (
-                                    <motion.div
-                                        key="post_room"
-                                        initial={{ opacity: 0, y: 15 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -15 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
+                                    <div>
                                         {!editingRoom && !isCreating ? (
                                             <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
                                                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
@@ -183,10 +170,8 @@ export default function DashboardPage({ user, navigate, initialData }) {
                                                 }}
                                             />
                                         )}
-                                    </motion.div>
+                                    </div>
                                 )}
-
-                            </AnimatePresence>
                         </main>
                     </div>
                 </div>

@@ -45,7 +45,7 @@ export const getUserRooms = async (userId) => {
 };
 
 /**
- * Publishes a room from draft (sets status = 'available')
+ * Publishes a room from draft (sets status = 'pending')
  * @param {string} roomId 
  * @returns {Promise<{error: any}>}
  */
@@ -53,7 +53,7 @@ export const publishRoom = async (roomId) => {
     try {
         const { error } = await supabase
             .from('rooms')
-            .update({ status: 'available' })
+            .update({ status: 'pending' })
             .eq('id', roomId);
         return { error };
     } catch (err) {
