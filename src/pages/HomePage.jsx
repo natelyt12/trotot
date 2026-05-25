@@ -5,6 +5,7 @@ import RoomGrid from '../components/rooms/RoomGrid.jsx';
 import AppIcon from '../components/common/AppIcon.jsx';
 import SearchTrigger from '../components/search/SearchTrigger.jsx';
 import { useRoomFilterContext } from '../context/RoomFilterContext.jsx';
+import { PROVINCE } from '../constants/province.js';
 
 /* ============================================
    HomePage – Listing + search + filters
@@ -77,7 +78,7 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
 
     const stats = [
         { value: `300+`, label: 'Phòng đăng ký' },
-        { value: `${cities.length}`, label: 'Thành phố' },
+        { value: `${PROVINCE.length}`, label: 'Thành phố' },
         { value: '500+', label: 'Chủ trọ tin cậy' },
         { value: '4.8★', label: 'Đánh giá trung bình' },
     ];
