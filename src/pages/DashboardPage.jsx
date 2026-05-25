@@ -27,6 +27,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
         handleMockVerify,
         handleDeleteRoom,
         handleDuplicateRoom,
+        fetchUserRooms,
         renewingRoom,
         setRenewingRoom,
         handleRenewRoom,
@@ -136,6 +137,7 @@ export default function DashboardPage({ user, navigate, initialData }) {
                                             setIsCreating={setIsCreating}
                                             setActiveTab={setActiveTab}
                                             handleRenewRoom={handleRenewRoom}
+                                            onRefresh={fetchUserRooms}
                                         />
                                     </motion.div>
                                 )}

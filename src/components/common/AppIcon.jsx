@@ -124,6 +124,7 @@ const ICON_MAP = {
     'file-text': TbFileText,
     calendar: TbCalendar,
     reload: TbRefresh,
+    refresh: TbRefresh,
     settings: TbSettings,
 };
 

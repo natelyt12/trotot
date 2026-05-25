@@ -692,26 +692,28 @@ export default function ProfilePage({ user, navigate, initialData }) {
                                                     </Field>
                                                 </div>
 
-                                                <Field label="Vai trò của bạn">
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                        {[
-                                                            { id: 'tenant', label: 'Người thuê' },
-                                                            { id: 'landlord', label: 'Bên cho thuê' },
-                                                        ].map((opt) => (
-                                                            <button
-                                                                key={opt.id}
-                                                                type="button"
-                                                                onClick={() => setFormData({ ...formData, role: opt.id })}
-                                                                className={`py-3 rounded-lg border-2 font-bold text-sm cursor-pointer transition-all duration-200 ${formData.role === opt.id
-                                                                    ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                                                    : 'border-stone-100 bg-white text-stone-500 hover:bg-stone-50 hover:border-stone-200'
-                                                                    }`}
-                                                            >
-                                                                {opt.label}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </Field>
+                                                {oldRole !== 'admin' && formData.role !== 'admin' && (
+                                                    <Field label="Vai trò của bạn">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                            {[
+                                                                { id: 'tenant', label: 'Người thuê' },
+                                                                { id: 'landlord', label: 'Bên cho thuê' },
+                                                            ].map((opt) => (
+                                                                <button
+                                                                    key={opt.id}
+                                                                    type="button"
+                                                                    onClick={() => setFormData({ ...formData, role: opt.id })}
+                                                                    className={`py-3 rounded-lg border-2 font-bold text-sm cursor-pointer transition-all duration-200 ${formData.role === opt.id
+                                                                        ? 'border-amber-500 bg-amber-50 text-amber-700'
+                                                                        : 'border-stone-100 bg-white text-stone-500 hover:bg-stone-50 hover:border-stone-200'
+                                                                        }`}
+                                                                >
+                                                                    {opt.label}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </Field>
+                                                )}
 
                                                 <div className="pt-4 flex justify-end">
                                                     <button

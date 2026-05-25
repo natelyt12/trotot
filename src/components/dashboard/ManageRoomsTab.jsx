@@ -18,7 +18,8 @@ export default function ManageRoomsTab({
     setEditingRoom,
     setIsCreating,
     setActiveTab,
-    handleRenewRoom
+    handleRenewRoom,
+    onRefresh
 }) {
     const ITEMS_PER_PAGE = 10;
 
@@ -42,7 +43,8 @@ export default function ManageRoomsTab({
             return room.status === 'available' && !room.is_verified;
         }
         if (subTab === 'published') {
-            return room.status === 'available' && room.is_verified;
+            // Tất cả phòng đã công khai (cả verified và chờ duyệt)
+            return room.status === 'available';
         }
         // default to published available
         return room.status === 'available';
@@ -50,16 +52,29 @@ export default function ManageRoomsTab({
 
     return (
         <div className="animate-fade-in">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-amber-100 text-amber-600">
-                    <AppIcon name="check-square" size={18} />
+            <div className="flex items-center justify-between gap-3 mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center bg-amber-100 text-amber-600">
+                        <AppIcon name="check-square" size={18} />
+                    </div>
+                    <h2
+                        className="text-lg font-bold text-stone-900"
+                        style={{ fontFamily: 'var(--font-heading)' }}
+                    >
+                        Quản lý tin đăng
+                    </h2>
                 </div>
-                <h2
-                    className="text-lg font-bold text-stone-900"
-                    style={{ fontFamily: 'var(--font-heading)' }}
-                >
-                    Quản lý tin đăng
-                </h2>
+                {onRefresh && (
+                    <button
+                        onClick={onRefresh}
+                        disabled={loadingRooms}
+                        title="Làm mới dữ liệu"
+                        className="flex items-center gap-1.5 px-3 py-1.5 border border-stone-200 rounded-full text-[0.75rem] font-bold text-stone-500 hover:bg-stone-50 hover:text-stone-800 cursor-pointer transition-colors disabled:opacity-50"
+                    >
+                        <AppIcon name="refresh" size={13} className={loadingRooms ? 'animate-spin' : ''} />
+                        <span>Làm mới</span>
+                    </button>
+                )}
             </div>
             
             <div className="flex border-b border-stone-200 mb-6 overflow-x-auto whitespace-nowrap">
