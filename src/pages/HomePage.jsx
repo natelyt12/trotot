@@ -21,7 +21,6 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
         toggleAmenity,
         activeFilterCount,
         totalCount,
-        getAvailableCities,
         loading,
         loadingMore,
         hasMore,
@@ -52,7 +51,6 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage]);
 
-    const cities = getAvailableCities();
 
 
     const handleRoomClick = (room) => navigate('room-detail', room);

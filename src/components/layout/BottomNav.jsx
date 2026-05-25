@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import AppIcon from '../common/AppIcon.jsx';
+import { useRoomFilterContext } from '../../context/RoomFilterContext.jsx';
 
 /* ============================================
    BottomNav Component
@@ -11,6 +12,7 @@ import AppIcon from '../common/AppIcon.jsx';
 export default function BottomNav({ currentPage, navigate, user, onFilterClick }) {
     const isHost = user && user.user_metadata?.role === 'landlord';
     const isDashboard = currentPage === 'dashboard';
+    const { activeFilterCount } = useRoomFilterContext();
 
     const navItems = [
         { id: 'home', label: 'Trang chủ', icon: 'home' },
@@ -78,6 +80,9 @@ export default function BottomNav({ currentPage, navigate, user, onFilterClick }
                                     }`}
                                 style={{ background: isCenter ? undefined : 'transparent' }}
                             >
+                                {isCenter && !isDashboard && activeFilterCount > 0 && (
+                                    <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-red-500 border-2 border-white rounded-full z-10 animate-pulse" />
+                                )}
                                 {/* Micro-animation for icon on active */}
                                 <motion.div
                                     className="flex items-center justify-center"
