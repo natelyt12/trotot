@@ -188,13 +188,13 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                                 </button>
                                             </>
                                         )}
-                                        {user && (
+                                        {user && user.user_metadata?.role === "admin" && (
                                             <button
                                                 onClick={() => navigate("admin")}
                                                 className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                             >
                                                 <AppIcon name="settings" size={16} />
-                                                <span>Trang quản trị (Test)</span>
+                                                <span>Trang quản trị</span>
                                             </button>
                                         )}
                                         <div className="h-px bg-stone-100 my-1.5" />
@@ -335,7 +335,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                             {link.label}
                         </button>
                     ))}
-                    {user && (
+                    {user && user.user_metadata?.role === "admin" && (
                         <button
                             onClick={() => {
                                 navigate("admin");
@@ -343,7 +343,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                             }}
                             className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-stone-900 transition-colors duration-200"
                         >
-                            Trang quản trị (Test)
+                            Trang quản trị
                         </button>
                     )}
                     {user && (

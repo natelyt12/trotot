@@ -78,8 +78,6 @@ export default function App() {
                 navigate('login');
                 return;
             }
-            // TẠM THỜI: Cho phép mọi user đã đăng nhập để dễ test thử
-            /*
             if (user.user_metadata?.role !== 'admin') {
                 showModal({
                     title: "Từ chối truy cập",
@@ -88,7 +86,6 @@ export default function App() {
                 });
                 return;
             }
-            */
         }
 
         // Draft Check for Room Detail
@@ -237,10 +234,7 @@ export default function App() {
             } else if (currentPage === 'admin') {
                 if (!user) {
                     navigate('login');
-                }
-                // TẠM THỜI: Cho phép mọi user đã đăng nhập để dễ test thử
-                /*
-                else if (user.user_metadata?.role !== 'admin') {
+                } else if (user.user_metadata?.role !== 'admin') {
                     showModal({
                         title: "Từ chối truy cập",
                         message: "Bạn không có quyền quản trị viên để truy cập trang này.",
@@ -248,7 +242,6 @@ export default function App() {
                     });
                     navigate('home');
                 }
-                */
             }
         }
     }, [authLoaded, user, currentPage, showModal]);

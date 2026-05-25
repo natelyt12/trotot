@@ -32,16 +32,22 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
     } = filterState;
 
     const isFirstMount = useRef(true);
+    const prevPageRef = useRef(currentPage);
 
     // Bug #2: Refetch dữ liệu mỗi khi user navigate trở lại HomePage (sau lần đầu mount)
     useEffect(() => {
         if (isFirstMount.current) {
             isFirstMount.current = false;
+            prevPageRef.current = currentPage;
             return;
         }
-        if (currentPage === 'home') {
+
+        // Reload khi quay lại trang chủ từ các trang khác, NGOẠI TRỪ trang chi tiết tin đăng (room-detail)
+        if (currentPage === 'home' && prevPageRef.current !== 'room-detail') {
             refetch();
         }
+
+        prevPageRef.current = currentPage;
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage]);
 
