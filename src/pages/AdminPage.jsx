@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     TbLayoutDashboard, 
@@ -17,11 +17,30 @@ import {
     TbCalendar,
     TbMapPin,
     TbBuildingWarehouse,
-    TbRefresh
+    TbRefresh,
+    TbPlus,
+    TbListDetails
 } from 'react-icons/tb';
 import { useModal } from '../context/ModalContext';
 import { useNotification } from '../context/NotificationContext';
 import { formatPrice } from '../utils/formatters';
+import { supabase } from '../lib/supabase';
+
+const formatRules = (rules) => {
+    if (!rules) return '';
+    if (typeof rules === 'string') return rules;
+    if (typeof rules === 'object') {
+        const parts = [];
+        if (rules.curfew) parts.push(`Giờ giấc: ${rules.curfew}`);
+        if (rules.is_pet_allowed) parts.push(rules.is_pet_allowed === 'yes' || rules.is_pet_allowed === true ? 'Cho phép nuôi thú cưng' : 'Không nuôi thú cưng');
+        if (rules.gender_preference) {
+            const genderLabel = rules.gender_preference === 'all' ? 'Tất cả' : rules.gender_preference === 'male' ? 'Nam' : 'Nữ';
+            parts.push(`Yêu cầu giới tính: ${genderLabel}`);
+        }
+        return parts.join(' | ');
+    }
+    return '';
+};
 
 // Sample Mock Pending Rooms
 const INITIAL_PENDING_ROOMS = [
@@ -91,11 +110,21 @@ export default function AdminPage({ navigate }) {
     const { showModal } = useModal();
     const { addNotification } = useNotification();
     const [activeSubTab, setActiveSubTab] = useState('overview'); // 'overview', 'rooms', 'kyc', 'settings'
+    const [roomsSubTab, setRoomsSubTab] = useState('pending_verification'); // 'pending_verification' or 'verified'
 
-    // Mock States
-    const [pendingRooms, setPendingRooms] = useState(INITIAL_PENDING_ROOMS);
-    const [kycRequests, setKycRequests] = useState(INITIAL_KYC_REQUESTS);
+    // Real DB States
+    const [allRooms, setAllRooms] = useState([]);
+    const [pendingRooms, setPendingRooms] = useState([]);
+    const [kycRequests, setKycRequests] = useState(INITIAL_KYC_REQUESTS); // Mock KYC as there is no DB table for it
     
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        totalLandlords: 0,
+        totalTenants: 0,
+        totalRoomsCount: 0
+    });
+    const [loadingStats, setLoadingStats] = useState(true);
+
     // Config States
     const [systemSettings, setSystemSettings] = useState({
         autoApproveKYC: false,
@@ -104,11 +133,77 @@ export default function AdminPage({ navigate }) {
         sendVerificationEmails: true
     });
 
-    // Overview statistics calculation
-    const totalUsers = 432;
-    const totalLandlords = 89;
-    const totalTenants = totalUsers - totalLandlords;
-    const totalRoomsCount = 194;
+    // Fetch Real Stats & All Active Rooms from Supabase
+    const fetchAdminData = useCallback(async () => {
+        setLoadingStats(true);
+        try {
+            // 1. Fetch counts
+            const { count: usersCount } = await supabase
+                .from('profiles')
+                .select('*', { count: 'exact', head: true });
+
+            const { count: landlordsCount } = await supabase
+                .from('profiles')
+                .select('*', { count: 'exact', head: true })
+                .eq('role', 'landlord');
+
+            const { count: tenantsCount } = await supabase
+                .from('profiles')
+                .select('*', { count: 'exact', head: true })
+                .eq('role', 'tenant');
+
+            const { count: roomsCount } = await supabase
+                .from('rooms')
+                .select('*', { count: 'exact', head: true });
+
+            setStats({
+                totalUsers: usersCount || 0,
+                totalLandlords: landlordsCount || 0,
+                totalTenants: tenantsCount || 0,
+                totalRoomsCount: roomsCount || 0
+            });
+
+            // 2. Fetch all available rooms (both verified and unverified)
+            const { data: roomsData, error: roomsError } = await supabase
+                .from('rooms')
+                .select('*, profiles(*)')
+                .eq('status', 'available')
+                .order('created_at', { ascending: false });
+
+            if (roomsError) throw roomsError;
+
+            // Map all rooms for UI
+            const mappedRooms = (roomsData || []).map(room => {
+                const profile = room.profiles;
+                return {
+                    id: room.id,
+                    title: room.title,
+                    owner: profile?.full_name || room.media_contact?.contact?.name || 'Bên cho thuê',
+                    owner_phone: profile?.phone || room.media_contact?.contact?.phone || 'Chưa cập nhật',
+                    price_monthly: room.price_monthly,
+                    area_sqm: room.area_sqm,
+                    address: [room.address, room.ward, room.district, room.city].filter(Boolean).join(', '),
+                    date: new Date(room.created_at).toLocaleDateString('vi-VN'),
+                    image: room.media_contact?.images?.[0]?.url || '/images/placeholder.png',
+                    description: room.description || formatRules(room.rules_utilities) || 'Không có mô tả.',
+                    is_verified: room.is_verified,
+                    room_type: room.room_type
+                };
+            });
+
+            setAllRooms(mappedRooms);
+            setPendingRooms(mappedRooms.filter(r => !r.is_verified));
+        } catch (err) {
+            console.error('Error fetching admin dashboard data:', err);
+            addNotification('Lỗi khi tải dữ liệu từ cơ sở dữ liệu!', 'error');
+        } finally {
+            setLoadingStats(false);
+        }
+    }, [addNotification]);
+
+    useEffect(() => {
+        fetchAdminData();
+    }, [fetchAdminData]);
 
     // Approve Room Handler
     const handleApproveRoom = (roomId, title) => {
@@ -117,10 +212,49 @@ export default function AdminPage({ navigate }) {
             message: `Bạn có chắc chắn muốn PHÊ DUYỆT tin đăng "${title}"? Tin trọ này sẽ xuất hiện công khai trên trang chủ lập tức.`,
             type: 'warning',
             confirmText: 'Phê duyệt',
+            cancelText: 'Hủy bộ',
+            onConfirm: async () => {
+                try {
+                    const { error } = await supabase
+                        .from('rooms')
+                        .update({ is_verified: true })
+                        .eq('id', roomId);
+
+                    if (error) throw error;
+
+                    addNotification('Đã phê duyệt tin đăng phòng trọ thành công!', 'success');
+                    fetchAdminData(); // Refresh counts
+                } catch (err) {
+                    console.error('Error approving room:', err);
+                    addNotification('Có lỗi xảy ra khi phê duyệt phòng.', 'error');
+                }
+            }
+        });
+    };
+
+    // Cancel Room Verification Handler (move is_verified = false)
+    const handleCancelVerification = (roomId, title) => {
+        showModal({
+            title: 'Hủy xác thực tin đăng',
+            message: `Bạn có chắc chắn muốn HỦY XÁC THỰC tin đăng "${title}" không? Tin này sẽ chuyển về hàng chờ kiểm duyệt.`,
+            type: 'warning',
+            confirmText: 'Hủy xác thực',
             cancelText: 'Hủy bỏ',
-            onConfirm: () => {
-                setPendingRooms(prev => prev.filter(room => room.id !== roomId));
-                addNotification('Đã phê duyệt tin đăng phòng trọ thành công!', 'success');
+            onConfirm: async () => {
+                try {
+                    const { error } = await supabase
+                        .from('rooms')
+                        .update({ is_verified: false })
+                        .eq('id', roomId);
+
+                    if (error) throw error;
+
+                    addNotification('Đã hủy xác thực tin đăng thành công!', 'success');
+                    fetchAdminData(); // Refresh list and counts
+                } catch (err) {
+                    console.error('Error cancelling room verification:', err);
+                    addNotification('Có lỗi xảy ra khi hủy xác thực phòng.', 'error');
+                }
             }
         });
     };
@@ -132,10 +266,22 @@ export default function AdminPage({ navigate }) {
             message: `Bạn có chắc chắn muốn TỪ CHỐI tin đăng "${title}" không? Tin sẽ bị gỡ về bản nháp và thông báo cho người đăng.`,
             type: 'error',
             confirmText: 'Từ chối',
-            cancelText: 'Hủy bỏ',
-            onConfirm: () => {
-                setPendingRooms(prev => prev.filter(room => room.id !== roomId));
-                addNotification('Đã từ chối tin đăng và gửi phản hồi cho chủ trọ.', 'warning');
+            cancelText: 'Hủy bộ',
+            onConfirm: async () => {
+                try {
+                    const { error } = await supabase
+                        .from('rooms')
+                        .update({ status: 'draft', is_verified: false })
+                        .eq('id', roomId);
+
+                    if (error) throw error;
+
+                    addNotification('Đã từ chối tin đăng và chuyển về bản nháp.', 'warning');
+                    fetchAdminData(); // Refresh counts
+                } catch (err) {
+                    console.error('Error rejecting room:', err);
+                    addNotification('Có lỗi xảy ra khi từ chối tin đăng.', 'error');
+                }
             }
         });
     };
@@ -243,6 +389,25 @@ export default function AdminPage({ navigate }) {
                                         </button>
                                     );
                                 })}
+
+                                <div className="h-px bg-stone-200 my-4" />
+                                <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">
+                                    Tiện ích chủ nhà
+                                </div>
+                                <button
+                                    onClick={() => navigate("dashboard", { tab: "post_room" })}
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-bold text-sm border-none cursor-pointer bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800 transition-all duration-200"
+                                >
+                                    <TbPlus size={18} />
+                                    <span>Đăng tin mới</span>
+                                </button>
+                                <button
+                                    onClick={() => navigate("dashboard")}
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-bold text-sm border-none cursor-pointer bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800 transition-all duration-200"
+                                >
+                                    <TbListDetails size={18} />
+                                    <span>Quản lý tin đăng</span>
+                                </button>
                             </div>
                         </div>
 
@@ -276,10 +441,10 @@ export default function AdminPage({ navigate }) {
                                     {/* Stats Grid */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                                         {[
-                                            { label: 'Tổng số người dùng', value: totalUsers, sub: `${totalTenants} người thuê / ${totalLandlords} chủ nhà`, icon: TbUsers, color: 'from-blue-500/10 to-indigo-500/10 text-blue-600 border-blue-500/20' },
-                                            { label: 'Tổng số tin trọ', value: totalRoomsCount, sub: 'Đăng tải trên toàn hệ thống', icon: TbBuildingWarehouse, color: 'from-amber-500/10 to-orange-500/10 text-amber-600 border-amber-500/20' },
+                                            { label: 'Tổng số người dùng', value: loadingStats ? '...' : stats.totalUsers, sub: `${stats.totalTenants} người thuê / ${stats.totalLandlords} chủ nhà`, icon: TbUsers, color: 'from-blue-500/10 to-indigo-500/10 text-blue-600 border-blue-500/20' },
+                                            { label: 'Tổng số tin trọ', value: loadingStats ? '...' : stats.totalRoomsCount, sub: 'Đăng tải trên toàn hệ thống', icon: TbBuildingWarehouse, color: 'from-amber-500/10 to-orange-500/10 text-amber-600 border-amber-500/20' },
                                             { label: 'Hồ sơ KYC chưa duyệt', value: kycRequests.length, sub: 'Yêu cầu nâng cấp vai trò', icon: TbUserCheck, color: 'from-emerald-500/10 to-teal-500/10 text-emerald-600 border-emerald-500/20' },
-                                            { label: 'Tin đăng chờ kiểm duyệt', value: pendingRooms.length, sub: 'Yêu cầu đăng phòng mới', icon: TbHomeCheck, color: 'from-pink-500/10 to-rose-500/10 text-pink-600 border-pink-500/20' },
+                                            { label: 'Tin đăng chờ kiểm duyệt', value: loadingStats ? '...' : pendingRooms.length, sub: 'Yêu cầu đăng phòng mới', icon: TbHomeCheck, color: 'from-pink-500/10 to-rose-500/10 text-pink-600 border-pink-500/20' },
                                             { label: 'Hiệu suất vận hành', value: '99.98%', sub: 'Hệ thống Supabase Cloud', icon: TbTrendingUp, color: 'from-violet-500/10 to-purple-500/10 text-violet-600 border-violet-500/20' },
                                         ].map((stat, idx) => {
                                             const Icon = stat.icon;
@@ -302,137 +467,153 @@ export default function AdminPage({ navigate }) {
                                         })}
                                     </div>
 
-                                    {/* Action Shortcuts */}
-                                    <div className="border border-stone-200 rounded-2xl p-6 bg-stone-50/50">
-                                        <h4 className="text-sm font-bold text-stone-900 mb-4 flex items-center gap-2">
-                                            <span className="w-1.5 h-3 bg-amber-500 rounded-full inline-block"></span>
-                                            Lối tắt phê duyệt khẩn cấp
-                                        </h4>
-                                        <div className="flex flex-wrap gap-3">
-                                            <button 
-                                                onClick={() => setActiveSubTab('rooms')}
-                                                className="bg-white border border-stone-200 hover:border-amber-400 text-stone-700 hover:text-amber-700 px-5 py-3 rounded-xl text-xs font-bold cursor-pointer transition-all duration-200 flex items-center gap-2"
-                                            >
-                                                <TbHomeCheck size={16} />
-                                                <span>Duyệt ngay {pendingRooms.length} tin trọ chờ duyệt</span>
-                                            </button>
-                                            <button 
-                                                onClick={() => setActiveSubTab('kyc')}
-                                                className="bg-white border border-stone-200 hover:border-emerald-400 text-stone-700 hover:text-emerald-700 px-5 py-3 rounded-xl text-xs font-bold cursor-pointer transition-all duration-200 flex items-center gap-2"
-                                            >
-                                                <TbUserCheck size={16} />
-                                                <span>Duyệt {kycRequests.length} yêu cầu KYC</span>
-                                            </button>
-                                        </div>
-                                    </div>
+
                                 </MotionDiv>
                             )}
 
                             {/* --- TAB: ROOMS MODERATION --- */}
-                            {activeSubTab === 'rooms' && (
-                                <MotionDiv
-                                    key="rooms"
-                                    initial={{ opacity: 0, y: 15 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -15 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="space-y-6"
-                                >
-                                    <div>
-                                        <h3 className="text-xl font-extrabold text-stone-900 font-heading">Duyệt tin phòng trọ</h3>
-                                        <p className="text-stone-500 text-xs mt-1">Danh sách phòng trọ đang đăng ký công khai chờ hệ thống kiểm duyệt.</p>
-                                    </div>
+                            {activeSubTab === 'rooms' && (() => {
+                                const unverifiedRooms = allRooms.filter(r => !r.is_verified);
+                                const verifiedRooms = allRooms.filter(r => r.is_verified);
+                                const currentList = roomsSubTab === 'verified' ? verifiedRooms : unverifiedRooms;
 
-                                    {pendingRooms.length === 0 ? (
-                                        <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-2xl">
-                                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300 shadow-sm border border-stone-100">
-                                                <TbHomeCheck size={32} />
+                                return (
+                                    <MotionDiv
+                                        key="rooms"
+                                        initial={{ opacity: 0, y: 15 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -15 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="space-y-6"
+                                    >
+                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                            <div>
+                                                <h3 className="text-xl font-extrabold text-stone-900 font-heading">Duyệt tin phòng trọ</h3>
+                                                <p className="text-stone-500 text-xs mt-1">Quản lý duyệt và xác thực các tin đăng phòng trọ trên toàn hệ thống.</p>
                                             </div>
-                                            <p className="text-stone-500 font-bold text-sm">Không còn phòng trọ nào chờ duyệt</p>
-                                            <p className="text-stone-400 text-xs mt-1">Toàn bộ bài đăng đã được xử lý thành công.</p>
                                         </div>
-                                    ) : (
-                                        <div className="space-y-5">
-                                            {pendingRooms.map(room => (
-                                                <div 
-                                                    key={room.id}
-                                                    className="border border-stone-200 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200 flex flex-col md:flex-row bg-white"
-                                                >
-                                                    {/* Thumbnail */}
-                                                    <div className="w-full md:w-56 h-48 md:h-auto shrink-0 relative bg-stone-100">
-                                                        <img src={room.image} alt={room.title} className="w-full h-full object-cover" />
-                                                        <div className="absolute top-3 left-3 bg-stone-900/75 text-white px-2.5 py-1 rounded-full text-[10px] font-bold">
-                                                            Studio • {room.area_sqm} m²
-                                                        </div>
-                                                    </div>
 
-                                                    {/* Details body */}
-                                                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                                                        <div className="space-y-2">
-                                                            <div className="flex items-center justify-between flex-wrap gap-2">
-                                                                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
-                                                                    <TbCalendar size={13} />
-                                                                    Gửi ngày: {room.date}
-                                                                </span>
-                                                                <span className="text-amber-600 text-sm font-black font-heading">
-                                                                    {formatPrice(room.price_monthly)}/tháng
-                                                                </span>
+                                        {/* Horizontal Tab Bar inside Admin Rooms tab */}
+                                        <div className="flex border-b border-stone-200 mb-6 overflow-x-auto whitespace-nowrap">
+                                            <button
+                                                onClick={() => setRoomsSubTab('pending_verification')}
+                                                className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${roomsSubTab === 'pending_verification' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
+                                            >
+                                                Tin đăng chờ duyệt ({unverifiedRooms.length})
+                                            </button>
+                                            <button
+                                                onClick={() => setRoomsSubTab('verified')}
+                                                className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${roomsSubTab === 'verified' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
+                                            >
+                                                Xác thực tin đăng ({verifiedRooms.length})
+                                            </button>
+                                        </div>
+
+                                        {currentList.length === 0 ? (
+                                            <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-2xl">
+                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300 shadow-sm border border-stone-100">
+                                                    <TbHomeCheck size={32} />
+                                                </div>
+                                                <p className="text-stone-500 font-bold text-sm">
+                                                    {roomsSubTab === 'verified' ? 'Không có tin trọ nào đã xác thực' : 'Không còn phòng trọ nào chờ duyệt'}
+                                                </p>
+                                                <p className="text-stone-400 text-xs mt-1">Hệ thống đã đạt trạng thái sạch.</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-5">
+                                                {currentList.map(room => (
+                                                    <div 
+                                                        key={room.id}
+                                                        className="border border-stone-200 rounded-2xl overflow-hidden hover:shadow-md transition-all duration-200 flex flex-col md:flex-row bg-white"
+                                                    >
+                                                        {/* Thumbnail */}
+                                                        <div className="w-full md:w-56 h-48 md:h-auto shrink-0 relative bg-stone-100">
+                                                            <img src={room.image} alt={room.title} className="w-full h-full object-cover" />
+                                                            <div className="absolute top-3 left-3 bg-stone-900/75 text-white px-2.5 py-1 rounded-full text-[10px] font-bold">
+                                                                {room.room_type === 'room' ? 'Phòng trọ' : room.room_type === 'apartment' ? 'Chung cư' : room.room_type === 'house' ? 'Nhà nguyên căn' : 'Studio'} • {room.area_sqm} m²
                                                             </div>
-
-                                                            <h4 className="text-stone-950 font-extrabold text-sm leading-snug font-heading">
-                                                                {room.title}
-                                                            </h4>
-
-                                                            <div className="text-xs text-stone-500 flex items-start gap-1">
-                                                                <TbMapPin size={14} className="shrink-0 text-stone-400 mt-0.5" />
-                                                                <span>{room.address}</span>
-                                                            </div>
-
-                                                            <p className="text-[11px] text-stone-400 leading-relaxed font-medium line-clamp-2">
-                                                                {room.description}
-                                                            </p>
                                                         </div>
 
-                                                        {/* Owner Card & Moderation actions */}
-                                                        <div className="border-t border-stone-100 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                                            {/* Landlord contact */}
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="w-7 h-7 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 font-bold text-xs">
-                                                                    {room.owner.charAt(0).toUpperCase()}
+                                                        {/* Details body */}
+                                                        <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                                                            <div className="space-y-2">
+                                                                <div className="flex items-center justify-between flex-wrap gap-2">
+                                                                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                                        <TbCalendar size={13} />
+                                                                        Gửi ngày: {room.date}
+                                                                    </span>
+                                                                    <span className="text-amber-600 text-sm font-black font-heading">
+                                                                        {formatPrice(room.price_monthly)}/tháng
+                                                                    </span>
                                                                 </div>
-                                                                <div className="text-[11px]">
-                                                                    <div className="font-bold text-stone-800">{room.owner}</div>
-                                                                    <div className="text-stone-400 flex items-center gap-1.5 font-bold">
-                                                                        <TbPhone size={11} /> {room.owner_phone}
+
+                                                                <h4 className="text-stone-950 font-extrabold text-sm leading-snug font-heading">
+                                                                    {room.title}
+                                                                </h4>
+
+                                                                <div className="text-xs text-stone-500 flex items-start gap-1">
+                                                                    <TbMapPin size={14} className="shrink-0 text-stone-400 mt-0.5" />
+                                                                    <span>{room.address}</span>
+                                                                </div>
+
+                                                                <p className="text-[11px] text-stone-400 leading-relaxed font-medium line-clamp-2">
+                                                                    {room.description}
+                                                                </p>
+                                                            </div>
+
+                                                            {/* Owner Card & Moderation actions */}
+                                                            <div className="border-t border-stone-100 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                                                {/* Landlord contact */}
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="w-7 h-7 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 font-bold text-xs">
+                                                                        {room.owner.charAt(0).toUpperCase()}
+                                                                    </div>
+                                                                    <div className="text-[11px]">
+                                                                        <div className="font-bold text-stone-800">{room.owner}</div>
+                                                                        <div className="text-stone-400 flex items-center gap-1.5 font-bold">
+                                                                            <TbPhone size={11} /> {room.owner_phone}
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
 
-                                                            {/* Moderation buttons */}
-                                                            <div className="flex items-center gap-2 self-end sm:self-auto">
-                                                                <button
-                                                                    onClick={() => handleRejectRoom(room.id, room.title)}
-                                                                    className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl text-xs font-bold border border-red-100 cursor-pointer transition-colors flex items-center gap-1.5"
-                                                                >
-                                                                    <TbX size={14} />
-                                                                    <span>Từ chối</span>
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleApproveRoom(room.id, room.title)}
-                                                                    className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-xl text-xs font-bold border-none cursor-pointer shadow-md shadow-amber-500/10 transition-all flex items-center gap-1.5"
-                                                                >
-                                                                    <TbCheck size={14} />
-                                                                    <span>Phê duyệt</span>
-                                                                </button>
+                                                                {/* Moderation buttons */}
+                                                                <div className="flex items-center gap-2 self-end sm:self-auto">
+                                                                    {roomsSubTab === 'verified' ? (
+                                                                        <button
+                                                                            onClick={() => handleCancelVerification(room.id, room.title)}
+                                                                            className="bg-amber-50 hover:bg-amber-100 text-amber-600 px-4 py-2 rounded-xl text-xs font-bold border border-amber-100 cursor-pointer transition-colors flex items-center gap-1.5"
+                                                                        >
+                                                                            <TbX size={14} />
+                                                                            <span>Hủy xác thực</span>
+                                                                        </button>
+                                                                    ) : (
+                                                                        <>
+                                                                            <button
+                                                                                onClick={() => handleRejectRoom(room.id, room.title)}
+                                                                                className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl text-xs font-bold border border-red-100 cursor-pointer transition-colors flex items-center gap-1.5"
+                                                                            >
+                                                                                <TbX size={14} />
+                                                                                <span>Từ chối</span>
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => handleApproveRoom(room.id, room.title)}
+                                                                                className="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-xl text-xs font-bold border-none cursor-pointer shadow-md shadow-amber-500/10 transition-all flex items-center gap-1.5"
+                                                                            >
+                                                                                <TbCheck size={14} />
+                                                                                <span>Phê duyệt</span>
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </MotionDiv>
-                            )}
+                                                ))}
+                                            </div>
+                                        )}
+                                    </MotionDiv>
+                                );
+                            })()}
 
                             {/* --- TAB: KYC REQUESTS --- */}
                             {activeSubTab === 'kyc' && (

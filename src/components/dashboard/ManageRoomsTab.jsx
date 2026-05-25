@@ -12,7 +12,6 @@ export default function ManageRoomsTab({
     setSubTab,
     handlePublishFromDraft,
     handleUnpublish,
-    handleMockVerify,
     handleDeleteRoom,
     handleDuplicateRoom,
     setPreviewRoom,
@@ -42,7 +41,10 @@ export default function ManageRoomsTab({
         if (subTab === 'pending_verification') {
             return room.status === 'available' && !room.is_verified;
         }
-        // 'published' = all available
+        if (subTab === 'published') {
+            return room.status === 'available' && room.is_verified;
+        }
+        // default to published available
         return room.status === 'available';
     });
 
@@ -60,13 +62,18 @@ export default function ManageRoomsTab({
                 </h2>
             </div>
             
-            {/* Horizontal Tab Bar */}
             <div className="flex border-b border-stone-200 mb-6 overflow-x-auto whitespace-nowrap">
                 <button
                     onClick={() => { setSubTab('verified'); setCurrentPage(1); }}
                     className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'verified' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
                 >
                     Tin đã xác thực
+                </button>
+                <button
+                    onClick={() => { setSubTab('published'); setCurrentPage(1); }}
+                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === 'published' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
+                >
+                    Tin đã công khai
                 </button>
                 <button
                     onClick={() => { setSubTab('pending_verification'); setCurrentPage(1); }}
@@ -101,15 +108,17 @@ export default function ManageRoomsTab({
                                 {subTab === 'draft' ? 'Bạn chưa có bản nháp nào' :
                                     subTab === 'verified' ? 'Bạn chưa có tin nào được xác thực' :
                                         subTab === 'pending_verification' ? 'Không có tin đang chờ duyệt' :
-                                            subTab === 'expired' ? 'Bạn không có tin đăng nào đã hết hạn' :
-                                                'Bạn chưa có tin đăng nào được công khai'}
+                                            subTab === 'published' ? 'Bạn chưa có tin đăng nào được công khai' :
+                                                subTab === 'expired' ? 'Bạn không có tin đăng nào đã hết hạn' :
+                                                    'Bạn chưa có tin đăng nào được công khai'}
                             </h3>
                             <p className="text-stone-500 text-sm max-w-sm px-6 mb-6">
                                 {subTab === 'draft' ? 'Các bản nháp sẽ xuất hiện ở đây khi bạn lưu tin.' :
                                     subTab === 'verified' ? 'Tin đăng của bạn sau khi được xác thực sẽ xuất hiện ở đây.' :
-                                        subTab === 'pending_verification' ? 'Tất cả tin đăng đã được xác thực hoặc chưa có tin công khai nào.' :
-                                            subTab === 'expired' ? 'Tuyệt vời! Tất cả các tin đăng của bạn đều hoạt động hoặc được lưu nháp.' :
-                                                'Bắt đầu tiếp cận khách hàng tiềm năng bằng cách đăng tin cho thuê phòng của bạn.'}
+                                        subTab === 'pending_verification' ? 'Tất cả tin đăng của bạn đã được duyệt hoặc không có tin nào đang chờ.' :
+                                            subTab === 'published' ? 'Tin đăng công khai sẽ hiển thị tại đây khi bạn gửi bài.' :
+                                                subTab === 'expired' ? 'Tuyệt vời! Tất cả các tin đăng của bạn đều hoạt động hoặc được lưu nháp.' :
+                                                    'Bắt đầu tiếp cận khách hàng tiềm năng bằng cách đăng tin cho thuê phòng của bạn.'}
                             </p>
                             <button
                                 onClick={() => {
@@ -173,12 +182,16 @@ export default function ManageRoomsTab({
                                     {/* Badges bên trái */}
                                     <div className="flex items-center gap-1.5">
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase ${isExpired ? 'bg-red-50 text-red-600' :
-                                            room.status === 'available' ? 'bg-green-50 text-green-600' :
+                                            room.status === 'available' ? (
+                                                room.is_verified ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600 border border-amber-100'
+                                            ) :
                                                 room.status === 'hidden' ? 'bg-amber-50 text-amber-600' :
                                                     'bg-stone-50 text-stone-500'
                                             }`}>
                                             {isExpired ? 'Hết hạn' :
-                                                room.status === 'available' ? 'Đã công khai' :
+                                                room.status === 'available' ? (
+                                                    room.is_verified ? 'Đã công khai' : 'Đang chờ duyệt'
+                                                ) :
                                                     room.status === 'hidden' ? 'Đã ẩn' :
                                                         room.status === 'draft' ? 'Bản nháp' :
                                                             room.status}
@@ -209,17 +222,15 @@ export default function ManageRoomsTab({
                                             Xem trước
                                         </button>
 
-                                        {(subTab === 'pending_verification') && (
+                                        {subTab === 'pending_verification' ? (
                                             <button
-                                                onClick={() => handleMockVerify(room)}
-                                                className="flex items-center gap-1 px-3 py-1.5 border border-blue-200 bg-blue-50 rounded-full text-[0.75rem] font-bold text-blue-600 hover:bg-blue-100 cursor-pointer transition-colors"
+                                                onClick={() => handleUnpublish(room)}
+                                                className="flex items-center gap-1 px-3 py-1.5 border border-amber-200 bg-amber-50 rounded-full text-[0.75rem] font-bold text-amber-600 hover:bg-amber-100 cursor-pointer transition-colors"
                                             >
-                                                <AppIcon name="verified" size={12} strokeWidth={2.5} />
-                                                Xác thực tin đăng (Mock)
+                                                <AppIcon name="eye-off" size={12} />
+                                                Hủy duyệt
                                             </button>
-                                        )}
-
-                                        {subTab === 'pending_verification' || subTab === 'verified' ? (
+                                        ) : subTab === 'verified' || subTab === 'published' ? (
                                             <button
                                                 onClick={() => handleUnpublish(room)}
                                                 className="flex items-center gap-1 px-3 py-1.5 border border-amber-200 bg-amber-50 rounded-full text-[0.75rem] font-bold text-amber-600 hover:bg-amber-100 cursor-pointer transition-colors"

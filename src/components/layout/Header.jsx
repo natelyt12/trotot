@@ -170,7 +170,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             <AppIcon name="user" size={16} />
                                             <span>Trang cá nhân</span>
                                         </button>
-                                        {user.user_metadata?.role === "landlord" && (
+                                        {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
                                             <>
                                                 <button
                                                     onClick={() => navigate("dashboard", { tab: "post_room" })}
@@ -301,7 +301,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                         )}
                     </div>
 
-                    {user && user.user_metadata?.role === "landlord" && (
+                    {user && (user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
                         <>
                             <button
                                 onClick={() => {

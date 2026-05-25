@@ -17,7 +17,7 @@ export const useDashboard = (user, initialData) => {
     const [rooms, setRooms] = useState([]);
     const [loadingRooms, setLoadingRooms] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [subTab, setSubTab] = useState('pending_verification');
+    const [subTab, setSubTab] = useState('verified');
     const [renewingRoom, setRenewingRoom] = useState(null);
 
     const fetchUserRooms = useCallback(async () => {
