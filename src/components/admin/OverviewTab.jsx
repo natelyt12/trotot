@@ -97,9 +97,9 @@ export default function OverviewTab({
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
                 {/* Left Column (Charts & Activities) */}
-                <div className="lg:col-span-1 space-y-6 flex flex-col">
+                <div className="lg:col-span-2 space-y-6 flex flex-col">
                     {/* Revenue Chart */}
                     <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm flex-1">
                         <div className="flex justify-between items-center mb-6">
@@ -164,7 +164,7 @@ export default function OverviewTab({
                 </div>
 
                 {/* Right Column (Pending Rooms) */}
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-3">
                     <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm h-full flex flex-col">
                         <div className="flex justify-between items-center mb-5">
                             <h4 className="font-bold text-stone-900 text-sm">Tin chờ duyệt mới nhất</h4>
@@ -180,7 +180,7 @@ export default function OverviewTab({
                             {pendingRooms?.length > 0 ? (
                                 pendingRooms.slice(0, 5).map(room => (
                                     <div key={room.id} className="flex items-center justify-between gap-4 p-3 border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors group">
-                                        <div className="flex items-center gap-3 w-2/3 min-w-0">
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
                                             <img 
                                                 src={room.image} 
                                                 alt={room.title} 

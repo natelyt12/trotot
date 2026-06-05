@@ -437,8 +437,8 @@ export default function AdminPage({ navigate }) {
     const MotionDiv = motion.div;
 
     return (
-        <div className="min-h-screen bg-stone-50 pt-20 pb-16">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="min-h-screen bg-stone-50 pt-28 pb-16">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
                 {/* Upper bar with Back to homepage */}
                 <div className="mb-6 flex items-center justify-between">
                     <button
