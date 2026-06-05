@@ -126,6 +126,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
     ];
     const isExpired = metadata.status === "expired";
     const isAvailable = metadata.status === "available" && !isExpired;
+    const showAsPublished = resolvedRoom.subTab === "published";
 
     return (
         <div className="min-h-screen bg-stone-50 pt-16 md:pt-20 pb-24 md:pb-0">
@@ -208,20 +209,44 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                                         <span
                                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold ${
-                                                isAvailable
-                                                    ? "bg-green-100 text-green-700"
-                                                    : isExpired
-                                                      ? "bg-red-100 text-red-700"
-                                                      : "bg-stone-100 text-stone-700"
+                                                showAsPublished
+                                                    ? "bg-blue-100 text-blue-700"
+                                                    : isAvailable
+                                                      ? "bg-green-100 text-green-700"
+                                                      : isExpired
+                                                        ? "bg-red-100 text-red-700"
+                                                        : metadata.status === "pending"
+                                                          ? "bg-amber-100 text-amber-700"
+                                                          : "bg-stone-100 text-stone-700"
                                             }`}
                                         >
                                             <span
-                                                className={`w-2 h-2 rounded-full shrink-0 ${isAvailable ? "bg-green-600" : isExpired ? "bg-red-600" : "bg-stone-600"}`}
+                                                className={`w-2 h-2 rounded-full shrink-0 ${
+                                                    showAsPublished
+                                                        ? "bg-blue-600"
+                                                        : isAvailable
+                                                          ? "bg-green-600"
+                                                          : isExpired
+                                                            ? "bg-red-600"
+                                                            : metadata.status === "pending"
+                                                              ? "bg-amber-600"
+                                                              : "bg-stone-600"
+                                                }`}
                                             />
-                                            {isAvailable ? "Còn phòng" : isExpired ? "Đã hết hạn" : metadata.status === "draft" ? "Bản nháp" : metadata.status}
+                                            {showAsPublished
+                                                ? "Đã công khai"
+                                                : isAvailable
+                                                  ? "Còn phòng"
+                                                  : isExpired
+                                                    ? "Đã hết hạn"
+                                                    : metadata.status === "pending"
+                                                      ? "Chờ duyệt"
+                                                      : metadata.status === "draft"
+                                                        ? "Bản nháp"
+                                                        : metadata.status}
                                         </span>
 
-                                        {metadata.is_verified && (
+                                        {metadata.is_verified && !showAsPublished && (
                                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold bg-blue-100 text-blue-700">
                                                 <AppIcon name="verified" size={13} strokeWidth={2.5} />
                                                 Đã xác thực

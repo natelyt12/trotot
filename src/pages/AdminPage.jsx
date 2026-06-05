@@ -195,10 +195,10 @@ export default function AdminPage({ navigate }) {
     // Approve Room Publish Handler (moves status to 'available')
     const handleApprovePublish = (roomId, title) => {
         showModal({
-            title: "Duyệt công khai tin đăng",
-            message: `Bạn có chắc chắn muốn DUYỆT CÔNG KHAI tin đăng "${title}"? Tin trọ này sẽ xuất hiện công khai trên trang chủ nhưng CHƯA XÁC THỰC.`,
+            title: "Duyệt tin đăng",
+            message: `Bạn có chắc chắn muốn Duyệt tin đăng "${title}"? Tin trọ này sẽ xuất hiện công khai trên trang chủ nhưng CHƯA XÁC THỰC.`,
             type: "warning",
-            confirmText: "Duyệt công khai",
+            confirmText: "Duyệt",
             cancelText: "Hủy bộ",
             onConfirm: async () => {
                 try {
@@ -206,11 +206,11 @@ export default function AdminPage({ navigate }) {
 
                     if (error) throw error;
 
-                    addNotification("Đã duyệt công khai tin đăng phòng trọ thành công!", "success");
+                    addNotification("Đã Duyệt tin đăng phòng trọ thành công!", "success");
                     fetchAdminData(); // Refresh list and counts
                 } catch (err) {
                     console.error("Error approving room publication:", err);
-                    addNotification("Có lỗi xảy ra khi duyệt công khai phòng.", "error");
+                    addNotification("Có lỗi xảy ra khi Duyệt phòng.", "error");
                 }
             },
         });
@@ -352,7 +352,6 @@ export default function AdminPage({ navigate }) {
             },
         });
     };
-
 
     // Open room detail overlay for admin
     const handleOpenRoomPreview = useCallback(
@@ -544,8 +543,15 @@ export default function AdminPage({ navigate }) {
                             <OverviewTab
                                 stats={stats}
                                 loadingStats={loadingStats}
-                                kycRequestsCount={kycRequests.length}
-                                pendingRoomsCount={pendingRooms.length}
+                                pendingRooms={pendingRooms}
+                                onRejectRoom={handleRejectRoom}
+                                onApprovePublish={handleApprovePublish}
+                                onOpenRoomPreview={handleOpenRoomPreview}
+                                loadingPreviewRoom={loadingPreviewRoom}
+                                onViewAllPending={() => {
+                                    setActiveSubTab("rooms");
+                                    setRoomsSubTab("pending_publish");
+                                }}
                                 onRefresh={async () => {
                                     await fetchAdminData();
                                     addNotification("Đã làm mới thành công!", "success");

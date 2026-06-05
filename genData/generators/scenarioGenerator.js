@@ -1,4 +1,4 @@
-import { createMockRoom } from './roomGenerator.js';
+import { createMockRoom } from "./roomGenerator.js";
 
 // Random helper
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -9,7 +9,7 @@ const locations = [
     { city: "Thành phố Hà Nội", district: "Quận Đống Đa", ward: "Phường Láng Hạ" },
     { city: "Thành phố Hà Nội", district: "Quận Hai Bà Trưng", ward: "Phường Bách Khoa" },
     { city: "Thành phố Hồ Chí Minh", district: "Quận 10", ward: "Phường 14" },
-    { city: "Thành phố Hồ Chí Minh", district: "Quận Bình Thạnh", ward: "Phường 25" }
+    { city: "Thành phố Hồ Chí Minh", district: "Quận Bình Thạnh", ward: "Phường 25" },
 ];
 
 /**
@@ -19,11 +19,11 @@ const locations = [
 export const makeLargeScaleModerationScenario = (myUserId) => {
     const rooms = [];
 
-    // 20 tin Chờ admin duyệt công khai (pending)
+    // 20 tin Chờ admin Duyệt (pending)
     for (let i = 0; i < 20; i++) {
         const loc = randomItem(locations);
         const room = createMockRoom(myUserId, loc.city, loc.district, loc.ward);
-        room.status = 'pending';
+        room.status = "pending";
         room.is_verified = false;
         room.title = `[DUYỆT ĐĂNG] Phòng trọ dịch vụ khép kín tại ${loc.ward}`;
         rooms.push(room);
@@ -33,7 +33,7 @@ export const makeLargeScaleModerationScenario = (myUserId) => {
     for (let i = 0; i < 20; i++) {
         const loc = randomItem(locations);
         const room = createMockRoom(myUserId, loc.city, loc.district, loc.ward);
-        room.status = 'available';
+        room.status = "available";
         room.is_verified = false;
         room.title = `[CHỜ XÁC THỰC] Phòng tiện nghi giá tốt ở ${loc.district}`;
         rooms.push(room);
@@ -43,7 +43,7 @@ export const makeLargeScaleModerationScenario = (myUserId) => {
     for (let i = 0; i < 20; i++) {
         const loc = randomItem(locations);
         const room = createMockRoom(myUserId, loc.city, loc.district, loc.ward);
-        room.status = 'available';
+        room.status = "available";
         room.is_verified = true;
         room.title = `[ĐÃ XÁC THỰC] Phòng trọ chính chủ tích xanh gần ${loc.ward}`;
         rooms.push(room);
@@ -53,7 +53,7 @@ export const makeLargeScaleModerationScenario = (myUserId) => {
     for (let i = 0; i < 10; i++) {
         const loc = randomItem(locations);
         const room = createMockRoom(myUserId, loc.city, loc.district, loc.ward);
-        room.status = 'draft';
+        room.status = "draft";
         room.is_verified = false;
         room.title = `[BẢN NHÁP] Tin trọ nháp đang được biên tập ở ${loc.district}`;
         rooms.push(room);
@@ -63,7 +63,7 @@ export const makeLargeScaleModerationScenario = (myUserId) => {
     for (let i = 0; i < 10; i++) {
         const loc = randomItem(locations);
         const room = createMockRoom(myUserId, loc.city, loc.district, loc.ward);
-        room.status = 'expired';
+        room.status = "expired";
         room.is_verified = false;
         room.title = `[HẾT HẠN] Phòng trọ cũ đã quá hạn hiển thị ở ${loc.district}`;
         rooms.push(room);
@@ -83,7 +83,7 @@ export const makeUniversityStudentHubScenario = (myUserId) => {
         { name: "Đại học Ngoại Thương", city: "Thành phố Hà Nội", district: "Quận Đống Đa", ward: "Phường Láng Thượng" },
         { name: "Đại học Quốc Gia HN", city: "Thành phố Hà Nội", district: "Quận Cầu Giấy", ward: "Phường Dịch Vọng Hậu" },
         { name: "Đại học HUTECH", city: "Thành phố Hồ Chí Minh", district: "Quận Bình Thạnh", ward: "Phường 25" },
-        { name: "Đại học Quốc Gia HCM", city: "Thành phố Hồ Chí Minh", district: "Thành phố Thủ Đức", ward: "Phường Linh Trung" }
+        { name: "Đại học Quốc Gia HCM", city: "Thành phố Hồ Chí Minh", district: "Thành phố Thủ Đức", ward: "Phường Linh Trung" },
     ];
 
     const studentDescriptors = [
@@ -91,7 +91,7 @@ export const makeUniversityStudentHubScenario = (myUserId) => {
         "Chung cư mini khép kín sạch sẽ đi bộ ra",
         "Phòng trọ ở ghép đầy đủ đồ cho sinh viên",
         "Studio hiện đại an ninh tốt phù hợp học nhóm gần",
-        "Nhà trọ có gác lửng giá sinh viên gần"
+        "Nhà trọ có gác lửng giá sinh viên gần",
     ];
 
     for (let i = 0; i < 40; i++) {
@@ -100,7 +100,7 @@ export const makeUniversityStudentHubScenario = (myUserId) => {
         const room = createMockRoom(myUserId, uni.city, uni.district, uni.ward);
 
         room.title = `${desc} ${uni.name}`;
-        room.status = 'available';
+        room.status = "available";
         room.is_verified = Math.random() > 0.4;
         room.price_monthly = randomInt(15, 30) * 100000; // 1.5M - 3.0M (Giá sinh viên)
         room.room_features.counts.capacity = randomInt(1, 3);
@@ -120,8 +120,8 @@ export const makeOneHundredStandardRoomsScenario = (myUserId) => {
     for (let i = 0; i < 100; i++) {
         const loc = randomItem(locations);
         const room = createMockRoom(myUserId, loc.city, loc.district, loc.ward);
-        
-        room.status = 'available';
+
+        room.status = "available";
         // 60% verified
         room.is_verified = i % 10 < 6;
         rooms.push(room);
@@ -140,7 +140,7 @@ export const makePremiumFoodAndLifestyleScenario = (myUserId) => {
         { name: "Phố cổ & Phố đi bộ", city: "Thành phố Hà Nội", district: "Quận Hoàn Kiếm", ward: "Phường Hàng Đào" },
         { name: "Hồ Tây thơ mộng", city: "Thành phố Hà Nội", district: "Quận Tây Hồ", ward: "Phường Quảng An" },
         { name: "Phố đi bộ Bùi Viện", city: "Thành phố Hồ Chí Minh", district: "Quận 1", ward: "Phường Phạm Ngũ Lão" },
-        { name: "Khu biệt thự Thảo Điền", city: "Thành phố Hồ Chí Minh", district: "Thành phố Thủ Đức", ward: "Phường Thảo Điền" }
+        { name: "Khu biệt thự Thảo Điền", city: "Thành phố Hồ Chí Minh", district: "Thành phố Thủ Đức", ward: "Phường Thảo Điền" },
     ];
 
     const premiumAmenities = [
@@ -148,7 +148,7 @@ export const makePremiumFoodAndLifestyleScenario = (myUserId) => {
         "ban công view ngắm pháo hoa",
         "sân thượng chill phố đi bộ",
         "bồn tắm nằm cực sang chảnh",
-        "phòng gym free & Smart-lock"
+        "phòng gym free & Smart-lock",
     ];
 
     for (let i = 0; i < 30; i++) {
@@ -157,7 +157,7 @@ export const makePremiumFoodAndLifestyleScenario = (myUserId) => {
         const room = createMockRoom(myUserId, zone.city, zone.district, zone.ward);
 
         room.title = `⭐ Studio VIP sát ${zone.name} có ${amenity}`;
-        room.status = 'available';
+        room.status = "available";
         room.is_verified = true; // Premium 100% verified
         room.price_monthly = randomInt(70, 150) * 100000; // 7M - 15M (VIP)
         room.rules_utilities.curfew = "none"; // Giờ giấc tự do 24/7
