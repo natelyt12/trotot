@@ -207,18 +207,6 @@ export default function OverviewTab({
                                                     <TbEye size={12} />
                                                     Xem
                                                 </button>
-                                                <button 
-                                                    onClick={() => onRejectRoom && onRejectRoom(room.id, room.title)}
-                                                    className="px-2 py-1 rounded text-[10px] font-bold border border-red-200 text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
-                                                >
-                                                    Từ chối
-                                                </button>
-                                                <button 
-                                                    onClick={() => onApprovePublish && onApprovePublish(room.id, room.title)}
-                                                    className="px-2 py-1 rounded text-[10px] font-bold bg-emerald-500 border border-emerald-500 text-white hover:bg-emerald-600 shadow-sm cursor-pointer transition-colors"
-                                                >
-                                                    Duyệt
-                                                </button>
                                             </div>
                                         </div>
                                     </div>

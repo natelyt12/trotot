@@ -12,6 +12,7 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
 import PublicProfilePage from './pages/PublicProfilePage.jsx';
+import MyRoomPage from './pages/MyRoomPage.jsx';
 import { mapSupabaseRoom } from './utils/roomMapper.js';
 import { FavoritesProvider } from './context/FavoritesContext';
 import { useModal } from './context/ModalContext.jsx';
@@ -59,7 +60,7 @@ export default function App() {
 
     const navigate = (page, data = null) => {
         // Auth Check for Protected Routes
-        if (['profile', 'dashboard'].includes(page) && !user) {
+        if (['profile', 'dashboard', 'my-room'].includes(page) && !user) {
             navigate('login');
             return;
         }
@@ -102,7 +103,7 @@ export default function App() {
             const isTargetAlreadyMounted = (targetPage === 'public-profile' && pageData?.fromPublicProfile) || 
                                          (targetPage === 'profile' && pageData?.fromProfile);
             
-            if ((targetPage === 'public-profile' || ['profile', 'dashboard', 'admin'].includes(targetPage)) && !isTargetAlreadyMounted) {
+            if ((targetPage === 'public-profile' || ['profile', 'dashboard', 'admin', 'my-room'].includes(targetPage)) && !isTargetAlreadyMounted) {
                 setCurrentPage(targetPage);
                 setPageData(targetData);
                 window.scrollTo({ top: 0, behavior: 'instant' });
@@ -150,7 +151,7 @@ export default function App() {
     // Authentication Protection for /profile, /dashboard, and /admin
     useEffect(() => {
         if (authLoaded) {
-            if (['profile', 'dashboard'].includes(currentPage) && !user) {
+            if (['profile', 'dashboard', 'my-room'].includes(currentPage) && !user) {
                 navigate('login');
             } else if (currentPage === 'admin') {
                 if (!user) {
@@ -179,7 +180,7 @@ export default function App() {
                     return;
                 }
 
-                if (['login', 'register', 'profile', 'dashboard', 'admin'].includes(path)) {
+                if (['login', 'register', 'profile', 'dashboard', 'admin', 'my-room'].includes(path)) {
                     setCurrentPage(path);
                     setPageData(null);
                     return;
@@ -306,7 +307,7 @@ export default function App() {
 
                     <main>
                         {/* Base Layer: HomePage remains mounted to preserve scroll/filters */}
-                        <div className={(showLayout && !['profile', 'dashboard', 'admin', 'public-profile'].includes(currentPage) && !(currentPage === 'room-detail' && (pageData?.fromProfile || pageData?.fromPublicProfile))) ? 'block' : 'hidden'}>
+                        <div className={(showLayout && !['profile', 'dashboard', 'admin', 'public-profile', 'my-room'].includes(currentPage) && !(currentPage === 'room-detail' && (pageData?.fromProfile || pageData?.fromPublicProfile))) ? 'block' : 'hidden'}>
                             <HomePage
                                 navigate={navigate}
                                 user={user}
@@ -333,6 +334,11 @@ export default function App() {
                         {/* Admin Layer */}
                         <div className={currentPage === 'admin' ? 'block' : 'hidden'}>
                             <AdminPage user={user} navigate={navigate} />
+                        </div>
+
+                        {/* My Room Layer */}
+                        <div className={currentPage === 'my-room' ? 'block' : 'hidden'}>
+                            <MyRoomPage user={user} navigate={navigate} />
                         </div>
 
                         {/* Overlay Layer: Room Detail as a popup */}

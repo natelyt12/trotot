@@ -5,6 +5,7 @@ import { useRoomFilterContext } from "../../context/RoomFilterContext.jsx";
 import AppIcon from "../common/AppIcon.jsx";
 import { useModal } from "../../context/ModalContext.jsx";
 import { signOut } from "../../services/authService.js";
+import NotificationDropdown from "./NotificationDropdown.jsx";
 
 export default function Header({ currentPage, navigate, user, onSearchClick }) {
     const { filters, getLocationDisplayText } = useRoomFilterContext();
@@ -111,7 +112,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                     </div>
 
                     {/* RIGHT Area: Search (Conditional) + Auth */}
-                    <div className="flex items-center justify-end md:gap-4 shrink-0">
+                    <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0">
                         {/* Desktop Search - Appears on scroll */}
                         <AnimatePresence>
                             {showSearch && (
@@ -134,6 +135,10 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                         </AnimatePresence>
 
                         <div className="h-6 w-px bg-stone-100 hidden md:block" />
+
+                        {user && (
+                            <NotificationDropdown navigate={navigate} user={user} />
+                        )}
 
                         {user ? (
                             <div className="relative group flex items-center">
@@ -170,6 +175,15 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             <AppIcon name="user" size={16} />
                                             <span>Trang cá nhân</span>
                                         </button>
+                                        {user && (
+                                            <button
+                                                onClick={() => navigate("my-room")}
+                                                className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                            >
+                                                <AppIcon name="home" size={16} />
+                                                <span>Phòng trọ của tôi</span>
+                                            </button>
+                                        )}
                                         {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
                                             <>
                                                 <button
@@ -322,6 +336,17 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                 Quản lý tin đăng
                             </button>
                         </>
+                    )}
+                    {user && (
+                        <button
+                            onClick={() => {
+                                navigate("my-room");
+                                setMobileOpen(false);
+                            }}
+                            className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
+                        >
+                            Phòng trọ của tôi
+                        </button>
                     )}
                     {navLinks.map((link) => (
                         <button

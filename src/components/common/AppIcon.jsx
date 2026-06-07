@@ -52,7 +52,8 @@ import {
     TbFileText,
     TbCalendar,
     TbRefresh,
-    TbSettings
+    TbSettings,
+    TbBell
 } from 'react-icons/tb';
 import { PiWashingMachine } from "react-icons/pi";
 
@@ -104,6 +105,7 @@ const ICON_MAP = {
     check: TbCheck,
     x: TbX,
     copy: TbCopy,
+    bell: TbBell,
 
     // Section headers
     'credit-card': TbCreditCard,
