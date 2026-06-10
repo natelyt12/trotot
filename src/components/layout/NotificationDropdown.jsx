@@ -168,9 +168,7 @@ export default function NotificationDropdown({ navigate, user }) {
                 
                 {/* Red unread count badge */}
                 {unreadCount > 0 && (
-                    <span className="absolute top-1.5 right-1.5 flex h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white shadow-sm animate-pulse">
-                        {unreadCount}
-                    </span>
+                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white shadow-sm" />
                 )}
             </button>
 

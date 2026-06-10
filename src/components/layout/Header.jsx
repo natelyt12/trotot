@@ -33,16 +33,12 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
         const handleScroll = () => {
             const isHome = currentPage === "home";
             const isMobile = window.innerWidth < 768; // md breakpoint
-            const isExcludedPage = ["profile", "dashboard", "room-detail", "public-profile"].includes(currentPage);
 
-            if (isExcludedPage) {
-                setShowSearch(false);
-            } else if (isMobile) {
-                // Trên mobile: Ẩn hoàn toàn thanh tìm kiếm ở trang chủ vì đã có nút lọc ở bottom nav
+            if (!isHome || isMobile) {
                 setShowSearch(false);
             } else {
-                // Trên PC: Cuộn > 400px ở trang chủ mới hiện, hoặc luôn hiện ở các trang khác (ngoại trừ trang đã loại trừ)
-                setShowSearch(!isHome || window.scrollY > 400);
+                // Trên PC: Cuộn > 400px ở trang chủ mới hiện
+                setShowSearch(window.scrollY > 400);
             }
         };
 
@@ -58,15 +54,11 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
 
     const navLinks = [
         { label: "Tìm phòng", page: "home" },
-        { label: "Tìm bạn", page: "find-friends" },
+        { label: "Diễn đàn", page: "forum" },
         { label: "Tin đã lưu", page: "favorites" },
     ];
 
     const handleNavLinkClick = (link) => {
-        if (link.page === "find-friends") {
-            // Feature in development, do nothing
-            return;
-        }
         if (link.page === "favorites") {
             if (!user) navigate("login");
             else navigate("profile", { tab: "favorites" });
@@ -166,33 +158,56 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                 </button>
 
                                 {/* Dropdown menu for Desktop */}
-                                <div className="absolute right-0 top-full pt-2 w-48 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50">
-                                    <div className="bg-white border border-stone-200 rounded-xl shadow-lg p-1.5 space-y-1">
-                                        <button
-                                            onClick={() => navigate("profile")}
-                                            className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
-                                        >
-                                            <AppIcon name="user" size={16} />
-                                            <span>Trang cá nhân</span>
-                                        </button>
-                                        {user && (
+                                <div className="absolute right-0 top-full pt-2 w-64 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                                    <div className="bg-white border border-stone-200 rounded-2xl shadow-lg p-3 space-y-2">
+                                        {/* Yellow Action Buttons at the top */}
+                                        <div className="flex flex-col gap-1.5">
+                                            {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
+                                                <button
+                                                    onClick={() => navigate("dashboard", { tab: "post_room", isCreating: true })}
+                                                    className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2.5 px-3.5 rounded-xl border-none cursor-pointer transition-colors shadow-sm"
+                                                >
+                                                    <AppIcon name="plus" size={14} />
+                                                    <span>Đăng tin phòng trọ</span>
+                                                </button>
+                                            )}
                                             <button
-                                                onClick={() => navigate("my-room")}
+                                                onClick={() => navigate("forum", { openCreateModal: true })}
+                                                className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2.5 px-3.5 rounded-xl border-none cursor-pointer transition-colors shadow-sm"
+                                            >
+                                                <AppIcon name="messages" size={14} />
+                                                <span>Đăng tin diễn đàn</span>
+                                            </button>
+                                        </div>
+
+                                        <div className="h-px bg-stone-100 my-1" />
+
+                                        {/* Standard Links */}
+                                        <div className="space-y-0.5">
+                                            <button
+                                                onClick={() => navigate("public-profile", { userId: user.id })}
                                                 className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                             >
-                                                <AppIcon name="home" size={16} />
-                                                <span>Phòng trọ của tôi</span>
+                                                <AppIcon name="user" size={16} />
+                                                <span>Xem trang cá nhân</span>
                                             </button>
-                                        )}
-                                        {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
-                                            <>
+                                            <button
+                                                onClick={() => navigate("profile")}
+                                                className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                            >
+                                                <AppIcon name="settings" size={16} />
+                                                <span>Cài đặt tài khoản</span>
+                                            </button>
+                                            {user && (user.user_metadata?.role === "tenant" || user.user_metadata?.role === "admin") && (
                                                 <button
-                                                    onClick={() => navigate("dashboard", { tab: "post_room" })}
+                                                    onClick={() => navigate("my-room")}
                                                     className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                                 >
-                                                    <AppIcon name="plus" size={16} />
-                                                    <span>Đăng tin mới</span>
+                                                    <AppIcon name="home" size={16} />
+                                                    <span>Phòng trọ của tôi</span>
                                                 </button>
+                                            )}
+                                            {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
                                                 <button
                                                     onClick={() => navigate("dashboard")}
                                                     className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
@@ -200,18 +215,29 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                                     <AppIcon name="check-square" size={16} />
                                                     <span>Quản lý tin đăng</span>
                                                 </button>
-                                            </>
-                                        )}
-                                        {user && user.user_metadata?.role === "admin" && (
-                                            <button
-                                                onClick={() => navigate("admin")}
-                                                className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
-                                            >
-                                                <AppIcon name="settings" size={16} />
-                                                <span>Trang quản trị</span>
-                                            </button>
-                                        )}
-                                        <div className="h-px bg-stone-100 my-1.5" />
+                                            )}
+                                            {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
+                                                <button
+                                                    onClick={() => navigate("manage-guests")}
+                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                >
+                                                    <AppIcon name="users" size={16} />
+                                                    <span>Quản lý khách thuê</span>
+                                                </button>
+                                            )}
+                                            {user && user.user_metadata?.role === "admin" && (
+                                                <button
+                                                    onClick={() => navigate("admin")}
+                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                >
+                                                    <AppIcon name="settings" size={16} />
+                                                    <span>Trang quản trị</span>
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <div className="h-px bg-stone-100 my-1" />
+
                                         <button
                                             onClick={handleLogout}
                                             className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer border-none bg-transparent"
@@ -263,127 +289,159 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
             </nav>
 
             {/* Mobile dropdown menu */}
-            {mobileOpen && (
-                <div className="bg-white border-b border-stone-200 p-4 animate-slide-down md:hidden">
-                    {/* User card / auth */}
-                    <div className="mb-3">
-                        {user ? (
-                            <button
-                                onClick={() => {
-                                    navigate("profile");
-                                    setMobileOpen(false);
-                                }}
-                                className="w-full bg-stone-50 border border-stone-200 p-3.5 rounded-xl flex items-center justify-between cursor-pointer text-left hover:bg-amber-50 hover:border-amber-200 transition-colors duration-200"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-base overflow-hidden shrink-0">
-                                        {user.user_metadata?.avatar_url ? (
-                                            <img src={user.user_metadata.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                                        ) : (
-                                            (user.user_metadata?.full_name || "U").charAt(0).toUpperCase()
-                                        )}
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-semibold text-stone-900">{user.user_metadata?.full_name || "Người dùng"}</div>
-                                        <div className="text-xs text-stone-500">{roleLabel(user.user_metadata?.role)}</div>
-                                    </div>
-                                </div>
-                                <svg
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="text-stone-400"
+            <AnimatePresence>
+                {mobileOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="bg-white border-b border-stone-200 p-4 md:hidden overflow-hidden"
+                    >
+                        {/* User card / auth */}
+                        <div className="mb-3">
+                            {user ? (
+                                <button
+                                    onClick={() => {
+                                        navigate("profile");
+                                        setMobileOpen(false);
+                                    }}
+                                    className="w-full bg-stone-50 border border-stone-200 p-3.5 rounded-xl flex items-center justify-between cursor-pointer text-left hover:bg-amber-50 hover:border-amber-200 transition-colors duration-200"
                                 >
-                                    <polyline points="9 18 15 12 9 6" />
-                                </svg>
-                            </button>
-                        ) : (
-                            <button
-                                onClick={() => {
-                                    navigate("login");
-                                    setMobileOpen(false);
-                                }}
-                                className="w-full bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-3.5 rounded-full cursor-pointer border-none transition-colors duration-200"
-                            >
-                                Đăng nhập
-                            </button>
-                        )}
-                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-base overflow-hidden shrink-0">
+                                            {user.user_metadata?.avatar_url ? (
+                                                <img src={user.user_metadata.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                                            ) : (
+                                                (user.user_metadata?.full_name || "U").charAt(0).toUpperCase()
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-semibold text-stone-900">{user.user_metadata?.full_name || "Người dùng"}</div>
+                                            <div className="text-xs text-stone-500">{roleLabel(user.user_metadata?.role)}</div>
+                                        </div>
+                                    </div>
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="text-stone-400"
+                                    >
+                                        <polyline points="9 18 15 12 9 6" />
+                                    </svg>
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        navigate("login");
+                                        setMobileOpen(false);
+                                    }}
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-3.5 rounded-full cursor-pointer border-none transition-colors duration-200"
+                                >
+                                    Đăng nhập
+                                </button>
+                            )}
+                        </div>
 
-                    {user && (user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
-                        <>
-                            <button
-                                onClick={() => {
-                                    navigate("dashboard", { tab: "post_room" });
-                                    setMobileOpen(false);
-                                }}
-                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-amber-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-700 transition-colors duration-200"
-                            >
-                                Đăng tin mới
-                            </button>
+                        {user && (
+                            <div className="flex flex-col gap-2 my-3 border-b border-stone-100 pb-3">
+                                {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
+                                    <button
+                                        onClick={() => {
+                                            navigate("dashboard", { tab: "post_room", isCreating: true });
+                                            setMobileOpen(false);
+                                        }}
+                                        className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 text-center text-xs rounded-xl border-none cursor-pointer shadow-sm transition-colors"
+                                    >
+                                        Đăng tin phòng trọ
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => {
+                                        navigate("forum", { openCreateModal: true });
+                                        setMobileOpen(false);
+                                    }}
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 text-center text-xs rounded-xl border-none cursor-pointer shadow-sm transition-colors"
+                                >
+                                    Đăng tin diễn đàn
+                                </button>
+                            </div>
+                        )}
+                        {user && (user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
                             <button
                                 onClick={() => {
                                     navigate("dashboard");
                                     setMobileOpen(false);
                                 }}
-                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-medium cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
                             >
                                 Quản lý tin đăng
                             </button>
-                        </>
-                    )}
-                    {user && (
-                        <button
-                            onClick={() => {
-                                navigate("my-room");
-                                setMobileOpen(false);
-                            }}
-                            className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
-                        >
-                            Phòng trọ của tôi
-                        </button>
-                    )}
-                    {navLinks.map((link) => (
-                        <button
-                            key={link.page}
-                            onClick={() => {
-                                handleNavLinkClick(link);
-                                setMobileOpen(false);
-                            }}
-                            className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-medium cursor-pointer border-b border-stone-100 last:border-b-0 hover:text-amber-600 transition-colors duration-200"
-                        >
-                            {link.label}
-                        </button>
-                    ))}
-                    {user && user.user_metadata?.role === "admin" && (
-                        <button
-                            onClick={() => {
-                                navigate("admin");
-                                setMobileOpen(false);
-                            }}
-                            className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-stone-900 transition-colors duration-200"
-                        >
-                            Trang quản trị
-                        </button>
-                    )}
-                    {user && (
-                        <button
-                            onClick={() => {
-                                handleLogout();
-                                setMobileOpen(false);
-                            }}
-                            className="block w-full text-left bg-transparent border-none py-3 px-1 text-red-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-red-700 transition-colors duration-200"
-                        >
-                            Đăng xuất
-                        </button>
-                    )}
-                </div>
-            )}
+                        )}
+                        {user && (user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
+                            <button
+                                onClick={() => {
+                                    navigate("manage-guests");
+                                    setMobileOpen(false);
+                                }}
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
+                            >
+                                Quản lý khách thuê
+                            </button>
+                        )}
+                        {user && (user.user_metadata?.role === "tenant" || user.user_metadata?.role === "admin") && (
+                            <button
+                                onClick={() => {
+                                    navigate("my-room");
+                                    setMobileOpen(false);
+                                }}
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
+                            >
+                                Phòng trọ của tôi
+                            </button>
+                        )}
+                        {navLinks.map((link) => (
+                            <button
+                                key={link.page}
+                                onClick={() => {
+                                    handleNavLinkClick(link);
+                                    setMobileOpen(false);
+                                }}
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-medium cursor-pointer border-b border-stone-100 last:border-b-0 hover:text-amber-600 transition-colors duration-200"
+                            >
+                                {link.label}
+                            </button>
+                        ))}
+                        {user && user.user_metadata?.role === "admin" && (
+                            <button
+                                onClick={() => {
+                                    navigate("admin");
+                                    setMobileOpen(false);
+                                }}
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-stone-900 transition-colors duration-200"
+                            >
+                                Trang quản trị
+                            </button>
+                        )}
+                        {user && (
+                            <button
+                                onClick={() => {
+                                    handleLogout();
+                                    setMobileOpen(false);
+                                }}
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-red-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-red-700 transition-colors duration-200"
+                            >
+                                Đăng xuất
+                            </button>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </header>
     );
 }

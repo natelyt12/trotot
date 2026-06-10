@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AppIcon from '../components/common/AppIcon.jsx';
 import RoomPostForm from '../components/dashboard/RoomPostForm.jsx';
 import ManageRoomsTab from '../components/dashboard/ManageRoomsTab.jsx';
+import RequestsTab from '../components/dashboard/RequestsTab.jsx';
 import RoomDetailPage from './RoomDetailPage.jsx';
 import { useDashboard } from '../hooks/useDashboard.js';
 
@@ -34,15 +35,6 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
         executeRenewal
     } = useDashboard(user, initialData, routerPage);
 
-    const TAB_GROUPS = [
-        {
-            label: 'Quản lý',
-            tabs: [
-                { id: 'manage_rooms', label: 'Quản lý tin đăng', icon: 'check-square' },
-                { id: 'post_room', label: 'Đăng / Sửa tin', icon: 'edit' },
-            ]
-        }
-    ];
 
     return (
         <div className="min-h-screen bg-stone-50 pt-20 pb-20 md:pb-10">
@@ -78,32 +70,93 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
                         {/* Sidebar */}
                         <aside className="lg:border-r border-stone-100 bg-stone-50/30 p-6 flex flex-col justify-between">
                             <div className="space-y-6">
-                                {TAB_GROUPS.map((group) => (
-                                    <div key={group.label} className="space-y-2">
-                                        <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                                            {group.label}
-                                        </div>
-                                        <div className="space-y-1">
-                                            {group.tabs.map((tab) => {
-                                                const isActive = activeTab === tab.id;
-                                                return (
-                                                    <button
-                                                        key={tab.id}
-                                                        onClick={() => setActiveTab(tab.id)}
-                                                        className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                            isActive 
-                                                                ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20' 
-                                                                : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
-                                                        }`}
-                                                    >
-                                                        <AppIcon name={tab.icon} size={18} strokeWidth={isActive ? 2.5 : 2} />
-                                                        <span>{tab.label}</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
+                                <div className="space-y-2">
+                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                        Quản lý
                                     </div>
-                                ))}
+                                    <div className="space-y-1">
+                                        {/* Đăng sửa tin button */}
+                                        <button
+                                            onClick={() => setActiveTab('post_room')}
+                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
+                                                activeTab === 'post_room'
+                                                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                                                    : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                            }`}
+                                        >
+                                            <AppIcon name="edit" size={18} strokeWidth={activeTab === 'post_room' ? 2.5 : 2} />
+                                            <span>Đăng / Sửa tin</span>
+                                        </button>
+                                        
+                                        <hr className="my-4 border-stone-200" />
+                                        
+                                        {/* Subtabs for status filtering */}
+                                        {[
+                                            { id: 'verified', label: 'Tin đã xác thực', icon: 'verified' },
+                                            { id: 'published', label: 'Tin đã công khai', icon: 'home' },
+                                            { id: 'pending_verification', label: 'Tin đang chờ duyệt', icon: 'clock' },
+                                            { id: 'expired', label: 'Tin hết hạn', icon: 'alert' },
+                                            { id: 'draft', label: 'Tin nháp', icon: 'file-text' }
+                                        ].map((subItem) => {
+                                            const isActive = activeTab === 'manage_rooms' && subTab === subItem.id;
+                                            return (
+                                                <button
+                                                    key={subItem.id}
+                                                    onClick={() => {
+                                                        setActiveTab('manage_rooms');
+                                                        setSubTab(subItem.id);
+                                                        setCurrentPage(1);
+                                                    }}
+                                                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
+                                                        isActive
+                                                            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                                                            : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                                    }`}
+                                                >
+                                                    <AppIcon name={subItem.icon} size={18} strokeWidth={isActive ? 2.5 : 2} />
+                                                    <span>{subItem.label}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                        Khách thuê
+                                    </div>
+                                    <div className="space-y-1">
+                                        <button
+                                            onClick={() => {
+                                                setActiveTab('occupied_rooms');
+                                                setCurrentPage(1);
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
+                                                activeTab === 'occupied_rooms'
+                                                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                                                    : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                            }`}
+                                        >
+                                            <AppIcon name="users" size={18} strokeWidth={activeTab === 'occupied_rooms' ? 2.5 : 2} />
+                                            <span>Phòng đang có người ở</span>
+                                        </button>
+                                        
+                                        <button
+                                            onClick={() => {
+                                                setActiveTab('requests');
+                                                setCurrentPage(1);
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
+                                                activeTab === 'requests'
+                                                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                                                    : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                            }`}
+                                        >
+                                            <AppIcon name="messages" size={18} strokeWidth={activeTab === 'requests' ? 2.5 : 2} />
+                                            <span>Yêu cầu</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </aside>
 
@@ -133,6 +186,24 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
                                             onRefresh={fetchUserRooms}
                                         />
                                     </div>
+                                )}
+
+                                {/* ---- TAB: OCCUPIED ROOMS ---- */}
+                                {activeTab === 'occupied_rooms' && (
+                                    <div className="flex flex-col items-center justify-center py-20">
+                                        <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mb-4">
+                                            <AppIcon name="users" size={32} className="text-stone-400" />
+                                        </div>
+                                        <h3 className="text-lg font-bold text-stone-900 mb-2">Phòng đang có người ở</h3>
+                                        <p className="text-stone-500 text-sm max-w-md text-center">
+                                            Tính năng này đang được phát triển. Sắp tới bạn có thể quản lý danh sách khách thuê hiện tại ở đây.
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* ---- TAB: REQUESTS ---- */}
+                                {activeTab === 'requests' && (
+                                    <RequestsTab user={user} />
                                 )}
 
                                 {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}

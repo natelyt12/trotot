@@ -11,8 +11,8 @@ export const useDashboard = (user, initialData, routerPage) => {
     const { addNotification } = useNotification();
 
     const [activeTab, setActiveTab] = useState(initialData?.tab || "manage_rooms");
-    const [editingRoom, setEditingRoom] = useState(null);
-    const [isCreating, setIsCreating] = useState(false);
+    const [editingRoom, setEditingRoom] = useState(initialData?.roomToEdit || null);
+    const [isCreating, setIsCreating] = useState(initialData?.isCreating || false);
     const [previewRoom, setPreviewRoom] = useState(null);
     const [rooms, setRooms] = useState([]);
     const [loadingRooms, setLoadingRooms] = useState(false);
@@ -39,6 +39,8 @@ export const useDashboard = (user, initialData, routerPage) => {
         if (routerPage === "dashboard") {
             const targetTab = initialData?.tab || "manage_rooms";
             setActiveTab(targetTab);
+            setEditingRoom(initialData?.roomToEdit || null);
+            setIsCreating(initialData?.isCreating || false);
         }
     }, [routerPage, initialData]);
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import AppIcon from "../common/AppIcon.jsx";
 import { formatPrice } from "../../utils/formatters.js";
 import { mapSupabaseRoom } from "../../utils/roomMapper.js";
@@ -51,14 +52,44 @@ export default function ManageRoomsTab({
     });
 
     return (
-        <div className="animate-fade-in">
+        <motion.div
+            key={subTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+        >
             <div className="flex items-center justify-between gap-3 mb-6">
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full flex items-center justify-center bg-amber-100 text-amber-600">
-                        <AppIcon name="check-square" size={18} />
+                        <AppIcon
+                            name={
+                                subTab === "verified"
+                                    ? "verified"
+                                    : subTab === "published"
+                                      ? "home"
+                                      : subTab === "pending_verification"
+                                        ? "clock"
+                                        : subTab === "expired"
+                                          ? "alert"
+                                          : subTab === "draft"
+                                            ? "file-text"
+                                            : "check-square"
+                            }
+                            size={18}
+                        />
                     </div>
                     <h2 className="text-lg font-bold text-stone-900" style={{ fontFamily: "var(--font-heading)" }}>
-                        Quản lý tin đăng
+                        {subTab === "verified"
+                            ? "Tin đã xác thực"
+                            : subTab === "published"
+                              ? "Tin đã công khai"
+                              : subTab === "pending_verification"
+                                ? "Tin đang chờ duyệt"
+                                : subTab === "expired"
+                                  ? "Tin hết hạn"
+                                  : subTab === "draft"
+                                    ? "Tin nháp"
+                                    : "Quản lý tin đăng"}
                     </h2>
                 </div>
                 {onRefresh && (
@@ -72,54 +103,6 @@ export default function ManageRoomsTab({
                         <span>Làm mới</span>
                     </button>
                 )}
-            </div>
-
-            <div className="flex border-b border-stone-200 mb-6 overflow-x-auto whitespace-nowrap">
-                <button
-                    onClick={() => {
-                        setSubTab("verified");
-                        setCurrentPage(1);
-                    }}
-                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === "verified" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
-                >
-                    Tin đã xác thực
-                </button>
-                <button
-                    onClick={() => {
-                        setSubTab("published");
-                        setCurrentPage(1);
-                    }}
-                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === "published" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
-                >
-                    Tin đã công khai
-                </button>
-                <button
-                    onClick={() => {
-                        setSubTab("pending_verification");
-                        setCurrentPage(1);
-                    }}
-                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === "pending_verification" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
-                >
-                    Tin đang chờ duyệt
-                </button>
-                <button
-                    onClick={() => {
-                        setSubTab("expired");
-                        setCurrentPage(1);
-                    }}
-                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === "expired" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
-                >
-                    Tin hết hạn
-                </button>
-                <button
-                    onClick={() => {
-                        setSubTab("draft");
-                        setCurrentPage(1);
-                    }}
-                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${subTab === "draft" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
-                >
-                    Tin nháp
-                </button>
             </div>
 
             {loadingRooms ? (
@@ -399,6 +382,6 @@ export default function ManageRoomsTab({
                     );
                 })()
             )}
-        </div>
+        </motion.div>
     );
 }

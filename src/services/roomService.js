@@ -26,6 +26,29 @@ export const getRoomById = async (id) => {
 };
 
 /**
+ * Fetches a single room by its UUID from Supabase
+ * @param {string} uuid 
+ * @returns {Promise<object|null>}
+ */
+export const getRoomByUuid = async (uuid) => {
+    try {
+        const { data, error } = await supabase
+            .from('rooms_view')
+            .select('*, profiles(*)')
+            .eq('id', uuid)
+            .single();
+
+        if (error) throw error;
+        if (!data) return null;
+
+        return mapSupabaseRoom(data);
+    } catch (err) {
+        console.error('Error fetching room by UUID:', err);
+        return null;
+    }
+};
+
+/**
  * Fetches all rooms owned by a specific user
  * @param {string} userId 
  * @returns {Promise<{data: any, error: any}>}

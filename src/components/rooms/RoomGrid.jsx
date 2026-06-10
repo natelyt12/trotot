@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import RoomCard from './RoomCard.jsx';
 
 /* ============================================
@@ -9,9 +10,14 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 justify-center sm:max-w-[720px] sm:mx-auto lg:max-w-none">
                 {Array.from({ length: 15 }).map((_, i) => (
-                    <div key={i} style={{ animationDelay: `${i * 60}ms` }} className="animate-fade-in">
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3, delay: Math.min(i, 11) * 0.04 }}
+                    >
                         <SkeletonCard />
-                    </div>
+                    </motion.div>
                 ))}
             </div>
         );
@@ -40,25 +46,46 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
         );
     }
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.04
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 15 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.35, ease: "easeOut" }
+        }
+    };
+
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 justify-center sm:max-w-[720px] sm:mx-auto lg:max-w-none">
-            {rooms.map((room, idx) => (
-                <div
+        <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 justify-center sm:max-w-[720px] sm:mx-auto lg:max-w-none"
+        >
+            {rooms.map((room) => (
+                <motion.div
                     key={room.listing_id}
-                    className="animate-fade-in-up"
-                    style={{
-                        animationDelay: `${Math.min(idx % 12, 8) * 60}ms`,
-                        opacity: 0,
-                    }}
+                    variants={itemVariants}
+                    style={{ height: '100%' }}
                 >
                     <RoomCard
                         room={room}
                         onClick={() => onRoomClick(room)}
                         style={{ height: '100%' }}
                     />
-                </div>
+                </motion.div>
             ))}
-        </div>
+        </motion.div>
     );
 }
 

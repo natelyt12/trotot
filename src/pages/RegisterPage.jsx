@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { signUp, checkNameExists, checkPhoneExists } from "../services/authService.js";
 import VerificationForm from "../components/auth/VerificationForm.jsx";
 import { useModal } from "../context/ModalContext";
@@ -159,8 +160,12 @@ export default function RegisterPage({ navigate, initialData }) {
     const labelCls = "block text-sm font-semibold text-stone-700 mb-1.5";
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-stone-900">
-            <div className="w-full max-w-sm">
+        <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-stone-900 relative overflow-hidden">
+            {/* Ambient organic glows */}
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-gradient-to-br from-amber-500/10 via-orange-600/5 to-transparent rounded-full pointer-events-none blur-[120px] z-0" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-gradient-to-tl from-amber-500/10 via-transparent to-transparent rounded-full pointer-events-none blur-[120px] z-0" />
+
+            <div className="w-full max-w-sm relative z-10">
                 {/* Logo */}
                 <div className="text-center mb-7">
                     <button onClick={() => navigate("home")} className="bg-transparent border-none cursor-pointer inline-flex flex-col items-center gap-2.5">
@@ -216,7 +221,11 @@ export default function RegisterPage({ navigate, initialData }) {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="animate-[fadeIn_0.3s_ease-out]">
+                                <motion.div
+                                    initial={{ opacity: 0, y: -8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                >
                                     <div className="flex items-center justify-between mb-2 px-1">
                                         <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Vai trò đăng ký</span>
                                         <button
@@ -243,7 +252,7 @@ export default function RegisterPage({ navigate, initialData }) {
                                             đăng tin.
                                         </p>
                                     </div>
-                                </div>
+                                </motion.div>
                             )}
 
                             {/* Name */}

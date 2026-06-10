@@ -18,7 +18,7 @@ export default function BottomNav({ currentPage, navigate, user, onFilterClick }
         { id: 'home', label: 'Trang chủ', icon: 'home' },
         isHost 
             ? { id: 'dashboard', label: 'Quản lý', icon: 'file-text' }
-            : { id: 'find-friends', label: 'Tìm bạn', icon: 'occupants' },
+            : { id: 'forum', label: 'Diễn đàn', icon: 'messages' },
         { 
             id: 'search', 
             label: isDashboard ? 'Đăng tin' : 'Bộ lọc', 
@@ -39,8 +39,8 @@ export default function BottomNav({ currentPage, navigate, user, onFilterClick }
             return;
         }
 
-        if (item.id === 'find-friends') {
-            // Feature in development, do nothing
+        if (item.id === 'forum') {
+            navigate('forum');
             return;
         }
 

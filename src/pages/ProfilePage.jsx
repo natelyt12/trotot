@@ -732,7 +732,7 @@ export default function ProfilePage({ user, navigate, initialData, currentPage }
                                             <RoomGrid
                                                 rooms={savedRooms}
                                                 isLoading={loadingSaved}
-                                                onRoomClick={(room) => navigate("room-detail", { ...room, fromProfile: true, originTab: "favorites" })}
+                                                onRoomClick={(room) => navigate("room-detail", room)}
                                             />
                                         ) : (
                                             <div className="text-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl">
@@ -770,7 +770,7 @@ export default function ProfilePage({ user, navigate, initialData, currentPage }
                                             commentedRooms.map(({ room, count }) => (
                                                 <div
                                                     key={room.id}
-                                                    onClick={() => navigate("room-detail", { ...room, fromProfile: true, originTab: "commented_rooms" })}
+                                                    onClick={() => navigate("room-detail", room)}
                                                     className="flex gap-4 p-3 border border-stone-100 rounded-xl hover:border-amber-300 hover:shadow-md transition-all cursor-pointer bg-white group"
                                                 >
                                                     {/* Thumbnail */}

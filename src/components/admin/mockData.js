@@ -22,9 +22,3 @@ export const INITIAL_KYC_REQUESTS = [
     }
 ];
 
-export const getRandomDistrictAndWard = () => {
-    const districts = ["Quận Cầu Giấy", "Quận Đống Đa", "Quận Hai Bà Trưng"];
-    const wards = ["Phường Dịch Vọng Hậu", "Phường Láng Thượng", "Phường Bách Khoa"];
-    const idx = Math.floor(Math.random() * districts.length);
-    return { district: districts[idx], ward: wards[idx] };
-};

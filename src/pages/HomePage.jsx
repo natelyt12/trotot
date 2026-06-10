@@ -6,6 +6,7 @@ import AppIcon from "../components/common/AppIcon.jsx";
 import SearchTrigger from "../components/search/SearchTrigger.jsx";
 import { useRoomFilterContext } from "../context/RoomFilterContext.jsx";
 import { PROVINCE } from "../constants/province.js";
+import HeroSection from "../components/home/HeroSection.jsx";
 
 /* ============================================
    HomePage – Listing + search + filters
@@ -97,70 +98,14 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
     return (
         <div className="min-h-screen bg-stone-50">
             {/* ---- HERO SECTION ---- */}
-            <section className={`${user ? "hidden md:block" : ""} pt-30 md:pt-48 pb-28 relative overflow-hidden bg-stone-900`}>
-                {/* Subtle amber tint blobs */}
-                <div className="absolute -top-20 -right-20 w-96 h-96 bg-amber-500/10 rounded-lg pointer-events-none blur-3xl" />
-                <div className="absolute bottom-0 -left-16 w-72 h-72 bg-amber-600/8 rounded-lg pointer-events-none blur-3xl" />
-
-                <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-6xl mx-auto px-4 sm:px-6 relative">
-                    <div className="max-w-2xl mx-auto text-center pb-8 md:pb-16">
-                        {/* Badge */}
-                        <motion.div
-                            variants={itemVariants}
-                            className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/25 rounded-full px-3 py-1 mb-6"
-                        >
-                            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-                            <span className="text-amber-300 text-xs font-semibold">Nền tảng tìm trọ #1 Việt Nam</span>
-                        </motion.div>
-
-                        <motion.h1
-                            variants={itemVariants}
-                            className="text-[clamp(2.35rem,7vw,3.25rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-tight"
-                            style={{ fontFamily: "var(--font-heading)" }}
-                        >
-                            Tìm phòng{" "}
-                            <span className="text-amber-400 px-3" style={{ fontFamily: "var(--font-script)", fontSize: "1.65em" }}>
-                                ưng ý
-                            </span>{" "}
-                            trong vài phút
-                        </motion.h1>
-
-                        <motion.p variants={itemVariants} className="text-stone-400 text-base leading-relaxed max-w-xl mx-auto mb-6 md:mb-10">
-                            Hàng nghìn phòng được xác thực tại Hà Nội, TP. Hồ Chí Minh và khắp cả nước. Miễn phí tìm kiếm, không phí trung gian.
-                        </motion.p>
-
-                        {/* Guided Search - Visible on all devices */}
-                        <motion.div variants={itemVariants} className="block max-w-2xl mx-auto mt-6">
-                            <SearchTrigger
-                                displayText={getLocationDisplayText()}
-                                onClick={onSearchClick}
-                                isFilled={filters.city || filters.university}
-                                isNavbar={false}
-                            />
-                        </motion.div>
-                    </div>
-                    {/* Stats bar */}
-                    <motion.div
-                        variants={itemVariants}
-                        className="grid grid-cols-2 md:grid-cols-4 bg-stone-800 border border-stone-700 rounded-xl overflow-hidden max-w-3xl mx-auto"
-                    >
-                        {stats.map((stat, idx) => (
-                            <div
-                                key={stat.label}
-                                className={`p-5 text-center border-stone-700 
-                                    ${idx % 2 === 0 ? "border-r" : ""} 
-                                    ${idx < 2 ? "border-b" : ""} 
-                                    md:border-b-0 md:border-r md:last:border-r-0`}
-                            >
-                                <div className="font-extrabold text-[1.6rem] text-amber-400 leading-none" style={{ fontFamily: "var(--font-heading)" }}>
-                                    {stat.value}
-                                </div>
-                                <div className="text-xs text-stone-400 mt-1.5 font-medium">{stat.label}</div>
-                            </div>
-                        ))}
-                    </motion.div>
-                </motion.div>
-            </section>
+            <HeroSection
+                user={user}
+                onSearchClick={onSearchClick}
+                filters={filters}
+                getLocationDisplayText={getLocationDisplayText}
+                rooms={filteredRooms}
+                onRoomClick={handleRoomClick}
+            />
 
             {/* ---- LISTING SECTION ---- */}
             <motion.section

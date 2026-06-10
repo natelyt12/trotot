@@ -1,3 +1,5 @@
+import { motion } from "framer-motion";
+
 /**
  * VerificationForm - Mock KYC component for Agents and Landlords
  * @param {Object} props
@@ -10,7 +12,12 @@ export default function VerificationForm({ onSubmit, onBack, loading, submitText
     const labelCls = "block text-sm font-semibold text-stone-700 mb-1.5";
 
     return (
-        <div className="flex flex-col gap-6 animate-[fadeIn_0.4s_ease-out]">
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="flex flex-col gap-6"
+        >
             <div className="text-center">
                 <p className="text-sm text-stone-500 leading-relaxed m-0 px-2">
                     Vui lòng tải lên ảnh giấy tờ để hệ thống xác thực quyền hạn <b>Chủ nhà</b> của bạn.
@@ -64,6 +71,6 @@ export default function VerificationForm({ onSubmit, onBack, loading, submitText
                     Quay lại bước trước
                 </button>
             </div>
-        </div>
+        </motion.div>
     );
 }

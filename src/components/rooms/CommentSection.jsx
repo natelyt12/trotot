@@ -340,7 +340,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
         <div className={isGridMode ? "p-6" : "bg-white border border-stone-200 p-6 rounded-xl"}>
             <h2 className={`font-bold text-[1.05rem] text-stone-900 flex items-center gap-2 font-heading ${previewMode ? "mb-6" : ""}`}>
                 <AppIcon name="messages" color="#d97706" />
-                Bình luận & Hỏi đáp
+                Bình luận & Hỏi đáp ({comments.reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0)})
             </h2>
 
             {/* Comment Input */}
@@ -363,8 +363,10 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                         placeholder="Viết câu hỏi hoặc bình luận của bạn..."
                         className="input w-full min-h-25 p-4 text-[0.95rem] resize-none border-stone-900/20 focus:border-amber-500 rounded-lg outline-none"
                         disabled={!user || submitting}
+                        maxLength={500}
                     />
-                    <div className="flex justify-end mt-3">
+                    <div className="flex justify-between items-center mt-3">
+                        <span className="text-stone-400 text-xs">{newComment.length}/500</span>
                         <button
                             onClick={handleCommentSubmit}
                             disabled={!user || submitting || !newComment.trim()}
@@ -415,7 +417,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                 onUpdate={handleCommentUpdate}
                                 onReplyClick={() => {
                                     const name = comment.profiles?.full_name || "Người dùng";
-                                    if (replyTo?.parentId === comment.id && replyTo.userName === name) {
+                                    if (replyTo?.commentId === comment.id && replyTo.userName === name) {
                                         setReplyTo(null);
                                     } else {
                                         setReplyTo({
@@ -430,8 +432,8 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                 navigate={navigate}
                             />
 
-                            {/* Inline Reply Input */}
-                            {replyTo?.parentId === comment.id && (
+                            {/* Inline Reply Input under Parent */}
+                            {replyTo?.commentId === comment.id && (
                                 <div className="ml-14 animate-fade-in">
                                     <div className="bg-stone-50 rounded-lg border border-stone-200 overflow-hidden focus-within:border-amber-500 transition-colors">
                                         {replyTo.userName && (
@@ -455,25 +457,29 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                             onChange={(e) => setReplyContent(e.target.value)}
                                             placeholder="Viết câu trả lời..."
                                             className="w-full min-h-20 p-3 text-[0.9rem] resize-none outline-none bg-transparent border-none"
+                                            maxLength={500}
                                         />
                                     </div>
-                                    <div className="flex justify-end gap-2 mt-2">
-                                        <button
-                                            onClick={() => {
-                                                setReplyTo(null);
-                                                setReplyContent("");
-                                            }}
-                                            className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
-                                        >
-                                            Hủy
-                                        </button>
-                                        <button
-                                            onClick={handleReplySubmit}
-                                            disabled={submitting || !replyContent.trim()}
-                                            className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
-                                        >
-                                            {submitting ? "Đang gửi..." : "Gửi trả lời"}
-                                        </button>
+                                    <div className="flex justify-between items-center mt-2">
+                                        <span className="text-stone-400 text-xs ml-2">{replyContent.length}/500</span>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    setReplyTo(null);
+                                                    setReplyContent("");
+                                                }}
+                                                className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
+                                            >
+                                                Hủy
+                                            </button>
+                                            <button
+                                                onClick={handleReplySubmit}
+                                                disabled={submitting || !replyContent.trim()}
+                                                className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
+                                            >
+                                                {submitting ? "Đang gửi..." : "Gửi trả lời"}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -482,45 +488,98 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                             {comment.replies?.length > 0 && (
                                 <div className="ml-14 flex flex-col gap-4 border-l-2 border-stone-100 pl-4">
                                     {comment.replies.map((reply) => (
-                                        <CommentItem
-                                            key={reply.id}
-                                            comment={reply}
-                                            user={user}
-                                            isReply={true}
-                                            activeMenuId={activeMenuId}
-                                            setActiveMenuId={setActiveMenuId}
-                                            onDelete={handleCommentDelete}
-                                            onReport={handleCommentReport}
-                                            onVote={handleVote}
-                                            editingId={editingId}
-                                            setEditingId={(id) => {
-                                                if (id === null) {
-                                                    setEditingId(null);
-                                                    setEditingTag(null);
-                                                    setEditingContent("");
-                                                } else {
-                                                    const { tag, content } = parseContent(reply.content);
-                                                    setEditingId(id);
-                                                    setEditingTag(tag);
-                                                    setEditingContent(content);
-                                                }
-                                            }}
-                                            editingContent={editingContent}
-                                            setEditingContent={setEditingContent}
-                                            editingTag={editingTag}
-                                            setEditingTag={setEditingTag}
-                                            onUpdate={handleCommentUpdate}
-                                            onReplyClick={() => {
-                                                setReplyTo({
-                                                    commentId: reply.id,
-                                                    parentId: comment.id,
-                                                    userName: reply.profiles?.full_name || "Người dùng",
-                                                });
-                                                setReplyContent("");
-                                            }}
-                                            previewMode={previewMode}
-                                            navigate={navigate}
-                                        />
+                                        <div key={reply.id} className="flex flex-col gap-4">
+                                            <CommentItem
+                                                comment={reply}
+                                                user={user}
+                                                isReply={true}
+                                                activeMenuId={activeMenuId}
+                                                setActiveMenuId={setActiveMenuId}
+                                                onDelete={handleCommentDelete}
+                                                onReport={handleCommentReport}
+                                                onVote={handleVote}
+                                                editingId={editingId}
+                                                setEditingId={(id) => {
+                                                    if (id === null) {
+                                                        setEditingId(null);
+                                                        setEditingTag(null);
+                                                        setEditingContent("");
+                                                    } else {
+                                                        const { tag, content } = parseContent(reply.content);
+                                                        setEditingId(id);
+                                                        setEditingTag(tag);
+                                                        setEditingContent(content);
+                                                    }
+                                                }}
+                                                editingContent={editingContent}
+                                                setEditingContent={setEditingContent}
+                                                editingTag={editingTag}
+                                                setEditingTag={setEditingTag}
+                                                onUpdate={handleCommentUpdate}
+                                                onReplyClick={() => {
+                                                    setReplyTo({
+                                                        commentId: reply.id,
+                                                        parentId: comment.id,
+                                                        userName: reply.profiles?.full_name || "Người dùng",
+                                                    });
+                                                    setReplyContent("");
+                                                }}
+                                                previewMode={previewMode}
+                                                navigate={navigate}
+                                            />
+
+                                            {/* Inline Reply Input under Child Reply */}
+                                            {replyTo?.commentId === reply.id && (
+                                                <div className="ml-12 animate-fade-in">
+                                                    <div className="bg-stone-50 rounded-lg border border-stone-200 overflow-hidden focus-within:border-amber-500 transition-colors">
+                                                        {replyTo.userName && (
+                                                            <div className="px-3 py-1.5 bg-amber-50 border-b border-stone-200 flex items-center justify-between">
+                                                                <span className="text-[0.75rem] text-amber-700 font-bold flex items-center gap-1.5">
+                                                                    <AppIcon name="messages" size={12} />
+                                                                    Đang phản hồi @{replyTo.userName}
+                                                                </span>
+                                                                <button
+                                                                    onClick={() => setReplyTo({ ...replyTo, userName: null })}
+                                                                    className="text-stone-400 hover:text-stone-600 cursor-pointer border-none bg-transparent"
+                                                                    title="Bỏ gắn thẻ (trở thành bình luận độc lập)"
+                                                                >
+                                                                    <AppIcon name="close" size={14} />
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                        <textarea
+                                                            autoFocus
+                                                            value={replyContent}
+                                                            onChange={(e) => setReplyContent(e.target.value)}
+                                                            placeholder="Viết câu trả lời..."
+                                                            className="w-full min-h-20 p-3 text-[0.9rem] resize-none outline-none bg-transparent border-none"
+                                                            maxLength={500}
+                                                        />
+                                                    </div>
+                                                    <div className="flex justify-between items-center mt-2">
+                                                        <span className="text-stone-400 text-xs ml-2">{replyContent.length}/500</span>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setReplyTo(null);
+                                                                    setReplyContent("");
+                                                                }}
+                                                                className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
+                                                            >
+                                                                Hủy
+                                                            </button>
+                                                            <button
+                                                                onClick={handleReplySubmit}
+                                                                disabled={submitting || !replyContent.trim()}
+                                                                className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
+                                                            >
+                                                                {submitting ? "Đang gửi..." : "Gửi trả lời"}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     ))}
                                 </div>
                             )}
@@ -683,22 +742,26 @@ function CommentItem({
                                 value={editingContent}
                                 onChange={(e) => setEditingContent(e.target.value)}
                                 className="w-full min-h-20 p-3 text-[0.9rem] resize-none outline-none bg-transparent border-none"
+                                maxLength={500}
                             />
                         </div>
-                        <div className="flex justify-end gap-2 mt-2">
-                            <button
-                                onClick={() => setEditingId(null)}
-                                className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                onClick={() => onUpdate(comment.id)}
-                                disabled={!editingContent.trim()}
-                                className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
-                            >
-                                Cập nhật
-                            </button>
+                        <div className="flex justify-between items-center mt-2">
+                            <span className="text-stone-400 text-xs ml-2">{editingContent.length}/500</span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setEditingId(null)}
+                                    className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
+                                >
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={() => onUpdate(comment.id)}
+                                    disabled={!editingContent.trim()}
+                                    className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
+                                >
+                                    Cập nhật
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ) : (

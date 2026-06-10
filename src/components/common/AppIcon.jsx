@@ -78,6 +78,7 @@ const ICON_MAP = {
     price: TbCurrencyDollar,
     area: TbMaximize,
     occupants: TbUsers,
+    users: TbUsers,
     address: TbMapPin,
     location: TbMapPin,
     'location-arrow': TbLocation,

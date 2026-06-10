@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { signIn } from '../services/authService.js';
 import ForgotPasswordForm from '../components/auth/ForgotPasswordForm.jsx';
 
@@ -41,11 +42,19 @@ export default function LoginPage({ navigate }) {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-stone-900 font-quicksand">
+        <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-stone-900 font-quicksand relative overflow-hidden">
+            {/* Ambient organic glows */}
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-gradient-to-br from-amber-500/10 via-orange-600/5 to-transparent rounded-full pointer-events-none blur-[120px] z-0" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-gradient-to-tl from-amber-500/10 via-transparent to-transparent rounded-full pointer-events-none blur-[120px] z-0" />
 
-            <div className="w-full max-w-sm">
+            <div className="w-full max-w-sm relative z-10">
                 {/* Logo */}
-                <div className="text-center mb-8 animate-[fadeIn_0.5s_ease-out]">
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-center mb-8"
+                >
                     <button
                         onClick={() => navigate('home')}
                         className="bg-transparent border-none cursor-pointer inline-flex flex-col items-center gap-3"
@@ -69,7 +78,7 @@ export default function LoginPage({ navigate }) {
                     <p className="text-stone-400 text-sm mt-2">
                         {view === 'login' ? 'Đăng nhập để tiếp tục tìm phòng' : 'Khôi phục quyền truy cập tài khoản'}
                     </p>
-                </div>
+                </motion.div>
 
                 {/* Card */}
                 <div className="bg-white rounded-xl p-8 border border-stone-200 shadow-xl shadow-black/20">
@@ -81,14 +90,19 @@ export default function LoginPage({ navigate }) {
                     </h1>
 
                     {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg py-2.5 px-3 mb-4 text-red-600 text-sm flex items-center gap-2 animate-[shake_0.4s_ease-in-out]">
+                        <motion.div
+                            initial={{ opacity: 0, x: 0 }}
+                            animate={{ opacity: 1, x: [0, -6, 6, -6, 6, 0] }}
+                            transition={{ duration: 0.4 }}
+                            className="bg-red-50 border border-red-200 rounded-lg py-2.5 px-3 mb-4 text-red-600 text-sm flex items-center gap-2"
+                        >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10" />
                                 <line x1="12" y1="8" x2="12" y2="12" />
                                 <line x1="12" y1="16" x2="12.01" y2="16" />
                             </svg>
                             {error}
-                        </div>
+                        </motion.div>
                     )}
 
                     {view === 'login' ? (

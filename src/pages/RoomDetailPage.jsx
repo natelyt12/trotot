@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useModal } from "../context/ModalContext";
-import { incrementRoomViews } from "../services/roomService";
+import { incrementRoomViews, getRoomByUuid } from "../services/roomService";
 import { AMENITIES, STATUS_LABELS, CURFEW_LABELS, BATHROOM_TYPES, LAUNDRY_TYPES } from "../constants/constants.js";
 import { UNIVERSITIES } from "../constants/universities";
 import { formatPrice, formatArea, formatDate, formatElectricity, formatWater, formatDeposit } from "../utils/formatters.js";
@@ -56,21 +56,68 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
     // Robust parsing in case room is wrapped in an object
     const resolvedRoom = room && !room.basic_info && room.room ? room.room : room;
 
-    const fromDashboard = room?.fromDashboard || resolvedRoom?.fromDashboard;
-    const fromProfile = room?.fromProfile || resolvedRoom?.fromProfile;
-    const originTab = room?.originTab || resolvedRoom?.originTab;
-
     const { showModal } = useModal();
     const { isFavorite, toggleFavorite } = useFavorites();
     const [activeImage, setActiveImage] = useState(0);
     const [showPhone, setShowPhone] = useState(false);
-    const [views, setViews] = useState(resolvedRoom?.metadata?.total_views || 0);
+    const [views, setViews] = useState(0);
     const lastIncrementedRoomId = useRef(null);
 
-    const favorited = isFavorite(resolvedRoom?.id);
+    // Fetch full details if only partial info is passed
+    const [fullRoom, setFullRoom] = useState(null);
+    const [loadingDetail, setLoadingDetail] = useState(false);
+
+    useEffect(() => {
+        if (!resolvedRoom?.id) return;
+        
+        // If it is already complete (has listing_id and description), no need to fetch
+        if (resolvedRoom.listing_id && resolvedRoom.media_contact?.description !== undefined) {
+            return;
+        }
+
+        let isMounted = true;
+        const fetchFullRoomDetail = async () => {
+            setLoadingDetail(true);
+            try {
+                const data = await getRoomByUuid(resolvedRoom.id);
+                if (isMounted && data) {
+                    setFullRoom(data);
+                }
+            } catch (err) {
+                console.error("Error fetching full room detail:", err);
+            } finally {
+                if (isMounted) setLoadingDetail(false);
+            }
+        };
+
+        fetchFullRoomDetail();
+        return () => {
+            isMounted = false;
+        };
+    }, [resolvedRoom]);
+
+    const activeRoom = fullRoom || resolvedRoom;
+
+    // Thay đổi tiêu đề của tab trình duyệt khi có thông tin phòng
+    useEffect(() => {
+        if (activeRoom?.basic_info?.title) {
+            document.title = `${activeRoom.basic_info.title} | TrọTốt`;
+        }
+        return () => {
+            document.title = 'TrọTốt';
+        };
+    }, [activeRoom?.basic_info?.title]);
+
+    // Rented room state (only for tenant and admin, and not the landlord/owner of the room)
+    const isTenantOrAdmin = user?.user_metadata?.role === 'tenant' || user?.user_metadata?.role === 'admin';
+    const isOwner = user?.id === activeRoom?.user_id;
+
+    const displayViews = views || activeRoom?.metadata?.total_views || 0;
+
+    const favorited = isFavorite(activeRoom?.id);
 
     const handleToggleFavorite = async () => {
-        const result = await toggleFavorite(resolvedRoom?.id);
+        const result = await toggleFavorite(activeRoom?.id);
         if (result?.error === "login_required") {
             showModal({
                 title: "Thông báo",
@@ -84,26 +131,35 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
     // Increment views on mount
     useEffect(() => {
-        if (!resolvedRoom?.id || previewMode || lastIncrementedRoomId.current === resolvedRoom.id) return;
+        if (!activeRoom?.id || previewMode || lastIncrementedRoomId.current === activeRoom.id) return;
 
-        lastIncrementedRoomId.current = resolvedRoom.id;
+        lastIncrementedRoomId.current = activeRoom.id;
 
-        const initialViews = resolvedRoom.metadata?.total_views || 0;
+        const initialViews = activeRoom.metadata?.total_views || 0;
         const incrementViews = async () => {
-            const { data, error } = await incrementRoomViews(resolvedRoom.id, initialViews);
+            const { data, error } = await incrementRoomViews(activeRoom.id, initialViews);
             if (!error && data) {
                 setViews(data.total_views);
             }
         };
 
         incrementViews();
-        // Only run once per resolvedRoom.id to prevent infinite loops and double increments
-    }, [resolvedRoom?.id, previewMode, resolvedRoom?.metadata?.total_views]);
+        // Only run once per activeRoom.id to prevent infinite loops and double increments
+    }, [activeRoom?.id, previewMode, activeRoom?.metadata?.total_views]);
 
-    if (!resolvedRoom) {
+    if (!activeRoom) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <p className="text-stone-500">Không tìm thấy phòng này.</p>
+            </div>
+        );
+    }
+
+    if (loadingDetail && !fullRoom) {
+        return (
+            <div className="min-h-screen bg-stone-50 pt-20 flex flex-col items-center justify-center gap-3">
+                <AppIcon name="reload" size={32} className="text-amber-500 animate-spin" />
+                <span className="text-stone-500 text-sm font-semibold">Đang tải chi tiết phòng trọ...</span>
             </div>
         );
     }
@@ -115,7 +171,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
         rules_utilities = {},
         media_contact = { video_urls: [], images: [] },
         metadata = {},
-    } = resolvedRoom;
+    } = activeRoom;
     const videos = Array.isArray(media_contact.video_urls) ? media_contact.video_urls : media_contact.video_url ? [media_contact.video_url] : [];
 
     const mediaItems = [
@@ -126,7 +182,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
     ];
     const isExpired = metadata.status === "expired";
     const isAvailable = metadata.status === "available" && !isExpired;
-    const showAsPublished = resolvedRoom.subTab === "published";
+    const showAsPublished = activeRoom.subTab === "published";
 
     return (
         <div className="min-h-screen bg-stone-50 pt-16 md:pt-20 pb-24 md:pb-0">
@@ -142,12 +198,14 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                         onClick={() => {
                             if (onClose) {
                                 onClose();
-                            } else if (fromDashboard) {
-                                navigate("dashboard");
-                            } else if (resolvedRoom?.fromPublicProfile) {
-                                navigate("public-profile", { userId: resolvedRoom?.publicProfileUserId });
+                            } else if (window.history.length <= 2) {
+                                window.close();
+                                // Fallback in case window.close() fails
+                                setTimeout(() => {
+                                    if (!document.hidden) navigate("home");
+                                }, 100);
                             } else {
-                                navigate(fromProfile ? "profile" : "home", fromProfile ? { tab: originTab || "info" } : undefined);
+                                window.history.back();
                             }
                         }}
                         className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
@@ -325,9 +383,11 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         {favorited && !previewMode ? "Đã lưu tin" : "Lưu tin"}
                                     </button>
 
+
+
                                     <div className="flex items-center gap-1.5 text-stone-500 text-sm font-medium">
                                         <AppIcon name="eye" size={16} />
-                                        <span>{views.toLocaleString()} lượt xem</span>
+                                        <span>{displayViews.toLocaleString()} lượt xem</span>
                                     </div>
 
                                     <div className="hidden sm:block h-3 w-px bg-stone-200" />
@@ -339,7 +399,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
                                     <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
                                         <AppIcon name="calendar" size={16} />
-                                        <span>Hết hạn: {resolvedRoom.available_until ? formatDate(resolvedRoom.available_until) : "Không xác định"}</span>
+                                        <span>Hết hạn: {activeRoom.available_until ? formatDate(activeRoom.available_until) : "Không xác định"}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2 text-stone-500 text-[0.925rem] mb-6">
@@ -394,7 +454,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
                                 <div className="mt-3 text-[0.8rem] text-stone-400">
                                     Đăng ngày: {formatDate(metadata.created_at)} • Hết hạn:{" "}
-                                    {resolvedRoom.available_until ? formatDate(resolvedRoom.available_until) : "Không xác định"} • ID: {resolvedRoom.listing_id}
+                                    {activeRoom.available_until ? formatDate(activeRoom.available_until) : "Không xác định"} • ID: {activeRoom.listing_id}
                                 </div>
                             </div>
 
@@ -511,12 +571,12 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                             </div>
 
                             {/* Comments */}
-                            <CommentSection room={resolvedRoom} user={user} navigate={navigate} isGridMode={true} previewMode={previewMode} />
+                            <CommentSection room={activeRoom} user={user} navigate={navigate} isGridMode={true} previewMode={previewMode} />
                         </div>
 
                         {/* ---- RIGHT COLUMN: Contact sidebar ---- */}
                         <LandlordCard
-                            room={resolvedRoom}
+                            room={activeRoom}
                             user={user}
                             previewMode={previewMode}
                             showPhone={showPhone}
