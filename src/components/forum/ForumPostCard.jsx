@@ -99,11 +99,11 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
         setShowMenu(false);
     };
 
-    const handleRequestTransfer = () => {
+    const handleRequestAction = () => {
         if (!user) {
             showModal({
                 title: "Yêu cầu đăng nhập",
-                message: "Vui lòng đăng nhập để xin sang nhượng!",
+                message: post.category === "roommate" ? "Vui lòng đăng nhập để xin ở ghép!" : "Vui lòng đăng nhập để xin sang nhượng!",
                 type: "warning",
                 confirmText: "Đăng nhập",
                 onConfirm: () => navigate("login"),
@@ -111,13 +111,13 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
             return;
         }
         showModal({
-            title: "Xin sang nhượng phòng",
-            message: `Bạn muốn gửi yêu cầu sang nhượng phòng này đến ${displayName}?`,
+            title: post.category === "roommate" ? "Xin ở ghép" : "Xin sang nhượng phòng",
+            message: post.category === "roommate" ? `Bạn muốn gửi yêu cầu xin ở ghép với ${displayName}?` : `Bạn muốn gửi yêu cầu sang nhượng phòng này đến ${displayName}?`,
             type: "info",
             confirmText: "Gửi yêu cầu",
             cancelText: "Hủy",
             onConfirm: async () => {
-                const { error } = await createRoomRequest({ postId: post.id, requesterId: user.id, type: "transfer" });
+                const { error } = await createRoomRequest({ postId: post.id, requesterId: user.id, type: post.category === "roommate" ? "roommate" : "transfer" });
                 if (error) {
                     if (error.code === "23505") {
                         addNotification("Bạn đã gửi yêu cầu cho bài viết này rồi!", "warning");
@@ -126,7 +126,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                     }
                     return;
                 }
-                addNotification("Đã gửi yêu cầu sang nhượng! Vui lòng chờ người cho thuê phản hồi.", "success");
+                addNotification(post.category === "roommate" ? "Đã gửi yêu cầu ở ghép! Vui lòng chờ phản hồi." : "Đã gửi yêu cầu sang nhượng! Vui lòng chờ người cho thuê phản hồi.", "success");
             },
         });
     };
@@ -322,13 +322,13 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                     <span>Bình luận</span>
                 </button>
 
-                {post.category === "transfer" && !isOwner && !isAdmin && post.status === "published" ? (
+                {(post.category === "transfer" || post.category === "roommate") && !isOwner && !isAdmin && post.status === "published" ? (
                     <button
-                        onClick={handleRequestTransfer}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-purple-600 hover:bg-purple-50 transition-colors cursor-pointer border-none bg-transparent"
+                        onClick={handleRequestAction}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border-none bg-transparent ${post.category === 'roommate' ? 'text-sky-600 hover:bg-sky-50' : 'text-purple-600 hover:bg-purple-50'}`}
                     >
                         <AppIcon name="home" size={16} />
-                        <span>Gửi yêu cầu</span>
+                        <span>{post.category === "roommate" ? "Xin ở ghép" : "Gửi yêu cầu"}</span>
                     </button>
                 ) : (
                     <button

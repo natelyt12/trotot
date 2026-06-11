@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getBookingsForLandlord, updateBookingStatus, approveRoomBookingRPC } from '../../services/bookingService';
 import { getRoomRequestsForLandlord, updateRoomRequestStatus } from '../../services/forumService';
-import { approveRoomTransferRPC } from '../../services/rentedRoomService';
+import { approveRoomTransferRPC, approveRoommateRequest } from '../../services/rentedRoomService';
 import { useModal } from '../../context/ModalContext';
 import { useNotification } from '../../context/NotificationContext';
 import AppIcon from '../common/AppIcon';
@@ -73,23 +73,37 @@ export default function RequestsTab({ user }) {
     };
 
     const handleApproveTransfer = (request) => {
+        const isRoommate = request.type === 'roommate';
         showModal({
-            title: 'Duyệt yêu cầu chuyển nhượng',
-            message: `Bạn muốn chuyển phòng "${request.post?.rooms?.title}" từ ${request.post?.tenant?.full_name} sang ${request.requester?.full_name}?`,
+            title: isRoommate ? 'Duyệt yêu cầu ở ghép' : 'Duyệt yêu cầu chuyển nhượng',
+            message: isRoommate 
+                ? `Bạn muốn duyệt cho ${request.requester?.full_name} vào ở ghép phòng "${request.post?.rooms?.title}" cùng với ${request.post?.tenant?.full_name}?` 
+                : `Bạn muốn chuyển phòng "${request.post?.rooms?.title}" từ ${request.post?.tenant?.full_name} sang ${request.requester?.full_name}?`,
             type: 'info',
             confirmText: 'Đồng ý',
             cancelText: 'Hủy',
             onConfirm: async () => {
                 try {
-                    const { error } = await approveRoomTransferRPC(
-                        request.id,
-                        request.post_id,
-                        request.post?.room_id,
-                        request.post?.user_id,
-                        request.requester_id
-                    );
-                    if (error) throw error;
-                    addNotification('Đã duyệt yêu cầu chuyển nhượng thành công!', 'success');
+                    if (isRoommate) {
+                        const { error } = await approveRoommateRequest(
+                            request.id,
+                            request.post_id,
+                            request.post?.room_id,
+                            request.requester_id
+                        );
+                        if (error) throw error;
+                        addNotification('Đã duyệt yêu cầu ở ghép thành công!', 'success');
+                    } else {
+                        const { error } = await approveRoomTransferRPC(
+                            request.id,
+                            request.post_id,
+                            request.post?.room_id,
+                            request.post?.user_id,
+                            request.requester_id
+                        );
+                        if (error) throw error;
+                        addNotification('Đã duyệt yêu cầu chuyển nhượng thành công!', 'success');
+                    }
                     fetchData();
                 } catch (err) {
                     addNotification('Có lỗi xảy ra khi duyệt yêu cầu.', 'error');
@@ -99,9 +113,10 @@ export default function RequestsTab({ user }) {
     };
 
     const handleRejectTransfer = (request) => {
+        const isRoommate = request.type === 'roommate';
         showModal({
             title: 'Từ chối yêu cầu',
-            message: 'Bạn có muốn từ chối yêu cầu chuyển nhượng này không?',
+            message: `Bạn có muốn từ chối yêu cầu ${isRoommate ? 'ở ghép' : 'chuyển nhượng'} này không?`,
             type: 'warning',
             confirmText: 'Từ chối',
             cancelText: 'Hủy',
@@ -135,7 +150,7 @@ export default function RequestsTab({ user }) {
                     className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors cursor-pointer bg-transparent ${activeSubTab === 'transfers' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
                     onClick={() => setActiveSubTab('transfers')}
                 >
-                    Yêu cầu sang nhượng ({transfers.filter(t => t.status === 'pending' || t.status === 'pending_landlord').length})
+                    Yêu cầu sang nhượng / ở ghép ({transfers.filter(t => t.status === 'pending' || t.status === 'pending_landlord').length})
                 </button>
             </div>
 
@@ -184,7 +199,7 @@ export default function RequestsTab({ user }) {
 
                     {activeSubTab === 'transfers' && (
                         transfers.length === 0 ? (
-                            <div className="text-stone-500 text-sm italic">Chưa có yêu cầu sang nhượng nào.</div>
+                            <div className="text-stone-500 text-sm italic">Chưa có yêu cầu sang nhượng / ở ghép nào.</div>
                         ) : (
                             <div className="space-y-4">
                                 {transfers.map(request => (
@@ -196,10 +211,10 @@ export default function RequestsTab({ user }) {
                                             <div>
                                                 <p className="font-medium text-stone-800">{request.post?.rooms?.title}</p>
                                                 <p className="text-sm text-stone-500 mt-1">
-                                                    Người thuê cũ: <span className="font-medium text-stone-700">{request.post?.tenant?.full_name}</span>
+                                                    Người thuê hiện tại: <span className="font-medium text-stone-700">{request.post?.tenant?.full_name}</span>
                                                 </p>
                                                 <p className="text-sm text-stone-500 mt-1">
-                                                    Khách thuê mới: <span className="font-medium text-blue-600">{request.requester?.full_name}</span> - SĐT: {request.requester?.phone || 'Chưa cập nhật'}
+                                                    {request.type === 'roommate' ? 'Khách xin ở ghép:' : 'Khách thuê mới:'} <span className="font-medium text-blue-600">{request.requester?.full_name}</span> - SĐT: {request.requester?.phone || 'Chưa cập nhật'}
                                                 </p>
                                                 {request.message && (
                                                     <p className="text-sm text-stone-500 mt-2 p-2 bg-stone-50 rounded-lg italic">

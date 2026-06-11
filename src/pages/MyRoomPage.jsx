@@ -83,9 +83,10 @@ export default function MyRoomPage({ user, navigate }) {
     };
 
     const handleApproveRequest = (request) => {
+        const isRoommate = request.type === 'roommate';
         showModal({
-            title: "Duyệt yêu cầu sang nhượng",
-            message: `Bạn có chắc chắn muốn duyệt yêu cầu sang nhượng từ ${request.requester?.full_name}? Yêu cầu sẽ được chuyển đến chủ trọ để phê duyệt cuối cùng.`,
+            title: isRoommate ? "Duyệt yêu cầu ở ghép" : "Duyệt yêu cầu sang nhượng",
+            message: `Bạn có chắc chắn muốn duyệt yêu cầu ${isRoommate ? 'ở ghép' : 'sang nhượng'} từ ${request.requester?.full_name}? Yêu cầu sẽ được chuyển đến chủ trọ để phê duyệt cuối cùng.`,
             type: "info",
             confirmText: "Đồng ý",
             cancelText: "Hủy",
@@ -102,9 +103,10 @@ export default function MyRoomPage({ user, navigate }) {
     };
 
     const handleRejectRequest = (request) => {
+        const isRoommate = request.type === 'roommate';
         showModal({
             title: "Từ chối yêu cầu",
-            message: `Bạn có chắc chắn muốn từ chối yêu cầu sang nhượng từ ${request.requester?.full_name}?`,
+            message: `Bạn có chắc chắn muốn từ chối yêu cầu ${isRoommate ? 'ở ghép' : 'sang nhượng'} từ ${request.requester?.full_name}?`,
             type: "warning",
             confirmText: "Từ chối",
             cancelText: "Hủy",
@@ -579,9 +581,9 @@ export default function MyRoomPage({ user, navigate }) {
                                                 <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
                                                     <AppIcon name="messages" size={32} />
                                                 </div>
-                                                <p className="font-medium text-stone-700 mb-1 text-base">Bạn chưa có yêu cầu chuyển nhượng nào</p>
+                                                <p className="font-medium text-stone-700 mb-1 text-base">Bạn chưa có yêu cầu nào</p>
                                                 <p className="text-stone-400 text-sm mb-6 max-w-xs mx-auto">
-                                                    Khi ai đó xin sang nhượng phòng bạn đang đăng, yêu cầu sẽ xuất hiện ở đây.
+                                                    Khi ai đó xin sang nhượng hoặc xin ở ghép, yêu cầu sẽ xuất hiện ở đây.
                                                 </p>
                                             </div>
                                         ) : (
@@ -596,9 +598,15 @@ export default function MyRoomPage({ user, navigate }) {
 
                                                         <div className="flex-1 min-w-0 pl-2">
                                                             <div className="flex items-center gap-2 mb-3">
-                                                                <span className="px-2.5 py-1 bg-purple-100 text-purple-700 text-[0.65rem] font-medium rounded-full uppercase tracking-wider">
-                                                                    Yêu cầu xin sang nhượng
-                                                                </span>
+                                                                {request.type === 'roommate' ? (
+                                                                    <span className="px-2.5 py-1 bg-sky-100 text-sky-700 text-[0.65rem] font-medium rounded-full uppercase tracking-wider">
+                                                                        Yêu cầu xin ở ghép
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="px-2.5 py-1 bg-purple-100 text-purple-700 text-[0.65rem] font-medium rounded-full uppercase tracking-wider">
+                                                                        Yêu cầu xin sang nhượng
+                                                                    </span>
+                                                                )}
                                                             </div>
 
                                                             <h3 className="font-medium text-stone-900 text-base line-clamp-1 mb-1">
