@@ -195,7 +195,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onSuccess, edit
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
-                    <h2 className="font-extrabold text-stone-900 text-base">{isEdit ? "Chỉnh sửa bài đăng" : "Tạo bài đăng mới"}</h2>
+                    <h2 className="font-semibold text-stone-900 text-base">{isEdit ? "Chỉnh sửa bài đăng" : "Tạo bài đăng mới"}</h2>
                     <button
                         onClick={onClose}
                         className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors cursor-pointer border-none"
@@ -210,14 +210,14 @@ export default function CreatePostModal({ isOpen, onClose, user, onSuccess, edit
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div
-                                className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden"
+                                className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-medium text-sm shrink-0 overflow-hidden"
                                 style={userAvatar ? { backgroundImage: `url(${userAvatar})`, backgroundSize: "cover" } : {}}
                             >
                                 {!userAvatar && userName.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                                <div className="font-bold text-stone-900 text-sm">{userName}</div>
-                                <div className="text-[10px] text-stone-400 font-medium mt-0.5">Đăng công khai</div>
+                                <div className="font-medium text-stone-900 text-sm">{userName}</div>
+                                <div className="text-[10px] text-stone-400 font-normal mt-0.5">Đăng công khai</div>
                             </div>
                         </div>
 
@@ -245,7 +245,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onSuccess, edit
                             className="w-full min-h-[120px] text-stone-900 text-[0.95rem] resize-none outline-none border-none placeholder:text-stone-300 leading-relaxed pb-6"
                             autoFocus
                         />
-                        <div className="absolute bottom-0 right-0 text-[10px] font-semibold text-stone-400 select-none">
+                        <div className="absolute bottom-0 right-0 text-[10px] font-medium text-stone-400 select-none">
                             {content.length} / {CHARACTER_LIMIT}
                         </div>
                     </div>
@@ -276,7 +276,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onSuccess, edit
                                     if (singleRoom) setAttachedRoom(singleRoom);
                                 }
                             }}
-                            className="w-full py-2.5 border border-dashed border-amber-300 bg-amber-50/50 hover:bg-amber-50 rounded-xl text-amber-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            className="w-full py-2.5 border border-dashed border-amber-300 bg-amber-50/50 hover:bg-amber-50 rounded-xl text-amber-700 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
                             <AppIcon name="home" size={14} />
                             Đính kèm phòng đang thuê
@@ -296,8 +296,8 @@ export default function CreatePostModal({ isOpen, onClose, user, onSuccess, edit
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="text-[10px] font-bold text-amber-700 uppercase mb-0.5">Phòng đính kèm</div>
-                                <div className="text-sm font-bold text-stone-900 line-clamp-1">{attachedRoom.title}</div>
+                                <div className="text-[10px] font-medium text-amber-700 uppercase mb-0.5">Phòng đính kèm</div>
+                                <div className="text-sm font-medium text-stone-900 line-clamp-1">{attachedRoom.title}</div>
                             </div>
                             {/* Cho phép gỡ đính kèm bất cứ lúc nào */}
                             <button
@@ -356,7 +356,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onSuccess, edit
                             <button
                                 onClick={() => handleSubmit("published")}
                                 disabled={submitting || uploading || !content.trim()}
-                                className="px-5 py-2 rounded-xl text-sm font-bold cursor-pointer transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white border-none"
+                                className="px-5 py-2 rounded-xl text-sm font-medium cursor-pointer transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white border-none"
                             >
                                 {(submitting || uploading) && (
                                     <div className="w-3.5 h-3.5 border-2 border-t-transparent border-white/30 border-t-white rounded-full animate-spin" />

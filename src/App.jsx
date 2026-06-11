@@ -265,7 +265,7 @@ export default function App() {
                         <div className="w-6 h-6 rounded-full bg-amber-500/20 animate-pulse" />
                     </div>
                 </div>
-                <p className="text-stone-400 text-sm font-semibold tracking-wide">Đang tải...</p>
+                <p className="text-stone-400 text-sm font-medium tracking-wide">Đang tải...</p>
             </div>
         );
     }

@@ -102,14 +102,14 @@ export default function LocationWizardModal({ isOpen, onClose }) {
                                     <AppIcon name="location" size={20} />
                                 </div>
                                 <div>
-                                    <div className="font-bold text-amber-900">Tôi không tìm gần trường ĐH</div>
+                                    <div className="font-medium text-amber-900">Tôi không tìm gần trường ĐH</div>
                                     <div className="text-xs text-amber-700 mt-0.5">Tìm theo Tỉnh/Thành, Quận/Huyện</div>
                                 </div>
                             </div>
                             <AppIcon name="chevronRight" size={18} className="text-amber-500" />
                         </button>
 
-                        <div className="px-2 pb-2 pt-1 text-xs font-bold text-stone-400 uppercase tracking-wider">
+                        <div className="px-2 pb-2 pt-1 text-xs font-medium text-stone-400 uppercase tracking-wider">
                             Hoặc chọn trường Đại học
                         </div>
 
@@ -123,7 +123,7 @@ export default function LocationWizardModal({ isOpen, onClose }) {
                                     <AppIcon name="bookmark" size={16} />
                                 </div>
                                 <div className="flex-1">
-                                    <div className="text-sm font-semibold text-stone-800">{uni.name}</div>
+                                    <div className="text-sm font-medium text-stone-800">{uni.name}</div>
                                     <div className="text-xs text-stone-500 mt-0.5">{uni.district}, {uni.city}</div>
                                 </div>
                             </button>
@@ -223,7 +223,7 @@ export default function LocationWizardModal({ isOpen, onClose }) {
                                             <AppIcon name="arrowLeft" size={20} className="text-stone-700" />
                                         </button>
                                     )}
-                                    <h3 className={`font-bold text-lg text-stone-900 ${step == 'uni' && 'ml-3'}`}>
+                                    <h3 className={`font-medium text-lg text-stone-900 ${step == 'uni' && 'ml-3'}`}>
                                         {step === 'uni' && 'Bạn muốn tìm trọ ở đâu?'}
                                         {step === 'city' && 'Chọn Tỉnh / Thành phố'}
                                         {step === 'district' && `Quận/Huyện tại ${tempCity}`}
@@ -239,7 +239,7 @@ export default function LocationWizardModal({ isOpen, onClose }) {
                                             setSearchQuery('');
                                             updateFilter({ university: '', city: '', district: '', ward: '', search: '' });
                                         }}
-                                        className="bg-transparent border-none text-amber-600 text-sm font-semibold cursor-pointer hover:text-amber-700 transition-colors duration-200"
+                                        className="bg-transparent border-none text-amber-600 text-sm font-medium cursor-pointer hover:text-amber-700 transition-colors duration-200"
                                     >
                                         Xóa tất cả
                                     </button>
@@ -262,7 +262,7 @@ export default function LocationWizardModal({ isOpen, onClose }) {
                                                 step === 'city' ? "Nhập tên thành phố..." :
                                                     "Tìm kiếm..."
                                         }
-                                        className="w-full bg-stone-100 border-none py-3 pl-10 pr-4 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-amber-500/50"
+                                        className="w-full bg-stone-100 border-none py-3 pl-10 pr-4 rounded-xl text-sm font-normal outline-none focus:ring-2 focus:ring-amber-500/50"
                                     />
                                 </div>
                             </div>
@@ -285,7 +285,7 @@ function LocationItem({ label, onClick, isPrimary = false, hasChevron = false })
     return (
         <button
             onClick={onClick}
-            className={`p-4 hover:bg-stone-50 rounded-xl transition-colors text-left w-full text-sm font-semibold border-b border-stone-50 last:border-0 flex justify-between items-center group cursor-pointer border-none ${isPrimary ? 'bg-stone-50 text-amber-600 font-bold mb-2' : 'text-stone-800'
+            className={`p-4 hover:bg-stone-50 rounded-xl transition-colors text-left w-full text-sm font-medium border-b border-stone-50 last:border-0 flex justify-between items-center group cursor-pointer border-none ${isPrimary ? 'bg-stone-50 text-amber-600 font-medium mb-2' : 'text-stone-800'
                 }`}
         >
             <span>{label}</span>

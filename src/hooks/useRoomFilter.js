@@ -1,25 +1,23 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import { mapSupabaseRoom } from '../utils/roomMapper.js';
-import { UNIVERSITIES } from '../constants/universities.js';
-import { getFilteredRooms, getDistinctCities } from '../services/roomService.js';
-
-
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { mapSupabaseRoom } from "../utils/roomMapper.js";
+import { UNIVERSITIES } from "../constants/universities.js";
+import { getFilteredRooms, getDistinctCities } from "../services/roomService.js";
 
 const DEFAULT_FILTERS = {
-    search: '',
-    city: '',
-    district: '',
-    ward: '',
-    university: '',
+    search: "",
+    city: "",
+    district: "",
+    ward: "",
+    university: "",
     priceMin: 0,
     priceMax: 50000000,
     areaMin: 0,
     areaMax: 200,
     amenities: [],
-    bathroomType: '',
-    roomType: '',
+    bathroomType: "",
+    roomType: "",
     verifiedOnly: false,
-    sortBy: 'newest', // newest | price_asc | price_desc | area_asc
+    sortBy: "newest", // newest | price_asc | price_desc | area_asc
 };
 
 const ITEMS_PER_PAGE = 18;
@@ -38,37 +36,40 @@ export const useRoomFilter = () => {
     const [hasMore, setHasMore] = useState(true);
 
     // Function to build and execute the query
-    const fetchRooms = useCallback(async (targetPage, isLoadMore = false) => {
-        try {
-            if (isLoadMore) setLoadingMore(true);
-            else {
-                setLoading(true);
-                setError(null);
+    const fetchRooms = useCallback(
+        async (targetPage, isLoadMore = false) => {
+            try {
+                if (isLoadMore) setLoadingMore(true);
+                else {
+                    setLoading(true);
+                    setError(null);
+                }
+
+                const { data, error, count } = await getFilteredRooms(filters, targetPage, ITEMS_PER_PAGE);
+
+                if (error) throw error;
+
+                const mappedData = data ? data.map(mapSupabaseRoom) : [];
+
+                if (isLoadMore) {
+                    setRooms((prev) => [...prev, ...mappedData]);
+                } else {
+                    setRooms(mappedData);
+                }
+
+                setPage(targetPage);
+                setTotalCount(count || 0);
+                setHasMore(mappedData.length === ITEMS_PER_PAGE);
+            } catch (err) {
+                console.error("Error fetching rooms:", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+                setLoadingMore(false);
             }
-
-            const { data, error, count } = await getFilteredRooms(filters, targetPage, ITEMS_PER_PAGE);
-
-            if (error) throw error;
-
-            const mappedData = data ? data.map(mapSupabaseRoom) : [];
-
-            if (isLoadMore) {
-                setRooms(prev => [...prev, ...mappedData]);
-            } else {
-                setRooms(mappedData);
-            }
-
-            setPage(targetPage);
-            setTotalCount(count || 0);
-            setHasMore(mappedData.length === ITEMS_PER_PAGE);
-        } catch (err) {
-            console.error('Error fetching rooms:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-            setLoadingMore(false);
-        }
-    }, [filters]); // Does not depend on page anymore
+        },
+        [filters],
+    ); // Does not depend on page anymore
 
     // Reset page and fetch when filters change
     useEffect(() => {
@@ -98,31 +99,29 @@ export const useRoomFilter = () => {
         setFilters((prev) => {
             let next = { ...prev };
 
-            const updates = typeof updatesOrKey === 'string'
-                ? { [updatesOrKey]: value }
-                : updatesOrKey;
+            const updates = typeof updatesOrKey === "string" ? { [updatesOrKey]: value } : updatesOrKey;
 
-            Object.keys(updates).forEach(key => {
+            Object.keys(updates).forEach((key) => {
                 const val = updates[key];
                 next[key] = val;
 
                 // --- Location Dependency Rules ---
-                if (key === 'university' && val) {
-                    const uni = UNIVERSITIES.find(u => u.name === val);
+                if (key === "university" && val) {
+                    const uni = UNIVERSITIES.find((u) => u.name === val);
                     if (uni) {
                         next.city = uni.city;
                         next.district = uni.district;
-                        next.ward = uni.ward || '';
+                        next.ward = uni.ward || "";
                     }
-                } else if (key === 'city') {
-                    if (!('district' in updates)) next.district = '';
-                    if (!('ward' in updates)) next.ward = '';
-                    if (!('university' in updates)) next.university = '';
-                } else if (key === 'district') {
-                    if (!('ward' in updates)) next.ward = '';
-                    if (!('university' in updates)) next.university = '';
-                } else if (key === 'ward') {
-                    if (!('university' in updates)) next.university = '';
+                } else if (key === "city") {
+                    if (!("district" in updates)) next.district = "";
+                    if (!("ward" in updates)) next.ward = "";
+                    if (!("university" in updates)) next.university = "";
+                } else if (key === "district") {
+                    if (!("ward" in updates)) next.ward = "";
+                    if (!("university" in updates)) next.university = "";
+                } else if (key === "ward") {
+                    if (!("university" in updates)) next.university = "";
                 }
             });
 
@@ -135,9 +134,7 @@ export const useRoomFilter = () => {
     const toggleAmenity = (amenity) => {
         setFilters((prev) => ({
             ...prev,
-            amenities: prev.amenities.includes(amenity)
-                ? prev.amenities.filter((a) => a !== amenity)
-                : [...prev.amenities, amenity],
+            amenities: prev.amenities.includes(amenity) ? prev.amenities.filter((a) => a !== amenity) : [...prev.amenities, amenity],
         }));
     };
 
@@ -174,7 +171,7 @@ export const useRoomFilter = () => {
         if (filters.ward && filters.district && filters.city) return `${filters.ward}, ${filters.district}, ${filters.city}`;
         if (filters.district && filters.city) return `${filters.district}, ${filters.city}`;
         if (filters.city) return `Toàn ${filters.city}`;
-        return 'Khám phá không gian sống lý tưởng dành riêng cho bạn.';
+        return "Tìm phòng trọ xung quanh bạn";
     }, [filters]);
 
     return {
@@ -195,6 +192,6 @@ export const useRoomFilter = () => {
         highlightedField,
         highlightField,
         getLocationDisplayText,
-        refetch: () => fetchRooms(0, false)
+        refetch: () => fetchRooms(0, false),
     };
 };

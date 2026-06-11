@@ -76,11 +76,11 @@ export default function RoomFilters({
                         >
                             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
                         </svg>
-                        <h2 className="text-sm font-bold text-stone-900 m-0" style={{ fontFamily: "var(--font-heading)" }}>
+                        <h2 className="text-sm font-medium text-stone-900 m-0" style={{ fontFamily: "var(--font-heading)" }}>
                             Bộ lọc
                         </h2>
                         {activeFilterCount > 0 && (
-                            <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[0.65rem] font-bold">
+                            <span className="bg-amber-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[0.65rem] font-medium">
                                 {activeFilterCount}
                             </span>
                         )}
@@ -88,7 +88,7 @@ export default function RoomFilters({
                     {activeFilterCount > 0 && (
                         <button
                             onClick={resetFilters}
-                            className="bg-transparent border-none text-amber-600 text-[0.8rem] font-semibold cursor-pointer hover:text-amber-700 transition-colors duration-200"
+                            className="bg-transparent border-none text-amber-600 text-[0.8rem] font-medium cursor-pointer hover:text-amber-700 transition-colors duration-200"
                         >
                             Xóa tất cả
                         </button>
@@ -98,9 +98,7 @@ export default function RoomFilters({
 
             {/* Bug #7: Tìm kiếm theo Mã tin */}
             <div>
-                <p className="text-[0.82rem] font-bold text-stone-700 m-0 mb-2" style={{ fontFamily: "var(--font-heading)" }}>
-                    Tìm theo mã tin
-                </p>
+                <p className="text-[0.82rem] font-normal text-stone-800 m-0 mb-2">Tìm theo mã tin</p>
                 <div className="grid grid-cols-[1fr_42px] gap-2 w-full">
                     <input
                         id="filter-listing-id"
@@ -112,7 +110,7 @@ export default function RoomFilters({
                         }}
                         onKeyDown={(e) => e.key === "Enter" && handleListingIdSearch()}
                         placeholder="Nhập mã... (VD: TT-12345)"
-                        className="min-w-0 w-full bg-white border border-stone-200 pl-3 pr-3 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300"
+                        className="min-w-0 w-full bg-stone-50 border border-transparent pl-3 pr-3 py-2 rounded-lg text-sm font-light text-stone-900 outline-none focus:bg-white focus:border-amber-400 transition-all duration-300"
                         aria-label="Tìm kiếm theo mã tin đăng"
                     />
                     <button
@@ -129,7 +127,7 @@ export default function RoomFilters({
             {/* Reload Data Button */}
             <button
                 onClick={() => refetch && refetch()}
-                className="flex items-center justify-center gap-2 w-full py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-bold transition-colors cursor-pointer border border-amber-200/50 mb-2"
+                className="flex items-center justify-center gap-2 w-full py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-medium transition-colors cursor-pointer border border-amber-200/50 mb-2"
             >
                 <AppIcon name="reload" size={14} />
                 Làm mới dữ liệu
@@ -144,7 +142,7 @@ export default function RoomFilters({
                         value={filters.university}
                         onChange={(e) => updateFilter("university", e.target.value)}
                         placeholder="Tìm theo tên trường..."
-                        className={`w-full bg-white border border-stone-200 pl-3 pr-10 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300 ${getHighlightStyles("university")}`}
+                        className={`w-full bg-stone-50 border border-transparent pl-3 pr-10 py-2 rounded-lg text-sm font-light text-stone-900 outline-none focus:bg-white focus:border-amber-400 transition-all duration-300 ${getHighlightStyles("university")}`}
                         aria-label="Lọc theo trường đại học"
                     />
                     <datalist id="university-list">
@@ -173,7 +171,7 @@ export default function RoomFilters({
                             value={filters.city}
                             onChange={(e) => updateFilter("city", e.target.value)}
                             placeholder="Chọn tỉnh thành..."
-                            className={`w-full bg-white border border-stone-200 pl-3 pr-10 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300 ${getHighlightStyles("city")}`}
+                            className={`w-full bg-stone-50 border border-transparent pl-3 pr-10 py-2 rounded-lg text-sm font-light text-stone-900 outline-none focus:bg-white focus:border-amber-400 transition-all duration-300 ${getHighlightStyles("city")}`}
                             aria-label="Lọc theo thành phố"
                         />
                         <datalist id="province-list">
@@ -200,7 +198,7 @@ export default function RoomFilters({
                             value={filters.district}
                             onChange={(e) => updateFilter("district", e.target.value)}
                             placeholder="Chọn quận huyện..."
-                            className={`w-full bg-white border border-stone-200 pl-3 pr-10 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${getHighlightStyles("district")}`}
+                            className={`w-full bg-stone-50 border border-transparent pl-3 pr-10 py-2 rounded-lg text-sm font-light text-stone-900 outline-none focus:bg-white focus:border-amber-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${getHighlightStyles("district")}`}
                             disabled={!filters.city}
                             aria-label="Lọc theo quận huyện"
                         />
@@ -228,7 +226,7 @@ export default function RoomFilters({
                             value={filters.ward}
                             onChange={(e) => updateFilter("ward", e.target.value)}
                             placeholder="Chọn phường xã..."
-                            className={`w-full bg-white border border-stone-200 pl-3 pr-10 py-2 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${getHighlightStyles("ward")}`}
+                            className={`w-full bg-stone-50 border border-transparent pl-3 pr-10 py-2 rounded-lg text-sm font-light text-stone-900 outline-none focus:bg-white focus:border-amber-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${getHighlightStyles("ward")}`}
                             disabled={!filters.district}
                             aria-label="Lọc theo phường xã"
                         />
@@ -339,19 +337,19 @@ export default function RoomFilters({
                     <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-stone-100">
                         <button
                             onClick={() => updateFilter("amenities", ["bed", "air_conditioner", "fridge", "wardrobe", "washing_machine", "wifi", "kitchen"])}
-                            className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[0.72rem] font-bold hover:bg-amber-200 transition-colors duration-200 border-none cursor-pointer"
+                            className="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[0.72rem] font-medium hover:bg-amber-200 transition-colors duration-200 border-none cursor-pointer"
                         >
                             Full nội thất
                         </button>
                         <button
                             onClick={() => updateFilter("amenities", ["bed", "wifi", "wardrobe", "kitchen"])}
-                            className="px-3 py-1 rounded-full bg-stone-100 text-stone-700 text-[0.72rem] font-bold hover:bg-stone-200 transition-colors duration-200 border-none cursor-pointer"
+                            className="px-3 py-1 rounded-full bg-stone-100 text-stone-700 text-[0.72rem] font-medium hover:bg-stone-200 transition-colors duration-200 border-none cursor-pointer"
                         >
                             Đồ thiết yếu
                         </button>
                         <button
                             onClick={() => updateFilter("amenities", [])}
-                            className="px-3 py-1 rounded-full bg-stone-50 text-stone-500 text-[0.72rem] font-bold hover:bg-stone-100 transition-colors duration-200 border border-stone-200 cursor-pointer"
+                            className="px-3 py-1 rounded-full bg-stone-50 text-stone-500 text-[0.72rem] font-medium hover:bg-stone-100 transition-colors duration-200 border border-stone-200 cursor-pointer"
                         >
                             Bỏ chọn
                         </button>
@@ -374,7 +372,7 @@ export default function RoomFilters({
                     id="filter-sort"
                     value={filters.sortBy}
                     onChange={(e) => updateFilter("sortBy", e.target.value)}
-                    className="w-full bg-white border border-stone-200 px-2.5 py-2.5 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-colors duration-200 cursor-pointer"
+                    className="w-full bg-stone-50 border border-transparent px-2.5 py-2.5 rounded-lg text-sm font-light text-stone-900 outline-none focus:bg-white focus:border-amber-400 transition-all duration-300 cursor-pointer"
                     aria-label="Sắp xếp kết quả"
                 >
                     <option value="newest">Mới nhất</option>
@@ -387,8 +385,10 @@ export default function RoomFilters({
             {/* Verification */}
             <FilterSection title="Xác thực">
                 <label
-                    className={`flex items-center justify-between py-2 px-3 rounded-md border cursor-pointer transition-colors duration-150 ${
-                        filters.verifiedOnly ? "border-amber-500 bg-amber-50 text-amber-800" : "border-stone-200 bg-white text-stone-600 hover:bg-stone-50"
+                    className={`flex items-center justify-between py-2 px-3 rounded-lg border cursor-pointer transition-colors duration-150 ${
+                        filters.verifiedOnly
+                            ? "border-amber-200 bg-amber-50 text-amber-800"
+                            : "border-transparent bg-stone-50 text-stone-600 hover:bg-stone-100"
                     }`}
                 >
                     <div className="flex items-center gap-2">
@@ -399,7 +399,7 @@ export default function RoomFilters({
                             className="hidden"
                         />
                         <AppIcon name="verified" size={15} color={filters.verifiedOnly ? "#d97706" : "#a8a29e"} />
-                        <span className="text-sm font-medium">Chỉ hiện phòng đã xác thực</span>
+                        <span className="text-sm font-normal">Lọc phòng đã xác thực</span>
                     </div>
                     {filters.verifiedOnly && (
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5">
@@ -417,9 +417,7 @@ export default function RoomFilters({
 function FilterSection({ title, children }) {
     return (
         <div>
-            <p className="text-[0.82rem] font-bold text-stone-700 m-0 mb-2" style={{ fontFamily: "var(--font-heading)" }}>
-                {title}
-            </p>
+            <p className="text-[0.82rem] font-normal text-stone-800 m-0 mb-2">{title}</p>
             {children}
         </div>
     );
@@ -431,12 +429,12 @@ function FilterButton({ isActive, onClick, children }) {
             onClick={onClick}
             className={`w-full text-left py-2 px-3 rounded-lg border text-[0.85rem] cursor-pointer transition-all duration-200 flex justify-between items-center ${
                 isActive
-                    ? "border-amber-500 bg-amber-50/50 text-amber-700 font-medium"
-                    : "border-stone-200 bg-white text-stone-500 font-normal hover:border-stone-300 hover:bg-stone-50/50"
+                    ? "border-amber-200 bg-amber-50 text-amber-700 font-normal shadow-sm"
+                    : "border-transparent bg-stone-50 text-stone-600 font-light hover:bg-stone-100 hover:text-stone-800"
             }`}
         >
             <span>{children}</span>
-            {isActive && <AppIcon name="check" size={16} strokeWidth={3} className="text-amber-600" />}
+            {isActive && <AppIcon name="check" size={16} strokeWidth={2.5} className="text-amber-600" />}
         </button>
     );
 }

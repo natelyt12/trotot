@@ -119,7 +119,7 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
                 <div className="flex justify-between items-center mb-5 flex-wrap gap-3">
                     <div>
                         <h2
-                            className="text-2xl font-extrabold text-stone-900 tracking-tight flex items-baseline flex-wrap"
+                            className="text-2xl font-medium text-stone-900 tracking-tight flex items-baseline flex-wrap"
                             style={{ fontFamily: "var(--font-heading)" }}
                         >
                             <span className="text-amber-500 mr-2.5" style={{ fontFamily: "var(--font-script)", fontSize: "1.25em" }}>
@@ -127,8 +127,8 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
                             </span>
                             <span>{user?.user_metadata?.full_name || ""}</span>
                         </h2>
-                        <p className="text-stone-500 text-sm font-medium mt-1">
-                            {activeFilterCount > 0 ? getLocationDisplayText() : "Khám phá không gian sống lý tưởng dành riêng cho bạn."}
+                        <p className="text-stone-500 text-sm font-light mt-1">
+                            {activeFilterCount > 0 ? getLocationDisplayText() : "Tìm phòng trọ xung quanh bạn"}
                         </p>
                     </div>
 
@@ -157,11 +157,11 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
                             <RoomGrid rooms={[]} isLoading={true} />
                         ) : error ? (
                             <div className="bg-red-50 border border-red-200 text-red-700 p-8 rounded-xl text-center">
-                                <p className="font-bold mb-2">Đã có lỗi xảy ra!</p>
+                                <p className="font-medium mb-2">Đã có lỗi xảy ra!</p>
                                 <p className="text-sm opacity-80 m-0">{error}</p>
                                 <button
                                     onClick={() => window.location.reload()}
-                                    className="mt-5 px-5 py-2 bg-red-600 text-white rounded-md text-sm font-bold hover:bg-red-700 transition-colors duration-200 border-none cursor-pointer"
+                                    className="mt-5 px-5 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700 transition-colors duration-200 border-none cursor-pointer"
                                 >
                                     Thử lại
                                 </button>
@@ -176,7 +176,7 @@ export default function HomePage({ navigate, user, onSearchClick, currentPage })
                                             type="button"
                                             onClick={loadMore}
                                             disabled={loadingMore}
-                                            className="inline-flex items-center gap-2 px-8 py-2.5 bg-white border border-stone-200 text-stone-700 rounded-full font-semibold text-sm cursor-pointer hover:border-amber-500 hover:text-amber-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="inline-flex items-center gap-2 px-8 py-2.5 bg-white border border-stone-200 text-stone-700 rounded-lg font-normal text-sm cursor-pointer hover:border-amber-500 hover:text-amber-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {loadingMore && <div className="w-4 h-4 border-2 border-stone-200 border-t-amber-500 rounded-full animate-spin" />}
                                             {loadingMore ? "Đang tải thêm..." : "Xem thêm kết quả"}

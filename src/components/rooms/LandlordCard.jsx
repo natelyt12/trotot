@@ -34,13 +34,13 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
             <div className="lg:sticky lg:top-[96px] z-10 bg-white border border-stone-200 rounded-xl overflow-hidden">
                 {/* Price Section */}
                 <div className="p-6 border-b border-stone-100 bg-white">
-                    <div className="text-[1.8rem] text-amber-600! font-bold tracking-tight font-heading">{formatPrice(basic_info.price_monthly)}</div>
+                    <div className="text-[1.8rem] text-amber-600! font-medium tracking-tight font-heading">{formatPrice(basic_info.price_monthly)}</div>
                     <div className="text-[0.85rem] text-stone-400 mt-1">
                         {formatArea(basic_info.area_sqm)} • Đặt cọc: {formatDeposit(monthly_costs.deposit_amount)}
                     </div>
                     {/* Listing ID & Copy */}
                     <div className="flex items-center justify-between bg-stone-50 rounded-md p-2 px-3 my-4 border border-stone-100">
-                        <span className="text-[0.75rem] text-stone-500 font-medium uppercase tracking-wider">Mã tin: {room.listing_id}</span>
+                        <span className="text-[0.75rem] text-stone-500 font-normal uppercase tracking-wider">Mã tin: {room.listing_id}</span>
                         <button
                             onClick={() => {
                                 const code = room.listing_id || "";
@@ -80,7 +80,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                     </div>
 
                     {/* Owner info inside price section */}
-                    <p className="text-[0.8rem] text-stone-400 mb-2 font-medium">Thông tin người đăng:</p>
+                    <p className="text-[0.8rem] text-stone-400 mb-2 font-normal">Thông tin người đăng:</p>
                     <div
                         onClick={previewMode ? undefined : () => navigate && navigate("public-profile", { userId: room.user_id })}
                         className={`flex items-center gap-3 mb-6 ${previewMode ? "" : "cursor-pointer hover:opacity-85 transition-opacity group/landlord"}`}
@@ -93,18 +93,18 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                             />
                         ) : (
                             <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center shrink-0">
-                                <span className="text-white font-bold text-sm">
+                                <span className="text-white font-medium text-sm">
                                     {(previewMode && user ? user.user_metadata?.full_name : media_contact.contact?.name)?.charAt(0) || "U"}
                                 </span>
                             </div>
                         )}
                         <div className="flex-1">
                             <p
-                                className={`font-bold text-sm text-stone-900 leading-tight mb-1 ${previewMode ? "" : "group-hover/landlord:text-amber-600 group-hover/landlord:underline transition-colors"}`}
+                                className={`font-medium text-sm text-stone-900 leading-tight mb-1 ${previewMode ? "" : "group-hover/landlord:text-amber-600 group-hover/landlord:underline transition-colors"}`}
                             >
                                 {previewMode && user ? user.user_metadata?.full_name : media_contact.contact?.name}
                             </p>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-semibold bg-amber-100 text-amber-800">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.68rem] font-medium bg-amber-100 text-amber-800">
                                 Bên cho thuê
                             </span>
                         </div>
@@ -115,7 +115,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                             <div className="flex flex-col gap-2.5">
                                 <button
                                     disabled={true}
-                                    className="flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-stone-400 bg-stone-100 border border-stone-200/60 cursor-not-allowed font-bold"
+                                    className="flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-stone-400 bg-stone-100 border border-stone-200/60 cursor-not-allowed font-medium"
                                 >
                                     <AppIcon name="calendar" size={20} strokeWidth={2.5} className="text-stone-400" />
                                     <span>Đặt lịch</span>
@@ -131,7 +131,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                                             onClick={() => {
                                                 window.location.href = `tel:${media_contact.contact?.phone}`;
                                             }}
-                                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-bold ${previewMode ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
+                                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-medium ${previewMode ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
                                         >
                                             <AppIcon name="phone" size={20} strokeWidth={2.5} />
                                             <span>{formatPhone(media_contact.contact?.phone)}</span>
@@ -146,7 +146,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                                                           window.open(`https://zalo.me/${media_contact.contact?.phone}`, "_blank");
                                                       }
                                             }
-                                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white transition-colors duration-200 border-none font-bold ${previewMode ? "bg-stone-300 cursor-not-allowed" : "bg-[#0068ff] hover:bg-[#005ae0] cursor-pointer"}`}
+                                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white transition-colors duration-200 border-none font-medium ${previewMode ? "bg-stone-300 cursor-not-allowed" : "bg-[#0068ff] hover:bg-[#005ae0] cursor-pointer"}`}
                                         >
                                             <AppIcon name="messages" size={20} strokeWidth={2.5} />
                                             <span>Nhắn tin qua Zalo</span>
@@ -156,7 +156,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                             </div>
                         ) : !showPhone ? (
                             <button
-                                disabled={previewMode}
+                                disabled={previewMode || user?.id === room?.user_id || user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "landlord"}
                                 onClick={
                                     previewMode
                                         ? undefined
@@ -175,7 +175,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                                               setIsBookingModalOpen(true);
                                           }
                                 }
-                                className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-bold ${previewMode ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
+                                className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-medium ${previewMode || user?.id === room?.user_id || user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "landlord" ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
                             >
                                 <AppIcon name="calendar" size={20} strokeWidth={2.5} />
                                 <span>Đặt lịch</span>
@@ -187,7 +187,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                                     onClick={() => {
                                         window.location.href = `tel:${media_contact.contact?.phone}`;
                                     }}
-                                    className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-bold ${previewMode ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
+                                    className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-medium ${previewMode ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
                                 >
                                     <AppIcon name="phone" size={20} strokeWidth={2.5} />
                                     <span>{formatPhone(media_contact.contact?.phone)}</span>
@@ -202,7 +202,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                                                   window.open(`https://zalo.me/${media_contact.contact?.phone}`, "_blank");
                                               }
                                     }
-                                    className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white transition-colors duration-200 border-none font-bold ${previewMode ? "bg-stone-300 cursor-not-allowed" : "bg-[#0068ff] hover:bg-[#005ae0] cursor-pointer"}`}
+                                    className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white transition-colors duration-200 border-none font-medium ${previewMode ? "bg-stone-300 cursor-not-allowed" : "bg-[#0068ff] hover:bg-[#005ae0] cursor-pointer"}`}
                                 >
                                     <AppIcon name="messages" size={20} strokeWidth={2.5} />
                                     <span>Nhắn tin qua Zalo</span>
@@ -225,7 +225,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                     <div className="flex gap-2 items-start text-amber-600">
                         <AppIcon name="alert" size={16} className="mt-0.5" />
                         <div>
-                            <p className="font-bold text-amber-900 text-[0.82rem] mb-1 font-heading">Lưu ý quan trọng</p>
+                            <p className="font-medium text-amber-900 text-[0.82rem] mb-1 font-heading">Lưu ý quan trọng</p>
                             <p className="text-amber-700 text-[0.78rem] leading-relaxed">
                                 Mọi thông tin liên quan đến tin đăng này chỉ mang tính chất tham khảo. Nếu bạn thấy rằng tin đăng này không đúng hoặc có dấu
                                 hiệu lừa đảo, hãy phản ánh với chúng tôi.
@@ -239,7 +239,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                                             type: "info",
                                         })
                                     }
-                                    className="mt-2 text-[0.78rem] text-amber-600 font-bold hover:text-amber-700 underline cursor-pointer border-none bg-transparent p-0 block"
+                                    className="mt-2 text-[0.78rem] text-amber-600 font-medium hover:text-amber-700 underline cursor-pointer border-none bg-transparent p-0 block"
                                 >
                                     Báo cáo tin đăng này
                                 </button>
@@ -254,7 +254,7 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                         <div className="flex gap-2 items-start text-red-600">
                             <AppIcon name="alert" size={16} className="mt-0.5" />
                             <div>
-                                <p className="font-bold text-red-950 text-[0.82rem] mb-1 font-heading">Tin đăng đã hết hạn</p>
+                                <p className="font-medium text-red-950 text-[0.82rem] mb-1 font-heading">Tin đăng đã hết hạn</p>
                                 <p className="text-red-700 text-[0.78rem] leading-relaxed">
                                     Tin đăng này đã quá hạn hiển thị. Vui lòng liên hệ bên cho thuê để xác nhận lại thông tin phòng trống.
                                 </p>

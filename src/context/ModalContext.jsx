@@ -107,12 +107,12 @@ export const ModalProvider = ({ children }) => {
                                         style={{ transition: "stroke-dashoffset 0.3s ease-in-out" }}
                                     />
                                 </svg>
-                                <span className="text-sm font-black text-stone-800">{progressConfig.percent}%</span>
+                                <span className="text-sm font-bold text-stone-800">{progressConfig.percent}%</span>
                             </div>
 
                             <div className="space-y-1 w-full">
-                                <h4 className="font-bold text-stone-950 text-sm">Đang xử lý dữ liệu</h4>
-                                <p className="text-xs text-stone-500 font-medium h-4 overflow-hidden truncate">
+                                <h4 className="font-medium text-stone-950 text-sm">Đang xử lý dữ liệu</h4>
+                                <p className="text-xs text-stone-500 font-normal h-4 overflow-hidden truncate">
                                     {progressConfig.message}
                                 </p>
                             </div>

@@ -30,7 +30,7 @@ h5,
 h6,
 .font-heading {
     font-family: var(--font-heading);
-    @apply font-bold text-stone-900;
+    @apply font-medium text-stone-900;
 }
 
 .font-script {

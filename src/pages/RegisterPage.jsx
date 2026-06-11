@@ -157,7 +157,7 @@ export default function RegisterPage({ navigate, initialData }) {
 
     const inputCls =
         "w-full px-3 py-2.5 border border-stone-200 rounded-lg text-sm text-stone-900 outline-none focus:border-amber-500 transition-colors duration-200 bg-white";
-    const labelCls = "block text-sm font-semibold text-stone-700 mb-1.5";
+    const labelCls = "block text-sm font-medium text-stone-700 mb-1.5";
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4 py-10 bg-stone-900 relative overflow-hidden">
@@ -171,10 +171,10 @@ export default function RegisterPage({ navigate, initialData }) {
                     <button onClick={() => navigate("home")} className="bg-transparent border-none cursor-pointer inline-flex flex-col items-center gap-2.5">
                         <img src="/logo.png" alt="Logo" className="w-12 h-12 object-contain rounded-lg" />
                         <span className="flex items-baseline">
-                            <span className="font-semibold text-[1.8rem] text-white tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
+                            <span className="font-medium text-[1.8rem] text-white tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
                                 Trọ
                             </span>
-                            <span className="text-amber-500 text-[2.2rem] font-bold ml-1" style={{ fontFamily: "var(--font-script)" }}>
+                            <span className="text-amber-500 text-[2.2rem] font-medium ml-1" style={{ fontFamily: "var(--font-script)" }}>
                                 Tốt
                             </span>
                         </span>
@@ -184,7 +184,7 @@ export default function RegisterPage({ navigate, initialData }) {
 
                 {/* Card */}
                 <div className="bg-white rounded-xl p-8 border border-stone-200">
-                    <h1 className="text-xl font-bold text-stone-900 mb-5 text-center" style={{ fontFamily: "var(--font-heading)" }}>
+                    <h1 className="text-xl font-medium text-stone-900 mb-5 text-center" style={{ fontFamily: "var(--font-heading)" }}>
                         {step === 1 ? "Tạo tài khoản" : "xác thực danh tính"}
                     </h1>
 
@@ -201,7 +201,7 @@ export default function RegisterPage({ navigate, initialData }) {
                                             setShowRoleSelector(true);
                                             setForm((prev) => ({ ...prev, role: "landlord" }));
                                         }}
-                                        className="w-full py-2.5 px-4 bg-stone-50 border border-dashed border-stone-300 rounded-xl text-stone-500 text-xs font-bold hover:bg-stone-100 hover:border-stone-400 transition-all flex items-center justify-center gap-2 group"
+                                        className="w-full py-2.5 px-4 bg-stone-50 border border-dashed border-stone-300 rounded-xl text-stone-500 text-xs font-medium hover:bg-stone-100 hover:border-stone-400 transition-all flex items-center justify-center gap-2 group"
                                     >
                                         <svg
                                             width="14"
@@ -227,14 +227,14 @@ export default function RegisterPage({ navigate, initialData }) {
                                     transition={{ duration: 0.3 }}
                                 >
                                     <div className="flex items-center justify-between mb-2 px-1">
-                                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Vai trò đăng ký</span>
+                                        <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">Vai trò đăng ký</span>
                                         <button
                                             type="button"
                                             onClick={() => {
                                                 setShowRoleSelector(false);
                                                 setForm((prev) => ({ ...prev, role: "tenant" }));
                                             }}
-                                            className="text-[10px] font-bold text-amber-600 hover:text-amber-700 bg-transparent border-none cursor-pointer"
+                                            className="text-[10px] font-medium text-amber-600 hover:text-amber-700 bg-transparent border-none cursor-pointer"
                                         >
                                             Hủy bỏ
                                         </button>
@@ -247,8 +247,8 @@ export default function RegisterPage({ navigate, initialData }) {
                                                 <line x1="12" y1="16" x2="12.01" y2="16" />
                                             </svg>
                                         </div>
-                                        <p className="text-[11px] text-amber-800 leading-relaxed m-0 font-medium">
-                                            Vai trò <span className="font-bold uppercase">Bên cho thuê</span> yêu cầu xác thực danh tính (KYC) trước khi có thể
+                                        <p className="text-[11px] text-amber-800 leading-relaxed m-0 font-normal">
+                                            Vai trò <span className="font-medium uppercase">Bên cho thuê</span> yêu cầu xác thực danh tính (KYC) trước khi có thể
                                             đăng tin.
                                         </p>
                                     </div>
@@ -381,14 +381,14 @@ export default function RegisterPage({ navigate, initialData }) {
                                     Tôi đồng ý với{" "}
                                     <button
                                         type="button"
-                                        className="bg-transparent border-none text-amber-600 font-semibold cursor-pointer text-sm p-0 hover:text-amber-700"
+                                        className="bg-transparent border-none text-amber-600 font-medium cursor-pointer text-sm p-0 hover:text-amber-700"
                                     >
                                         Điều khoản sử dụng
                                     </button>{" "}
                                     và{" "}
                                     <button
                                         type="button"
-                                        className="bg-transparent border-none text-amber-600 font-semibold cursor-pointer text-sm p-0 hover:text-amber-700"
+                                        className="bg-transparent border-none text-amber-600 font-medium cursor-pointer text-sm p-0 hover:text-amber-700"
                                     >
                                         Chính sách bảo mật
                                     </button>
@@ -400,7 +400,7 @@ export default function RegisterPage({ navigate, initialData }) {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold py-2.5 rounded-full cursor-pointer border-none transition-colors duration-200 mt-1"
+                                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-full cursor-pointer border-none transition-colors duration-200 mt-1"
                             >
                                 {form.role === "tenant" ? (loading ? "Đang xử lý..." : "Tạo tài khoản") : "Tiếp tục xác thực"}
                             </button>
@@ -414,7 +414,7 @@ export default function RegisterPage({ navigate, initialData }) {
                         <>
                             <div className="flex items-center gap-3 my-5">
                                 <div className="flex-1 h-px bg-stone-200" />
-                                <span className="text-xs text-stone-400 font-medium">hoặc</span>
+                                <span className="text-xs text-stone-400 font-normal">hoặc</span>
                                 <div className="flex-1 h-px bg-stone-200" />
                             </div>
 
@@ -422,7 +422,7 @@ export default function RegisterPage({ navigate, initialData }) {
                                 Đã có tài khoản?{" "}
                                 <button
                                     onClick={() => navigate("login")}
-                                    className="bg-transparent border-none text-amber-600 font-bold cursor-pointer text-sm hover:text-amber-700 transition-colors"
+                                    className="bg-transparent border-none text-amber-600 font-medium cursor-pointer text-sm hover:text-amber-700 transition-colors"
                                 >
                                     Đăng nhập
                                 </button>
@@ -434,7 +434,7 @@ export default function RegisterPage({ navigate, initialData }) {
                     <div className="mt-5 flex justify-center">
                         <button
                             onClick={() => navigate("home")}
-                            className="flex items-center gap-2.5 bg-transparent border-none text-stone-500 text-sm font-semibold cursor-pointer py-1.5 pl-1.5 pr-4 rounded-full! hover:text-stone-900 hover:bg-stone-100 transition-colors duration-200 group"
+                            className="flex items-center gap-2.5 bg-transparent border-none text-stone-500 text-sm font-medium cursor-pointer py-1.5 pl-1.5 pr-4 rounded-full! hover:text-stone-900 hover:bg-stone-100 transition-colors duration-200 group"
                         >
                             <div className="w-8 h-8 rounded-full! bg-stone-100 flex items-center justify-center text-stone-400 transition-colors group-hover:bg-stone-200 group-hover:text-stone-600">
                                 <svg

@@ -59,21 +59,21 @@ export default function MobileFilterModal({ isOpen, onClose }) {
                         {/* Header */}
                         <div className="px-6 pb-4 flex justify-between items-center border-b border-stone-200 shrink-0">
                             <div>
-                                <h2 className="text-xl font-extrabold text-stone-900 m-0 font-heading">Bộ lọc tìm kiếm</h2>
-                                <p className="text-stone-500 text-xs font-medium m-0 mt-0.5">Tùy chỉnh để tìm phòng phù hợp nhất</p>
+                                <h2 className="text-xl font-semibold text-stone-900 m-0 font-heading">Bộ lọc tìm kiếm</h2>
+                                <p className="text-stone-500 text-xs font-normal m-0 mt-0.5">Tùy chỉnh để tìm phòng phù hợp nhất</p>
                             </div>
                             <div className="flex items-center gap-4">
                                 {activeFilterCount > 0 && (
                                     <button
                                         onClick={resetFilters}
-                                        className="bg-transparent border-none text-amber-600 text-sm font-semibold cursor-pointer hover:text-amber-700 transition-colors duration-200"
+                                        className="bg-transparent border-none text-amber-600 text-sm font-medium cursor-pointer hover:text-amber-700 transition-colors duration-200"
                                     >
                                         Xóa tất cả
                                     </button>
                                 )}
                                 <button
                                     onClick={onClose}
-                                    className="w-10 h-10 bg-white border border-stone-200 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-600 transition-all cursor-pointer"
+                                    className="w-10 h-10 bg-stone-100 border-none rounded-full flex items-center justify-center text-stone-500 hover:bg-stone-200 hover:text-stone-700 transition-all cursor-pointer"
                                 >
                                     <AppIcon name="close" size={20} />
                                 </button>
@@ -98,9 +98,12 @@ export default function MobileFilterModal({ isOpen, onClose }) {
                         <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-center bg-linear-to-t from-stone-50 via-stone-50 to-transparent pointer-events-none">
                             <button
                                 onClick={onClose}
-                                className="px-8 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full font-bold transition-all pointer-events-auto cursor-pointer border-none"
+                                className="pl-2 pr-6 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full font-medium transition-all pointer-events-auto cursor-pointer border-none flex items-center gap-2 group shadow-lg"
                             >
-                                Xem kết quả ({activeFilterCount > 0 ? `Đã chọn ${activeFilterCount}` : 'Tất cả'})
+                                <div className="w-8 h-8 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shrink-0">
+                                    <AppIcon name="check" size={16} strokeWidth={2.5} />
+                                </div>
+                                <span className="text-sm">Xem kết quả {activeFilterCount > 0 ? `(${activeFilterCount})` : ''}</span>
                             </button>
                         </div>
                     </motion.div>

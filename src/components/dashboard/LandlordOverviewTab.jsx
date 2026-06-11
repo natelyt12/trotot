@@ -42,7 +42,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg shadow-amber-500/15">
                 <div>
                     <h2 className="text-xl md:text-2xl text-white! font-heading leading-tight">Xin chào, {user?.user_metadata?.full_name || "Chủ trọ"}!</h2>
-                    <p className="text-amber-100 text-sm mt-1.5 font-medium max-w-xl">
+                    <p className="text-amber-100 text-sm mt-1.5 font-normal max-w-md">
                         Chào mừng bạn trở lại trang quản trị của Trọ Tốt. Dưới đây là hiệu suất và trạng thái quản lý phòng trọ của bạn trong tháng này.
                     </p>
                 </div>
@@ -51,7 +51,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                         setIsCreating(true);
                         setActiveTab("post_room");
                     }}
-                    className="flex items-center justify-center gap-2 px-5 py-3 bg-white text-amber-700 hover:bg-amber-50 rounded-xl font-bold text-sm border-none shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    className="flex items-center justify-center gap-2 px-5 py-3 bg-white text-amber-700 hover:bg-amber-50 rounded-xl font-medium text-sm border-none shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                     <AppIcon name="plus" size={16} strokeWidth={3} />
                     <span>Đăng tin trọ mới</span>
@@ -69,14 +69,14 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                     className="bg-white border border-stone-100 p-5 rounded-2xl shadow-sm hover:shadow-md hover:border-amber-200 transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
                 >
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">Tổng tin đăng</span>
+                        <span className="text-xs font-medium text-stone-400 uppercase tracking-wider">Tổng tin đăng</span>
                         <div className="p-2 bg-stone-50 rounded-xl text-stone-500 group-hover:bg-amber-50 group-hover:text-amber-600 transition-colors">
                             <AppIcon name="home" size={20} />
                         </div>
                     </div>
                     <div className="mt-4">
-                        <span className="text-2xl font-black text-stone-800 tracking-tight leading-none">{totalRooms}</span>
-                        <p className="text-[10px] text-stone-400 mt-1 font-medium">Click để xem danh sách</p>
+                        <span className="text-2xl font-bold text-stone-800 tracking-tight leading-none">{totalRooms}</span>
+                        <p className="text-[10px] text-stone-400 mt-1 font-normal">Click để xem danh sách</p>
                     </div>
                 </div>
 
@@ -89,14 +89,14 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                     className="bg-white border border-stone-100 p-5 rounded-2xl shadow-sm hover:shadow-md hover:border-green-200 transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
                 >
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">Tin đang mở</span>
+                        <span className="text-xs font-medium text-stone-400 uppercase tracking-wider">Tin đang mở</span>
                         <div className="p-2 bg-stone-50 rounded-xl text-stone-500 group-hover:bg-green-50 group-hover:text-green-600 transition-colors">
                             <AppIcon name="check-square" size={20} />
                         </div>
                     </div>
                     <div className="mt-4">
-                        <span className="text-2xl font-black text-green-600 tracking-tight leading-none">{publishedRooms}</span>
-                        <p className="text-[10px] text-stone-400 mt-1 font-medium">Đang hiển thị tìm kiếm</p>
+                        <span className="text-2xl font-bold text-green-600 tracking-tight leading-none">{publishedRooms}</span>
+                        <p className="text-[10px] text-stone-400 mt-1 font-normal">Đang hiển thị tìm kiếm</p>
                     </div>
                 </div>
 
@@ -108,16 +108,16 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                     className="bg-white border border-stone-100 p-5 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
                 >
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">Đang cho thuê</span>
+                        <span className="text-xs font-medium text-stone-400 uppercase tracking-wider">Đang cho thuê</span>
                         <div className="p-2 bg-stone-50 rounded-xl text-stone-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                             <AppIcon name="users" size={20} />
                         </div>
                     </div>
                     <div className="mt-4">
-                        <span className="text-2xl font-black text-blue-600 tracking-tight leading-none">
+                        <span className="text-2xl font-bold text-blue-600 tracking-tight leading-none">
                             {rooms?.filter((r) => r.metadata?.status === "rented" || r.status === "rented").length || 1}
                         </span>
-                        <p className="text-[10px] text-stone-400 mt-1 font-medium">Khách hàng đang thuê trọ</p>
+                        <p className="text-[10px] text-stone-400 mt-1 font-normal">Khách hàng đang thuê trọ</p>
                     </div>
                 </div>
 
@@ -129,7 +129,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                     className="bg-white border border-stone-100 p-5 rounded-2xl shadow-sm hover:shadow-md hover:border-rose-200 transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
                 >
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">Yêu cầu chờ duyệt</span>
+                        <span className="text-xs font-medium text-stone-400 uppercase tracking-wider">Yêu cầu chờ duyệt</span>
                         <div
                             className={`p-2 rounded-xl transition-colors ${pendingBookingsCount > 0 ? "bg-rose-50 text-rose-600 animate-pulse" : "bg-stone-50 text-stone-500 group-hover:bg-rose-50 group-hover:text-rose-600"}`}
                         >
@@ -137,32 +137,26 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                         </div>
                     </div>
                     <div className="mt-4">
-                        <span className={`text-2xl font-black tracking-tight leading-none ${pendingBookingsCount > 0 ? "text-rose-600" : "text-stone-800"}`}>
+                        <span className={`text-2xl font-bold tracking-tight leading-none ${pendingBookingsCount > 0 ? "text-rose-600" : "text-stone-800"}`}>
                             {pendingBookingsCount}
                         </span>
-                        <p className="text-[10px] text-stone-400 mt-1 font-medium">Yêu cầu hẹn xem phòng mới</p>
+                        <p className="text-[10px] text-stone-400 mt-1 font-normal">Yêu cầu hẹn xem phòng mới</p>
                     </div>
                 </div>
             </div>
 
             {/* Graphics and lists Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-5">
                 {/* Premium Analytical Mock Chart */}
                 <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-4">
-                            <div>
-                                <h3 className="text-base font-bold text-stone-900 font-heading">Thống kê lượt xem tin đăng</h3>
-                                <p className="text-xs text-stone-400 mt-0.5">Lượt xem tin trong 7 ngày gần nhất</p>
-                            </div>
-                            <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                Live cập nhật
-                            </span>
+                            <h3 className="text-base font-medium text-stone-900 font-heading">Thống kê lượt xem tin đăng</h3>
+                            <p className="text-xs text-stone-400 mt-0.5">Lượt xem tin trong 7 ngày gần nhất</p>
                         </div>
 
                         {/* Custom visual chart using Tailwind flex alignment */}
-                        <div className="h-48 flex items-end justify-between gap-3 pt-6 pb-2 px-2 border-b border-stone-100">
+                        <div className="h-48 flex items-end justify-between gap-2 pt-6 pb-2 px-2 border-b border-stone-100">
                             {[
                                 { day: "Thứ 6", views: 45, height: "30%" },
                                 { day: "Thứ 7", views: 92, height: "65%" },
@@ -175,7 +169,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                                 <div key={idx} className="flex-1 flex flex-col items-center gap-2 group/bar cursor-pointer">
                                     <div className="relative w-full flex items-end justify-center">
                                         {/* Hover tooltip */}
-                                        <div className="absolute bottom-full mb-1 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-stone-800 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-md pointer-events-none whitespace-nowrap">
+                                        <div className="absolute bottom-full mb-1 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-stone-800 text-white text-[10px] font-medium px-2 py-0.5 rounded shadow-md pointer-events-none whitespace-nowrap">
                                             {item.views} lượt xem
                                         </div>
                                         <div
@@ -187,7 +181,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                                             }`}
                                         />
                                     </div>
-                                    <span className={`text-[10px] font-bold tracking-tight mt-1 ${item.active ? "text-amber-600" : "text-stone-400"}`}>
+                                    <span className={`text-[10px] font-medium tracking-tight mt-1 ${item.active ? "text-amber-600" : "text-stone-400"}`}>
                                         {item.day}
                                     </span>
                                 </div>
@@ -197,18 +191,18 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
 
                     <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-stone-50 text-center">
                         <div>
-                            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Tổng lượt xem</span>
-                            <span className="text-base font-black text-stone-800 mt-1 block">
+                            <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider block">Tổng lượt xem</span>
+                            <span className="text-base font-bold text-stone-800 mt-1 block">
                                 {rooms?.reduce((acc, r) => acc + (r.metadata?.total_views || 0), 0) || 578} lượt
                             </span>
                         </div>
                         <div>
-                            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Tỷ lệ chuyển đổi</span>
-                            <span className="text-base font-black text-stone-800 mt-1 block">4.8%</span>
+                            <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider block">Tỷ lệ chuyển đổi</span>
+                            <span className="text-base font-bold text-stone-800 mt-1 block">4.8%</span>
                         </div>
                         <div>
-                            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Lịch hẹn mới</span>
-                            <span className="text-base font-black text-amber-600 mt-1 block">+{pendingBookingsCount}</span>
+                            <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider block">Lịch hẹn mới</span>
+                            <span className="text-base font-bold text-amber-600 mt-1 block">+{pendingBookingsCount}</span>
                         </div>
                     </div>
                 </div>
@@ -216,7 +210,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                 {/* Quick Shortcuts & Tasks Card */}
                 <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                     <div>
-                        <h3 className="text-base font-bold text-stone-900 font-heading mb-4">Hoạt động cần làm</h3>
+                        <h3 className="text-base font-medium text-stone-900 font-heading mb-4">Hoạt động cần làm</h3>
 
                         <div className="space-y-3">
                             {/* Task 1: Check pending requests */}
@@ -230,7 +224,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                                     <AppIcon name="clock" size={16} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold text-stone-800 truncate">Duyệt lịch hẹn đặt phòng</p>
+                                    <p className="text-xs font-medium text-stone-800 truncate">Duyệt lịch hẹn đặt phòng</p>
                                     <p className="text-[10px] text-stone-400 truncate">Bạn có {pendingBookingsCount} yêu cầu đang chờ xử lý</p>
                                 </div>
                                 <AppIcon name="chevronLeft" size={12} className="rotate-180 text-stone-400 shrink-0" />
@@ -250,7 +244,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                                     <AppIcon name="alert" size={16} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold text-stone-800 truncate">Gia hạn các tin đăng hết hạn</p>
+                                    <p className="text-xs font-medium text-stone-800 truncate">Gia hạn các tin đăng hết hạn</p>
                                     <p className="text-[10px] text-stone-400 truncate">Có {expiredRooms} tin cần gia hạn để tiếp tục hiển thị</p>
                                 </div>
                                 <AppIcon name="chevronLeft" size={12} className="rotate-180 text-stone-400 shrink-0" />
@@ -270,7 +264,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                                     <AppIcon name="file-text" size={16} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold text-stone-800 truncate">Đăng tải các tin nháp</p>
+                                    <p className="text-xs font-medium text-stone-800 truncate">Đăng tải các tin nháp</p>
                                     <p className="text-[10px] text-stone-400 truncate">Có {draftRooms} bản nháp chưa công khai</p>
                                 </div>
                                 <AppIcon name="chevronLeft" size={12} className="rotate-180 text-stone-400 shrink-0" />
@@ -283,7 +277,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                             <div className="flex items-center gap-2">
                                 <AppIcon name="verified" size={16} className="text-amber-600" />
                                 <div>
-                                    <span className="font-bold text-amber-900 block">Xác thực tin nhanh</span>
+                                    <span className="font-medium text-amber-900 block">Xác thực tin nhanh</span>
                                     <span className="text-[10px] text-amber-700/80 block mt-0.5">Xác thực để tăng gấp 3 lần lượt hiển thị</span>
                                 </div>
                             </div>
@@ -292,7 +286,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                                     setActiveTab("manage_rooms");
                                     setSubTab("verified");
                                 }}
-                                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white border-none rounded-lg text-[10px] font-bold cursor-pointer transition-colors shadow-sm"
+                                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white border-none rounded-lg text-[10px] font-medium cursor-pointer transition-colors shadow-sm"
                             >
                                 Xem ngay
                             </button>

@@ -59,7 +59,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
             };
             return {
                 form: JSON.stringify(defaultForm),
-                images: JSON.stringify([])
+                images: JSON.stringify([]),
             };
         }
         return null;
@@ -191,16 +191,14 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
         setInitialFormState({
             form: JSON.stringify(initialForm),
-            images: JSON.stringify(initialImgs.map(img => img.url))
+            images: JSON.stringify(initialImgs.map((img) => img.url)),
         });
     }, [roomToEdit]);
-
-
 
     const isDirty = (() => {
         if (!initialFormState) return false;
         const currentForm = JSON.stringify(formData);
-        const currentImages = JSON.stringify(previewImages.map(img => img.url));
+        const currentImages = JSON.stringify(previewImages.map((img) => img.url));
         return initialFormState.form !== currentForm || initialFormState.images !== currentImages;
     })();
 
@@ -290,10 +288,8 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     };
 
     // --- TỰ ĐỘNG MAP TRƯỜNG ĐẠI HỌC ---
-    const nearbyUniversities = UNIVERSITIES.filter((uni) => 
-        uni.city === formData.city && 
-        uni.district === formData.district &&
-        (!formData.ward || uni.ward === formData.ward)
+    const nearbyUniversities = UNIVERSITIES.filter(
+        (uni) => uni.city === formData.city && uni.district === formData.district && (!formData.ward || uni.ward === formData.ward),
     );
 
     // --- XỬ LÝ TIỆN ÍCH ---
@@ -305,8 +301,8 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     };
 
     const extractMapSrc = (input) => {
-        if (!input) return '';
-        if (input.includes('src=')) {
+        if (!input) return "";
+        if (input.includes("src=")) {
             const match = input.match(/src=["'](https:\/\/www\.google\.com\/maps\/embed[^"']+)["']/);
             if (match && match[1]) {
                 return match[1];
@@ -360,38 +356,38 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     const addVideoUrl = () => {
         const currentUrls = formData.media_contact?.video_urls || [];
         if (currentUrls.length >= 3) {
-            addNotification('Tối đa chỉ được nhập 3 đường dẫn video.', 'warning');
+            addNotification("Tối đa chỉ được nhập 3 đường dẫn video.", "warning");
             return;
         }
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             media_contact: {
                 ...prev.media_contact,
-                video_urls: [...currentUrls, '']
-            }
+                video_urls: [...currentUrls, ""],
+            },
         }));
     };
 
     const updateVideoUrl = (index, value) => {
         const currentUrls = [...(formData.media_contact?.video_urls || [])];
         currentUrls[index] = value;
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             media_contact: {
                 ...prev.media_contact,
-                video_urls: currentUrls
-            }
+                video_urls: currentUrls,
+            },
         }));
     };
 
     const removeVideoUrl = (index) => {
         const currentUrls = (formData.media_contact?.video_urls || []).filter((_, i) => i !== index);
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             media_contact: {
                 ...prev.media_contact,
-                video_urls: currentUrls
-            }
+                video_urls: currentUrls,
+            },
         }));
     };
 
@@ -412,9 +408,9 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
         const executeSubmit = async () => {
             setIsSubmitting(true);
-            
+
             // Tính toán tổng số bước xử lý
-            const newImages = previewImages.filter(img => img.file);
+            const newImages = previewImages.filter((img) => img.file);
             const totalSteps = newImages.length * 2 + 1; // 1 bước nén + 1 bước tải lên cho mỗi ảnh mới, + 1 bước lưu DB
             let currentStep = 0;
 
@@ -438,10 +434,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     }
 
                     // Bước A: Nén ảnh
-                    updateProgress(
-                        Math.round((currentStep / totalSteps) * 100),
-                        `Đang tối ưu dung lượng ảnh ${i + 1}/${previewImages.length}...`
-                    );
+                    updateProgress(Math.round((currentStep / totalSteps) * 100), `Đang tối ưu dung lượng ảnh ${i + 1}/${previewImages.length}...`);
 
                     let fileToUpload = item.file;
 
@@ -452,10 +445,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     currentStep += 1;
 
                     // Bước B: Tải ảnh lên
-                    updateProgress(
-                        Math.round((currentStep / totalSteps) * 100),
-                        `Đang tải ảnh ${i + 1}/${previewImages.length} lên máy chủ...`
-                    );
+                    updateProgress(Math.round((currentStep / totalSteps) * 100), `Đang tải ảnh ${i + 1}/${previewImages.length} lên máy chủ...`);
 
                     let publicUrl = "";
                     const cloudinaryCloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -467,13 +457,10 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         formDataCloudinary.append("file", fileToUpload);
                         formDataCloudinary.append("upload_preset", cloudinaryUploadPreset);
 
-                        const response = await fetch(
-                            `https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`,
-                            {
-                                method: "POST",
-                                body: formDataCloudinary,
-                            }
-                        );
+                        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryCloudName}/image/upload`, {
+                            method: "POST",
+                            body: formDataCloudinary,
+                        });
 
                         if (!response.ok) {
                             const errData = await response.json().catch(() => ({}));
@@ -506,10 +493,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 }
 
                 // Bước C: Lưu thông tin vào Database
-                updateProgress(
-                    Math.round((currentStep / totalSteps) * 100),
-                    "Đang ghi nhận thông tin phòng trọ vào hệ thống..."
-                );
+                updateProgress(Math.round((currentStep / totalSteps) * 100), "Đang ghi nhận thông tin phòng trọ vào hệ thống...");
 
                 const availableUntil = new Date();
                 availableUntil.setDate(availableUntil.getDate() + 7);
@@ -530,9 +514,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     media_contact: {
                         ...normalizedFormData.media_contact,
                         images: finalImages,
-                        video_urls: (normalizedFormData.media_contact?.video_urls || [])
-                            .map(url => url.trim())
-                            .filter(url => url.length > 0),
+                        video_urls: (normalizedFormData.media_contact?.video_urls || []).map((url) => url.trim()).filter((url) => url.length > 0),
                         google_map_url: extractMapSrc(normalizedFormData.media_contact.google_map_url),
                     },
                     available_until: availableUntil.toISOString(),
@@ -555,17 +537,17 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 // Xử lý xóa ảnh thừa trên Cloudinary hoặc Supabase storage khi sửa tin
                 if (roomToEdit && roomToEdit.media_contact?.images) {
                     const oldImages = roomToEdit.media_contact.images;
-                    const newUrls = finalImages.map(img => img.url);
-                    
+                    const newUrls = finalImages.map((img) => img.url);
+
                     const pathsToDelete = [];
                     for (const oldImg of oldImages) {
                         if (!newUrls.includes(oldImg.url)) {
                             if (oldImg.url.includes("res.cloudinary.com")) {
                                 await deleteFromCloudinary(oldImg.url);
                             } else {
-                                const parts = oldImg.url.split('/room_media/');
+                                const parts = oldImg.url.split("/room_media/");
                                 if (parts.length > 1) {
-                                    const path = parts[1].split('?')[0];
+                                    const path = parts[1].split("?")[0];
                                     if (path.startsWith(`${user.id}/`)) {
                                         pathsToDelete.push(path);
                                     }
@@ -576,9 +558,9 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                     if (pathsToDelete.length > 0) {
                         const { error: storageError } = await deleteRoomMedia(pathsToDelete);
-                        
+
                         if (storageError) {
-                            console.error('Lỗi khi xóa ảnh thừa từ storage:', storageError);
+                            console.error("Lỗi khi xóa ảnh thừa từ storage:", storageError);
                         }
                     }
                 }
@@ -586,10 +568,10 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 currentStep += 1;
                 updateProgress(100, "Lưu tin thành công!");
 
-                const successMessage = roomToEdit 
-                    ? "Đã cập nhật tin đăng và lưu dưới dạng bản nháp thành công! Bạn có thể công khai tin trọ này từ Dashboard bất cứ lúc nào." 
+                const successMessage = roomToEdit
+                    ? "Đã cập nhật tin đăng và lưu dưới dạng bản nháp thành công! Bạn có thể công khai tin trọ này từ Dashboard bất cứ lúc nào."
                     : "Đã lưu bản nháp thành công! Bạn có thể công khai tin trọ này từ Dashboard bất cứ lúc nào.";
-                
+
                 addNotification(successMessage, "success");
                 setIsSubmitted(true);
 
@@ -598,7 +580,6 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     hideProgress();
                     if (onSuccess) onSuccess();
                 }, 600);
-
             } catch (err) {
                 console.error("Lỗi khi lưu tin:", err);
                 hideProgress();
@@ -614,17 +595,15 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-8 pb-10">
             {/* Header Form */}
-            <div className="border-b border-stone-100 pb-6 space-y-4">
-                <h3 className="text-xl font-bold text-stone-900 font-heading">
-                    {roomToEdit ? `Bạn đang sửa tin "${roomToEdit.title}"` : "Bạn đang đăng tin mới"}
-                </h3>
+            <div className="border-b border-stone-100 pb-6 space-y-4 flex items-center justify-between flex-wrap">
+                <h3 className="text-xl font-medium text-stone-900">{roomToEdit ? `Bạn đang sửa tin "${roomToEdit.title}"` : "Bạn đang đăng tin mới"}</h3>
 
                 {/* Top Action Bar */}
                 <div className="flex flex-wrap items-center gap-2.5">
                     <button
                         type="button"
                         onClick={handleClear}
-                        className="px-4 py-2 rounded-full border border-stone-300 text-stone-600 font-bold text-sm hover:bg-stone-50 transition-all cursor-pointer bg-white"
+                        className="px-5 py-2 rounded-full border border-stone-200 text-stone-600 font-medium text-sm hover:bg-stone-50 transition-all cursor-pointer bg-white"
                     >
                         Hủy bỏ
                     </button>
@@ -633,7 +612,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className={`px-6 py-2 rounded-full bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
+                        className={`px-6 py-2 rounded-full bg-amber-500 text-white font-medium text-sm hover:bg-amber-600 transition-all cursor-pointer flex items-center justify-center gap-2 border-none ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                         {isSubmitting ? "Đang lưu..." : "Lưu bản nháp"}
                     </button>
@@ -644,11 +623,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 {/* SECTION: HÌNH ẢNH (Minimalist) */}
                 <section className="bg-white border border-stone-200 rounded-xl overflow-hidden">
                     <div className="p-4 border-b border-stone-50 bg-stone-50/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2 font-bold text-stone-800 text-sm">
+                        <div className="flex items-center gap-2 font-medium text-stone-800 text-sm">
                             <AppIcon name="photo" color="#d97706" size={16} />
                             <span>Hình ảnh</span>
                         </div>
-                        <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-wider">{previewImages.length} / 6</span>
+                        <span className="text-[0.65rem] font-medium text-stone-400 uppercase tracking-wider">{previewImages.length} / 6</span>
                     </div>
                     <div className="p-3 pt-1">
                         <div
@@ -658,7 +637,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             <div className="w-10 h-10 bg-stone-50 rounded-full flex items-center justify-center text-stone-400 group-hover:text-amber-500 transition-colors mb-2">
                                 <AppIcon name="plus" size={20} />
                             </div>
-                            <p className="text-sm font-semibold text-stone-700">Tải ảnh lên</p>
+                            <p className="text-sm font-medium text-stone-700">Tải ảnh lên</p>
                             <p className="text-[0.7rem] text-stone-400 mt-1">Ảnh đầu tiên sẽ là ảnh bìa tin đăng</p>
                             <input type="file" multiple accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageChange} />
                         </div>
@@ -675,7 +654,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                             className={`relative aspect-square rounded-lg overflow-hidden border ${idx === 0 ? "border-amber-500 shadow-md ring-2 ring-amber-500/20" : "border-stone-100"}`}
                                         >
                                             <img src={img.url} className="w-full h-full object-cover" />
-                                            
+
                                             {/* Controls Overlay (Always Visible, Mobile Friendly) */}
                                             <div className="absolute inset-0 flex flex-col justify-between p-1.5 pointer-events-none z-10">
                                                 <div className="flex justify-end pointer-events-auto">
@@ -689,8 +668,8 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                                 </div>
                                             </div>
                                             {idx === 0 && (
-                                                <div className="absolute top-1.5 left-1.5 bg-amber-500 text-white text-[0.55rem] font-black uppercase px-2 py-0.5 rounded-md shadow-md z-10">
-                                                    Ảnh Bìa
+                                                <div className="absolute top-1.5 left-1.5 bg-amber-500 text-white text-[0.6rem] font-medium px-2.5 py-1 rounded-full z-10">
+                                                    Ảnh bìa
                                                 </div>
                                             )}
                                         </MotionDiv>
@@ -704,11 +683,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 {/* SECTION: VIDEO (YouTube / TikTok) */}
                 <section className="bg-white border border-stone-200 rounded-xl overflow-hidden">
                     <div className="p-4 border-b border-stone-50 bg-stone-50/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2 font-bold text-stone-800 text-sm">
+                        <div className="flex items-center gap-2 font-medium text-stone-800 text-sm">
                             <AppIcon name="play" color="#d97706" size={16} />
                             <span>Video giới thiệu (YouTube / TikTok)</span>
                         </div>
-                        <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-wider">
+                        <span className="text-[0.65rem] font-medium text-stone-400 uppercase tracking-wider">
                             {(formData.media_contact?.video_urls || []).length} / 3
                         </span>
                     </div>
@@ -724,16 +703,18 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         <input
                                             type="url"
                                             required
-                                            className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 transition-all text-sm font-medium pr-22"
+                                            className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-all text-sm font-normal pr-22"
                                             placeholder="VD: https://www.youtube.com/watch?v=... hoặc https://www.tiktok.com/@... *"
                                             value={url}
                                             onChange={(e) => updateVideoUrl(idx, e.target.value)}
                                         />
                                         <div className="absolute right-3 top-2.5">
-                                            {url.toLowerCase().includes('youtube.com') || url.toLowerCase().includes('youtu.be') ? (
-                                                <span className="bg-red-50 text-red-600 text-[0.65rem] font-black uppercase px-2 py-0.5 rounded border border-red-100">YouTube</span>
-                                            ) : url.toLowerCase().includes('tiktok.com') ? (
-                                                <span className="bg-stone-900 text-white text-[0.65rem] font-black uppercase px-2 py-0.5 rounded">TikTok</span>
+                                            {url.toLowerCase().includes("youtube.com") || url.toLowerCase().includes("youtu.be") ? (
+                                                <span className="bg-red-50 text-red-600 text-[0.65rem] font-bold uppercase px-2 py-0.5 rounded border border-red-100">
+                                                    YouTube
+                                                </span>
+                                            ) : url.toLowerCase().includes("tiktok.com") ? (
+                                                <span className="bg-stone-900 text-white text-[0.65rem] font-bold uppercase px-2 py-0.5 rounded">TikTok</span>
                                             ) : null}
                                         </div>
                                     </div>
@@ -753,7 +734,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             <button
                                 type="button"
                                 onClick={addVideoUrl}
-                                className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-lg cursor-pointer transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-700 text-xs font-medium rounded-lg cursor-pointer transition-colors"
                             >
                                 <AppIcon name="plus" size={14} />
                                 <span>Thêm link video</span>
@@ -767,9 +748,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     <div className="space-y-4">
                         <div>
                             <div className="flex justify-between items-baseline mb-1.5">
-                                <label className="block text-[0.7rem] font-bold text-stone-400 uppercase tracking-tight">Tiêu đề tin đăng *</label>
-                                <span className={`text-[0.65rem] font-bold ${(formData.title || '').length >= 40 ? 'text-red-500 font-extrabold' : 'text-stone-400 font-medium'}`}>
-                                    {(formData.title || '').length} / 40
+                                <label className="block text-[0.7rem] font-medium text-stone-400 uppercase tracking-tight">Tiêu đề tin đăng *</label>
+                                <span
+                                    className={`text-[0.65rem] font-medium ${(formData.title || "").length >= 40 ? "text-red-500 font-semibold" : "text-stone-400 font-normal"}`}
+                                >
+                                    {(formData.title || "").length} / 40
                                 </span>
                             </div>
                             <input
@@ -777,16 +760,16 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 required
                                 maxLength={40}
                                 placeholder="VD: Phòng trọ ban công, gần ĐH Bách Khoa... (Tối đa 40 ký tự)"
-                                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 transition-all text-sm font-medium"
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-all text-sm font-normal"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value.slice(0, 40) })}
                             />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-[0.7rem] font-bold text-stone-400 uppercase mb-1.5 tracking-tight">Loại hình</label>
+                                <label className="block text-[0.7rem] font-medium text-stone-400 uppercase mb-1.5 tracking-tight">Loại hình</label>
                                 <select
-                                    className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 appearance-none text-sm font-medium"
+                                    className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 appearance-none text-sm font-normal"
                                     value={formData.room_type}
                                     onChange={(e) => setFormData({ ...formData, room_type: e.target.value })}
                                 >
@@ -799,26 +782,26 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[0.7rem] font-bold text-stone-400 uppercase mb-1.5 tracking-tight">Giá thuê (đ) *</label>
+                                    <label className="block text-[0.7rem] font-medium text-stone-400 uppercase mb-1.5 tracking-tight">Giá thuê (đ) *</label>
                                     <input
                                         type="number"
                                         required
                                         min="100000"
                                         max="100000000"
                                         placeholder="3500000"
-                                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm font-bold text-amber-600"
+                                        className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-sm font-medium text-amber-600"
                                         value={formData.price_monthly}
                                         onChange={(e) => setFormData({ ...formData, price_monthly: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[0.7rem] font-bold text-stone-400 uppercase mb-1.5 tracking-tight">Diện tích (m²) *</label>
+                                    <label className="block text-[0.7rem] font-medium text-stone-400 uppercase mb-1.5 tracking-tight">Diện tích (m²) *</label>
                                     <input
                                         type="number"
                                         required
                                         min="1"
                                         placeholder="25"
-                                        className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm font-bold"
+                                        className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-sm font-medium"
                                         value={formData.area_sqm}
                                         onChange={(e) => setFormData({ ...formData, area_sqm: e.target.value })}
                                     />
@@ -833,10 +816,10 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
-                                <label className="block text-xs font-bold text-stone-500 mb-1">Tỉnh/Thành phố *</label>
+                                <label className="block text-xs font-medium text-stone-500 mb-1">Tỉnh/Thành phố *</label>
                                 <select
                                     required
-                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
+                                    className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-sm"
                                     value={formData.city}
                                     onChange={(e) => {
                                         const nextCity = e.target.value;
@@ -851,18 +834,22 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         setFormData((prev) => ({ ...prev, city: nextCity, district: nextDistrict, ward: nextWard }));
                                     }}
                                 >
-                                    <option value="" disabled>Chọn Tỉnh/Thành phố</option>
+                                    <option value="" disabled>
+                                        Chọn Tỉnh/Thành phố
+                                    </option>
                                     {PROVINCE.map((p) => (
-                                        <option key={p.name} value={p.name}>{p.name}</option>
+                                        <option key={p.name} value={p.name}>
+                                            {p.name}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-stone-500 mb-1">Quận/Huyện *</label>
+                                <label className="block text-xs font-medium text-stone-500 mb-1">Quận/Huyện *</label>
                                 <select
                                     required
                                     disabled={!formData.city}
-                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                                     value={formData.district}
                                     onChange={(e) => {
                                         const nextDistrict = e.target.value;
@@ -871,35 +858,43 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         setFormData((prev) => ({ ...prev, district: nextDistrict, ward: nextWard }));
                                     }}
                                 >
-                                    <option value="" disabled>Chọn Quận/Huyện</option>
+                                    <option value="" disabled>
+                                        Chọn Quận/Huyện
+                                    </option>
                                     {districts.map((d) => (
-                                        <option key={d.name} value={d.name}>{d.name}</option>
+                                        <option key={d.name} value={d.name}>
+                                            {d.name}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-stone-500 mb-1">Phường/Xã *</label>
+                                <label className="block text-xs font-medium text-stone-500 mb-1">Phường/Xã *</label>
                                 <select
                                     required
                                     disabled={!formData.district}
-                                    className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                                     value={formData.ward}
                                     onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
                                 >
-                                    <option value="" disabled>Chọn Phường/Xã</option>
+                                    <option value="" disabled>
+                                        Chọn Phường/Xã
+                                    </option>
                                     {wards.map((w) => (
-                                        <option key={w.name} value={w.name}>{w.name}</option>
+                                        <option key={w.name} value={w.name}>
+                                            {w.name}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
                         </div>
                         <div>
-                            <label className="block text-xs font-bold text-stone-500 mb-1">Địa chỉ cụ thể *</label>
+                            <label className="block text-xs font-medium text-stone-500 mb-1">Địa chỉ cụ thể *</label>
                             <input
                                 type="text"
                                 required
                                 placeholder="Số nhà, tên đường..."
-                                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-sm"
                                 value={formData.address}
                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                             />
@@ -907,32 +902,36 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                         {/* Google Maps Embed Field */}
                         <div className="mt-4 relative group/map">
-                            <label className="block text-xs font-bold text-stone-500 mb-1 flex items-center gap-1.5">
+                            <label className="block text-xs font-medium text-stone-500 mb-1 flex items-center gap-1.5">
                                 <AppIcon name="map" size={14} className="text-amber-500" />
                                 <span>Bản đồ Google Maps (Iframe hoặc Link chia sẻ)</span>
                                 <div className="relative inline-block cursor-help group/tooltip">
-                                    <span className="text-amber-500 text-xs font-bold flex items-center justify-center w-4 h-4 rounded-full bg-amber-50 border border-amber-200">💡</span>
-                                    <div className="absolute left-6 bottom-0 hidden group-hover/tooltip:block w-72 p-3 bg-stone-900 text-white text-[0.7rem] rounded-xl shadow-xl z-35 leading-relaxed font-normal">
-                                        <p className="font-bold text-amber-400 mb-1">💡 Hướng dẫn lấy bản đồ:</p>
-                                        1. Truy cập <span className="underline">google.com/maps</span> và tìm kiếm địa chỉ của bạn.<br />
-                                        2. Chọn nút <span className="font-bold text-amber-400">Chia sẻ</span>.<br />
-                                        3. Chọn tab <span className="font-bold text-amber-400">Nhúng bản đồ (Embed a map)</span>.<br />
-                                        4. Sao chép đường dẫn trong thuộc tính <span className="font-bold text-amber-400">src="..."</span> (hoặc sao chép toàn bộ thẻ Iframe) và dán vào đây.
+                                    <span className="text-amber-500 text-xs font-medium flex items-center justify-center w-4 h-4 rounded-full bg-amber-50 border border-amber-200">
+                                        💡
+                                    </span>
+                                    <div className="absolute left-6 bottom-0 hidden group-hover/tooltip:block w-72 p-3 bg-stone-900 text-white text-[0.7rem] rounded-xl shadow-xl z-35 leading-relaxed font-light">
+                                        <p className="font-medium text-amber-400 mb-1">💡 Hướng dẫn lấy bản đồ:</p>
+                                        1. Truy cập <span className="underline">google.com/maps</span> và tìm kiếm địa chỉ của bạn.
+                                        <br />
+                                        2. Chọn nút <span className="font-medium text-amber-400">Chia sẻ</span>.<br />
+                                        3. Chọn tab <span className="font-medium text-amber-400">Nhúng bản đồ (Embed a map)</span>.<br />
+                                        4. Sao chép đường dẫn trong thuộc tính <span className="font-medium text-amber-400">src="..."</span> (hoặc sao chép toàn
+                                        bộ thẻ Iframe) và dán vào đây.
                                     </div>
                                 </div>
                             </label>
                             <input
                                 type="text"
                                 placeholder="Dán mã nhúng iframe hoặc link chia sẻ Google Maps vào đây..."
-                                className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 text-sm"
+                                className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-sm"
                                 value={formData.media_contact.google_map_url || ""}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
                                         media_contact: {
                                             ...formData.media_contact,
-                                            google_map_url: e.target.value
-                                        }
+                                            google_map_url: e.target.value,
+                                        },
                                     })
                                 }
                             />
@@ -942,13 +941,15 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         {formData.city && formData.district && formData.ward && nearbyUniversities.length > 0 && (
                             <div className="mt-4 p-3 bg-amber-50/50 border border-amber-100 rounded-xl">
                                 <div className="flex gap-2 items-start text-amber-600">
-                                    <AppIcon name="verified" size={14} className="mt-0.5" />
                                     <div>
-                                        <p className="text-[0.65rem] font-bold uppercase tracking-wider mb-1">Gần các trường đại học:</p>
+                                        <p className="text-[0.65rem] font-medium tracking-wider mb-1">Gần các trường đại học:</p>
                                         <div className="flex flex-wrap gap-2 mt-1">
                                             {nearbyUniversities.map((u) => (
-                                                <span key={u.name} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[0.75rem] font-bold border border-amber-100">
-                                                    Gần {u.name}
+                                                <span
+                                                    key={u.name}
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[0.75rem] font-medium border border-amber-100"
+                                                >
+                                                    {u.name}
                                                 </span>
                                             ))}
                                         </div>
@@ -966,7 +967,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             required
                             rows={6}
                             placeholder="Mô tả đặc điểm phòng, tiện ích xung quanh, giờ giấc, an ninh... *"
-                            className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:border-amber-500 transition-colors text-sm leading-relaxed"
+                            className="w-full px-4 py-3 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 transition-colors text-sm leading-relaxed"
                             value={formData.media_contact.description}
                             onChange={(e) =>
                                 setFormData({
@@ -975,7 +976,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 })
                             }
                         />
-                        <div className="flex justify-end text-[0.6rem] text-stone-400 font-bold uppercase tracking-tighter">
+                        <div className="flex justify-end text-[0.6rem] text-stone-400 font-medium uppercase tracking-tighter">
                             {formData.media_contact.description.length} ký tự
                         </div>
                     </div>
@@ -986,7 +987,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-3">
                         <div className="space-y-4">
                             <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2 font-bold text-stone-800 text-sm">
+                                <div className="flex items-center gap-2 font-medium text-stone-800 text-sm">
                                     <AppIcon name="credit-card" color="#d97706" size={16} />
                                     <span>Chi phí hàng tháng (đ)</span>
                                 </div>
@@ -995,13 +996,13 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                             {/* Tiền cọc - Row riêng */}
                             <div>
-                                <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền cọc * (Tối thiểu 100k)</label>
+                                <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Tiền cọc * (Tối thiểu 100k)</label>
                                 <input
                                     type="number"
                                     required
                                     min="100000"
                                     max="500000000"
-                                    className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-lg text-sm font-bold text-stone-700 focus:border-amber-500 outline-none transition-colors"
+                                    className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm font-medium text-stone-700 focus:border-amber-500 outline-none transition-colors"
                                     value={formData.monthly_costs.deposit_amount}
                                     onChange={(e) => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, deposit_amount: e.target.value } })}
                                 />
@@ -1009,13 +1010,13 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Phí gửi xe *</label>
+                                    <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Phí gửi xe *</label>
                                     <input
                                         type="number"
                                         required
                                         min="0"
                                         max="1000000"
-                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs"
+                                        className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs"
                                         value={formData.monthly_costs.parking_fee}
                                         onChange={(e) =>
                                             setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, parking_fee: e.target.value } })
@@ -1023,13 +1024,13 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Internet *</label>
+                                    <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Internet *</label>
                                     <input
                                         type="number"
                                         required
                                         min="0"
                                         max="1000000"
-                                        className="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs"
+                                        className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs"
                                         value={formData.monthly_costs.internet}
                                         onChange={(e) => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, internet: e.target.value } })}
                                     />
@@ -1038,13 +1039,13 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="flex gap-1.5 items-end">
                                     <div className="flex-1">
-                                        <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền điện *</label>
+                                        <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Tiền điện *</label>
                                         <input
                                             type="number"
                                             required
                                             min="0"
                                             max="1000000"
-                                            className="w-full px-2 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium"
+                                            className="w-full px-2 py-2 bg-white border border-stone-200 rounded-xl text-xs font-normal"
                                             value={formData.monthly_costs.electricity.price}
                                             onChange={(e) =>
                                                 setFormData({
@@ -1058,7 +1059,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         />
                                     </div>
                                     <select
-                                        className="bg-stone-50 border border-stone-200 rounded-lg text-[0.6rem] h-8.5 px-1 font-bold text-stone-600 outline-none"
+                                        className="bg-white border border-stone-200 rounded-xl text-[0.6rem] h-8.5 px-1 font-medium text-stone-600 outline-none"
                                         value={formData.monthly_costs.electricity.unit}
                                         onChange={(e) =>
                                             setFormData({
@@ -1076,13 +1077,13 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 </div>
                                 <div className="flex gap-1.5 items-end">
                                     <div className="flex-1">
-                                        <label className="block text-[0.6rem] font-bold text-stone-400 mb-1">Tiền nước *</label>
+                                        <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Tiền nước *</label>
                                         <input
                                             type="number"
                                             required
                                             min="0"
                                             max="1000000"
-                                            className="w-full px-2 py-2 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium"
+                                            className="w-full px-2 py-2 bg-white border border-stone-200 rounded-xl text-xs font-normal"
                                             value={formData.monthly_costs.water.price}
                                             onChange={(e) =>
                                                 setFormData({
@@ -1096,7 +1097,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         />
                                     </div>
                                     <select
-                                        className="bg-stone-50 border border-stone-200 rounded-lg text-[0.6rem] h-8.5 px-1 font-bold text-stone-600 outline-none"
+                                        className="bg-white border border-stone-200 rounded-xl text-[0.6rem] h-8.5 px-1 font-medium text-stone-600 outline-none"
                                         value={formData.monthly_costs.water.unit}
                                         onChange={(e) =>
                                             setFormData({
@@ -1113,7 +1114,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                             {/* Extra Services UI */}
                             <div className="pt-2">
-                                <label className="block text-[0.6rem] font-bold text-stone-400 mb-2 uppercase tracking-widest">Phí dịch vụ khác</label>
+                                <label className="block text-[0.6rem] font-medium text-stone-400 mb-2 uppercase tracking-widest">Phí dịch vụ khác</label>
                                 <div className="space-y-2">
                                     {formData.monthly_costs.extra_services.map((service, idx) => (
                                         <div key={idx} className="flex gap-2 items-center">
@@ -1140,7 +1141,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     <button
                                         type="button"
                                         onClick={addExtraService}
-                                        className="w-full py-1.5 border border-dashed border-stone-200 rounded text-[0.6rem] font-bold text-stone-400 hover:border-amber-300 hover:text-amber-500 transition-colors"
+                                        className="w-full py-1.5 border border-dashed border-stone-200 rounded text-[0.6rem] font-medium text-stone-400 hover:border-amber-300 hover:text-amber-500 transition-colors"
                                     >
                                         + THÊM PHÍ DỊCH VỤ
                                     </button>
@@ -1150,13 +1151,13 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                     </div>
 
                     <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-3">
-                        <div className="flex items-center gap-2 font-bold text-stone-800 text-sm mb-2">
+                        <div className="flex items-center gap-2 font-medium text-stone-800 text-sm mb-2">
                             <AppIcon name="shield" color="#d97706" size={16} />
                             <span>Thông số & Nội quy</span>
                         </div>
                         <div className="space-y-2.5">
                             <div className="flex items-center justify-between">
-                                <span className="text-[0.8rem] text-stone-600 font-medium">Sức chứa (người)</span>
+                                <span className="text-[0.8rem] text-stone-600 font-normal">Sức chứa (người)</span>
                                 <div className="flex items-center gap-2">
                                     <CounterBtn
                                         onClick={() =>
@@ -1173,7 +1174,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         }
                                         icon="minus"
                                     />
-                                    <span className="w-4 text-center font-bold text-sm">{formData.room_features.counts.capacity}</span>
+                                    <span className="w-4 text-center font-medium text-sm">{formData.room_features.counts.capacity}</span>
                                     <CounterBtn
                                         onClick={() =>
                                             setFormData({
@@ -1192,7 +1193,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[0.8rem] text-stone-600 font-medium">Phòng ngủ</span>
+                                <span className="text-[0.8rem] text-stone-600 font-normal">Phòng ngủ</span>
                                 <div className="flex items-center gap-2">
                                     <CounterBtn
                                         onClick={() =>
@@ -1209,7 +1210,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         }
                                         icon="minus"
                                     />
-                                    <span className="w-4 text-center font-bold text-sm">{formData.room_features.counts.bedrooms}</span>
+                                    <span className="w-4 text-center font-medium text-sm">{formData.room_features.counts.bedrooms}</span>
                                     <CounterBtn
                                         onClick={() =>
                                             setFormData({
@@ -1228,7 +1229,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[0.8rem] text-stone-600 font-medium">Số giường</span>
+                                <span className="text-[0.8rem] text-stone-600 font-normal">Số giường</span>
                                 <div className="flex items-center gap-2">
                                     <CounterBtn
                                         onClick={() =>
@@ -1242,7 +1243,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                         }
                                         icon="minus"
                                     />
-                                    <span className="w-4 text-center font-bold text-sm">{formData.room_features.counts.beds}</span>
+                                    <span className="w-4 text-center font-medium text-sm">{formData.room_features.counts.beds}</span>
                                     <CounterBtn
                                         onClick={() =>
                                             setFormData({
@@ -1258,9 +1259,9 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[0.8rem] text-stone-600 font-medium">Nhà vệ sinh</span>
+                                <span className="text-[0.8rem] text-stone-600 font-normal">Nhà vệ sinh</span>
                                 <select
-                                    className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
+                                    className="bg-white border border-stone-200 rounded-xl px-2 py-1 text-[0.7rem] font-medium focus:outline-none"
                                     value={formData.room_features.bathroom_type}
                                     onChange={(e) => setFormData({ ...formData, room_features: { ...formData.room_features, bathroom_type: e.target.value } })}
                                 >
@@ -1272,9 +1273,9 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 </select>
                             </div>
                             <div className="flex items-center justify-between">
-                                <span className="text-[0.8rem] text-stone-600 font-medium">Phòng bếp</span>
+                                <span className="text-[0.8rem] text-stone-600 font-normal">Phòng bếp</span>
                                 <select
-                                    className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
+                                    className="bg-white border border-stone-200 rounded-xl px-2 py-1 text-[0.7rem] font-medium focus:outline-none"
                                     value={formData.room_features.kitchen_type}
                                     onChange={(e) => setFormData({ ...formData, room_features: { ...formData.room_features, kitchen_type: e.target.value } })}
                                 >
@@ -1285,11 +1286,11 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     ))}
                                 </select>
                             </div>
-                            <div className="pt-2 border-t border-stone-50">
+                            <div className="border-t border-stone-50">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[0.8rem] text-stone-600 font-medium">Giờ giấc</span>
+                                    <span className="text-[0.8rem] text-stone-600 font-normal">Giờ giấc</span>
                                     <select
-                                        className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
+                                        className="bg-white border border-stone-200 rounded-xl px-2 py-1 text-[0.7rem] font-medium focus:outline-none"
                                         value={formData.rules_utilities.curfew}
                                         onChange={(e) => setFormData({ ...formData, rules_utilities: { ...formData.rules_utilities, curfew: e.target.value } })}
                                     >
@@ -1301,9 +1302,9 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     </select>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[0.8rem] text-stone-600 font-medium">Ưu tiên giới tính</span>
+                                    <span className="text-[0.8rem] text-stone-600 font-normal">Ưu tiên giới tính</span>
                                     <select
-                                        className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
+                                        className="bg-white border border-stone-200 rounded-xl px-2 py-1 text-[0.7rem] font-medium focus:outline-none"
                                         value={formData.rules_utilities.gender_preference}
                                         onChange={(e) =>
                                             setFormData({ ...formData, rules_utilities: { ...formData.rules_utilities, gender_preference: e.target.value } })
@@ -1317,9 +1318,9 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     </select>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[0.8rem] text-stone-600 font-medium">Giặt giũ</span>
+                                    <span className="text-[0.8rem] text-stone-600 font-normal">Giặt giũ</span>
                                     <select
-                                        className="bg-stone-50 border border-stone-200 rounded-lg px-2 py-1 text-[0.7rem] font-bold focus:outline-none"
+                                        className="bg-white border border-stone-200 rounded-xl px-2 py-1 text-[0.7rem] font-medium focus:outline-none"
                                         value={formData.rules_utilities.laundry_type}
                                         onChange={(e) =>
                                             setFormData({ ...formData, rules_utilities: { ...formData.rules_utilities, laundry_type: e.target.value } })
@@ -1333,7 +1334,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     </select>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[0.8rem] text-stone-600 font-medium">Cho nuôi thú cưng?</span>
+                                    <span className="text-[0.8rem] text-stone-600 font-normal">Cho nuôi thú cưng?</span>
                                     <Toggle
                                         active={formData.rules_utilities.is_pet_allowed}
                                         onClick={() =>
@@ -1345,7 +1346,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[0.8rem] text-stone-600 font-medium">Chung chủ?</span>
+                                    <span className="text-[0.8rem] text-stone-600 font-normal">Chung chủ?</span>
                                     <Toggle
                                         active={formData.rules_utilities.is_shared_with_host}
                                         onClick={() =>
@@ -1366,7 +1367,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
                 {/* SECTION 5: TIỆN NGHI (Minimal) */}
                 <FormSection title="Tiện nghi phòng" icon="check-square">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-3">
                         {Object.entries(AMENITIES).map(([key, item]) => {
                             const isSelected = formData.room_features.amenities.includes(key);
                             return (
@@ -1377,7 +1378,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all gap-1.5 cursor-pointer ${isSelected ? "bg-amber-50 border-amber-500 text-amber-600" : "bg-white border-stone-100 text-stone-400 hover:border-stone-200"}`}
                                 >
                                     <AppIcon name={item.icon} size={18} />
-                                    <span className="text-[0.6rem] font-bold text-center leading-tight">{item.label}</span>
+                                    <span className="text-[0.6rem] font-medium text-center leading-tight">{item.label}</span>
                                 </button>
                             );
                         })}
@@ -1385,27 +1386,24 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                 </FormSection>
 
                 {/* SUBMIT AREA (Minimalist) */}
-                {/* SUBMIT AREA (Minimalist) */}
                 <div className="pt-6 border-t border-stone-100 flex flex-col items-center">
                     <button
                         type="button"
                         onClick={handleSubmit}
                         disabled={isSubmitting}
-                        className={`w-full md:w-auto px-16 py-3 rounded-full bg-amber-500 text-white font-bold text-sm hover:bg-amber-600 transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
+                        className={`w-full md:w-auto px-16 py-3 rounded-full bg-amber-500 text-white font-medium text-sm hover:bg-amber-600 transition-all cursor-pointer flex items-center justify-center gap-2 border-none ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                         {isSubmitting ? "Đang lưu..." : "Lưu bản nháp"}
                     </button>
                     <div className="mt-4 text-center max-w-sm">
-                                        <p className="text-[0.7rem] text-stone-400 leading-relaxed font-medium">
-                                            Mọi thông tin sẽ được lưu lại dưới dạng bản nháp.
-                                            <br />
-                                            Bạn có thể kiểm tra kỹ lại và công khai tin đăng từ danh sách quản lý.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-
+                        <p className="text-xs text-stone-500 leading-relaxed font-normal">
+                            Mọi thông tin sẽ được lưu lại dưới dạng bản nháp.
+                            <br />
+                            Bạn có thể kiểm tra kỹ lại và công khai tin đăng từ danh sách quản lý.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </form>
     );
 }
@@ -1414,12 +1412,12 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
 
 function FormSection({ title, icon, children }) {
     return (
-        <section className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-xs">
-            <div className="p-5 border-b border-stone-50 bg-stone-50/30 flex items-center gap-2.5 font-bold text-stone-900 font-heading">
+        <section className="bg-white border border-stone-200 rounded-xl overflow-hidden">
+            <div className="p-5 border-b border-stone-50 bg-stone-50/30 flex items-center gap-2.5 font-medium text-stone-900 font-heading">
                 <AppIcon name={icon} color="#d97706" size={18} />
                 <span>{title}</span>
             </div>
-            <div className="p-4 md:p-6 pt-2 md:pt-3">{children}</div>
+            <div className="p-4 md:p-6 pt-1 md:pt-3">{children}</div>
         </section>
     );
 }

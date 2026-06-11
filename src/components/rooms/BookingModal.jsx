@@ -113,7 +113,7 @@ export default function BookingModal({ isOpen, onClose, room, user, onSuccess })
                                     <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center">
                                         <AppIcon name="calendar" size={20} />
                                     </div>
-                                    <h3 className="font-bold text-lg text-stone-900 font-heading">
+                                    <h3 className="font-medium text-lg text-stone-900 font-heading">
                                         Đặt lịch xem phòng
                                     </h3>
                                 </div>
@@ -125,7 +125,7 @@ export default function BookingModal({ isOpen, onClose, room, user, onSuccess })
                             {/* Content */}
                             <div className="p-6 flex flex-col gap-5">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-sm font-bold text-stone-700">Ngày hẹn xem phòng</label>
+                                    <label className="text-sm font-medium text-stone-700">Ngày hẹn xem phòng</label>
                                     <input
                                         type="date"
                                         value={date}
@@ -136,7 +136,7 @@ export default function BookingModal({ isOpen, onClose, room, user, onSuccess })
                                 </div>
                                 
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-sm font-bold text-stone-700">Giờ hẹn</label>
+                                    <label className="text-sm font-medium text-stone-700">Giờ hẹn</label>
                                     <input
                                         type="time"
                                         value={time}
@@ -151,7 +151,7 @@ export default function BookingModal({ isOpen, onClose, room, user, onSuccess })
                                 <button
                                     onClick={handleSubmit}
                                     disabled={loading}
-                                    className="w-full py-3.5 rounded-xl font-bold text-sm bg-amber-500 text-white cursor-pointer hover:bg-amber-600 transition-colors border-none shadow-lg shadow-amber-500/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    className="w-full py-3.5 rounded-xl font-medium text-sm bg-amber-500 text-white cursor-pointer hover:bg-amber-600 transition-colors border-none shadow-lg shadow-amber-500/20 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 >
                                     {loading ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

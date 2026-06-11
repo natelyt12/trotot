@@ -438,12 +438,12 @@ export default function AdminPage({ navigate }) {
 
     return (
         <div className="min-h-screen bg-stone-50 pt-28 pb-16">
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6">
                 {/* Upper bar with Back to homepage */}
                 <div className="mb-6 flex items-center justify-between">
                     <button
                         onClick={() => navigate("home")}
-                        className="flex items-center gap-2 bg-white border border-stone-200 rounded-full pl-2 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-all duration-200 group"
+                        className="flex items-center gap-2 bg-white border border-stone-200 rounded-full pl-2 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-medium hover:bg-stone-50 hover:text-stone-900 transition-all duration-200 group"
                     >
                         <div className="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200">
                             <TbArrowLeft size={14} strokeWidth={2.5} />
@@ -451,24 +451,24 @@ export default function AdminPage({ navigate }) {
                         <span>Quay lại trang chủ</span>
                     </button>
 
-                    <div className="flex items-center gap-2 bg-amber-500/10 text-amber-700 px-4 py-1.5 rounded-full text-xs font-bold border border-amber-500/20">
+                    <div className="flex items-center gap-2 bg-amber-500/10 text-amber-700 px-4 py-1.5 rounded-full text-xs font-medium border border-amber-500/20">
                         <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                         Admin Workspace
                     </div>
                 </div>
 
                 {/* Main Admin Section Grid */}
-                <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm grid grid-cols-1 lg:grid-cols-[260px_1fr] min-h-[650px]">
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
                     {/* Sidebar */}
-                    <aside className="lg:border-r border-stone-200 bg-stone-50/40 p-6 flex flex-col justify-between">
+                    <aside className="w-full lg:w-[260px] shrink-0 bg-white border border-stone-200 rounded-xl p-6 flex flex-col justify-between h-auto shadow-sm">
                         <div>
                             {/* Logo Admin header */}
                             <div className="mb-8 border-b border-stone-100 pb-5">
-                                <h2 className="text-stone-900 text-lg font-black tracking-tight font-heading flex items-center gap-2">
+                                <h2 className="text-stone-900 text-lg font-bold tracking-tight font-heading flex items-center gap-2">
                                     <span className="w-2.5 h-2.5 bg-amber-500 rounded-full"></span>
                                     TroTot Admin
                                 </h2>
-                                <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider mt-1">Hệ thống kiểm duyệt</p>
+                                <p className="text-[10px] text-stone-400 font-medium uppercase tracking-wider mt-1">Hệ thống kiểm duyệt</p>
                             </div>
 
                             {/* Sidebar Tab List */}
@@ -487,10 +487,10 @@ export default function AdminPage({ navigate }) {
                                         <button
                                             key={tab.id}
                                             onClick={() => setActiveSubTab(tab.id)}
-                                            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
+                                            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-left font-medium text-sm border cursor-pointer transition-all duration-200 ${
                                                 isActive
-                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
-                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
+                                                    ? "bg-amber-50 border-amber-200 text-amber-700"
+                                                    : "bg-transparent border-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
                                             }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -499,7 +499,7 @@ export default function AdminPage({ navigate }) {
                                             </div>
                                             {tab.badge !== undefined && tab.badge > 0 && (
                                                 <span
-                                                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
                                                         isActive ? "bg-white text-amber-600" : "bg-red-500 text-white"
                                                     }`}
                                                 >
@@ -511,17 +511,17 @@ export default function AdminPage({ navigate }) {
                                 })}
 
                                 <div className="h-px bg-stone-200 my-4" />
-                                <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Tiện ích chủ nhà</div>
+                                <div className="px-3 py-1 text-[10px] font-medium text-stone-400 uppercase tracking-widest mb-1">Tiện ích chủ nhà</div>
                                 <button
                                     onClick={() => navigate("dashboard", { tab: "post_room" })}
-                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-bold text-sm border-none cursor-pointer bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800 transition-all duration-200"
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-sm border-none cursor-pointer bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800 transition-all duration-200"
                                 >
                                     <TbPlus size={18} />
                                     <span>Đăng tin mới</span>
                                 </button>
                                 <button
                                     onClick={() => navigate("dashboard")}
-                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-bold text-sm border-none cursor-pointer bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800 transition-all duration-200"
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-sm border-none cursor-pointer bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800 transition-all duration-200"
                                 >
                                     <TbListDetails size={18} />
                                     <span>Quản lý tin đăng</span>
@@ -530,14 +530,14 @@ export default function AdminPage({ navigate }) {
                         </div>
 
                         {/* Sidebar Footer info */}
-                        <div className="border-t border-stone-100 pt-5 mt-8 text-[11px] text-stone-400 font-medium">
+                        <div className="border-t border-stone-100 pt-5 mt-8 text-[11px] text-stone-400 font-normal">
                             <p>© 2026 TroTot Administration.</p>
                             <p className="mt-1">Version 1.0.0 Stable</p>
                         </div>
                     </aside>
 
                     {/* Content Panel Area */}
-                    <main className="p-6 md:p-8 flex flex-col bg-white">
+                    <main className="flex-1 w-full bg-white border border-stone-200 rounded-xl shadow-sm p-6 md:p-8 flex flex-col min-h-[650px]">
                         {/* --- TAB: OVERVIEW --- */}
                         {activeSubTab === "overview" && (
                             <OverviewTab
@@ -641,10 +641,10 @@ export default function AdminPage({ navigate }) {
                             </div>
 
                             <div className="space-y-1.5">
-                                <h3 className="text-base font-extrabold text-stone-950 font-heading">
+                                <h3 className="text-base font-semibold text-stone-950 font-heading">
                                     {scenarioProgress.percent === 100 ? "Hoàn tất!" : "Đang thực thi tác vụ..."}
                                 </h3>
-                                <p className="text-xs text-stone-500 font-medium">{scenarioProgress.text}</p>
+                                <p className="text-xs text-stone-500 font-normal">{scenarioProgress.text}</p>
                             </div>
 
                             {/* Thanh phần trăm tiến trình */}
@@ -655,7 +655,7 @@ export default function AdminPage({ navigate }) {
                                         style={{ width: `${scenarioProgress.percent}%` }}
                                     ></div>
                                 </div>
-                                <div className="text-[10px] font-black text-amber-600 text-right">{scenarioProgress.percent}%</div>
+                                <div className="text-[10px] font-bold text-amber-600 text-right">{scenarioProgress.percent}%</div>
                             </div>
                         </motion.div>
                     </motion.div>

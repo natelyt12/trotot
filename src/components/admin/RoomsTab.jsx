@@ -75,12 +75,12 @@ export default function RoomsTab({
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                 <div>
-                    <h3 className="text-xl font-extrabold text-stone-900 font-heading">Duyệt tin phòng trọ</h3>
+                    <h3 className="text-xl font-semibold text-stone-900 font-heading">Duyệt tin phòng trọ</h3>
                     <p className="text-stone-500 text-xs mt-1">Quản lý duyệt và xác thực các tin đăng phòng trọ trên toàn hệ thống.</p>
                 </div>
                 <button
                     onClick={onRefresh}
-                    className="flex items-center gap-1.5 px-4 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-500 hover:bg-stone-50 hover:text-stone-800 cursor-pointer transition-colors shrink-0"
+                    className="flex items-center gap-1.5 px-4 py-2 border border-stone-200 rounded-xl text-xs font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-800 cursor-pointer transition-colors shrink-0"
                 >
                     <TbRefresh size={14} />
                     Làm mới
@@ -91,14 +91,14 @@ export default function RoomsTab({
             <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4 space-y-3">
                 <div className="flex items-center gap-2">
                     <TbSearch size={14} className="text-stone-400 shrink-0" />
-                    <span className="text-xs font-bold text-stone-600">Lọc theo chủ nhà</span>
+                    <span className="text-xs font-medium text-stone-600">Lọc theo chủ nhà</span>
                     {roomUserFilter && (
                         <button
                             onClick={() => {
                                 setRoomUserFilter(null);
                                 setRoomUserSearch("");
                             }}
-                            className="ml-auto flex items-center gap-1 text-[10px] font-bold text-amber-600 hover:text-amber-700 cursor-pointer bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full border-none"
+                            className="ml-auto flex items-center gap-1 text-[10px] font-medium text-amber-600 hover:text-amber-700 cursor-pointer bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full border-none"
                         >
                             <TbX size={11} />
                             Xóa bộ lọc: {roomUserFilter.name}
@@ -118,12 +118,12 @@ export default function RoomsTab({
                                     handleSearchSubmit();
                                 }
                             }}
-                            className="w-full pl-8 pr-4 py-2 text-xs border border-stone-200 rounded-xl bg-white outline-none focus:border-amber-400 font-medium text-stone-700"
+                            className="w-full pl-8 pr-4 py-2 text-xs border border-stone-200 rounded-xl bg-white outline-none focus:border-amber-400 font-normal text-stone-700"
                         />
                     </div>
                     <button
                         onClick={handleSearchSubmit}
-                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer border-none shadow-sm flex items-center gap-1"
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-medium transition-colors cursor-pointer border-none shadow-sm flex items-center gap-1"
                     >
                         <TbSearch size={13} />
                         Tìm
@@ -138,12 +138,12 @@ export default function RoomsTab({
                                     setRoomUserFilter({ name: owner.name });
                                     setRoomUserSearch("");
                                 }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-stone-200 rounded-full text-[11px] font-bold text-stone-700 hover:border-amber-400 hover:text-amber-700 cursor-pointer transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-stone-200 rounded-full text-[11px] font-medium text-stone-700 hover:border-amber-400 hover:text-amber-700 cursor-pointer transition-colors"
                             >
                                 {owner.avatar ? (
                                     <img src={owner.avatar} alt={owner.name} className="w-4 h-4 rounded-full object-cover" />
                                 ) : (
-                                    <span className="w-4 h-4 rounded-full bg-stone-200 flex items-center justify-center text-[8px] font-black text-stone-600">
+                                    <span className="w-4 h-4 rounded-full bg-stone-200 flex items-center justify-center text-[8px] font-bold text-stone-600">
                                         {owner.name.charAt(0).toUpperCase()}
                                     </span>
                                 )}
@@ -153,26 +153,26 @@ export default function RoomsTab({
                         ))}
                     </div>
                 )}
-                {roomUserSearch && filteredOwners.length === 0 && <p className="text-[11px] text-stone-400 font-medium">Không tìm thấy chủ nhà nào.</p>}
+                {roomUserSearch && filteredOwners.length === 0 && <p className="text-[11px] text-stone-400 font-normal">Không tìm thấy chủ nhà nào.</p>}
             </div>
 
             {/* Sub tabs */}
             <div className="flex border-b border-stone-200 overflow-x-auto whitespace-nowrap">
                 <button
                     onClick={() => setRoomsSubTab("pending_publish")}
-                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${roomsSubTab === "pending_publish" || !roomsSubTab ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
+                    className={`flex-shrink-0 px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${roomsSubTab === "pending_publish" || !roomsSubTab ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
                 >
                     Chờ Duyệt ({pendingPublishRooms.length})
                 </button>
                 <button
                     onClick={() => setRoomsSubTab("unverified")}
-                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${roomsSubTab === "unverified" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
+                    className={`flex-shrink-0 px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${roomsSubTab === "unverified" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
                 >
                     Chưa xác thực ({unverifiedRooms.length})
                 </button>
                 <button
                     onClick={() => setRoomsSubTab("verified")}
-                    className={`flex-shrink-0 px-4 py-2 text-sm font-bold border-b-2 transition-colors cursor-pointer ${roomsSubTab === "verified" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
+                    className={`flex-shrink-0 px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${roomsSubTab === "verified" ? "border-amber-500 text-amber-600" : "border-transparent text-stone-500 hover:text-stone-800"}`}
                 >
                     Đã xác thực ({verifiedRooms.length})
                 </button>
@@ -183,7 +183,7 @@ export default function RoomsTab({
                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300 shadow-sm border border-stone-100">
                         <TbHomeCheck size={32} />
                     </div>
-                    <p className="text-stone-500 font-bold text-sm">
+                    <p className="text-stone-500 font-medium text-sm">
                         {roomsSubTab === "verified"
                             ? "Không có tin trọ nào đã xác thực"
                             : roomsSubTab === "unverified"
@@ -215,17 +215,17 @@ export default function RoomsTab({
                                             }}
                                         />
                                         {room.status === "pending" && (
-                                            <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase text-white shadow-sm bg-amber-500">
+                                            <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase text-white shadow-sm bg-amber-500">
                                                 Chờ duyệt
                                             </div>
                                         )}
                                         {room.status === "available" && !room.is_verified && (
-                                            <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase text-white shadow-sm bg-blue-500">
+                                            <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase text-white shadow-sm bg-blue-500">
                                                 Công khai
                                             </div>
                                         )}
                                         {room.status === "available" && room.is_verified && (
-                                            <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase text-white shadow-sm bg-emerald-500">
+                                            <div className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase text-white shadow-sm bg-emerald-500">
                                                 Đã xác thực
                                             </div>
                                         )}
@@ -233,7 +233,7 @@ export default function RoomsTab({
 
                                     {/* Specifications info panel */}
                                     <div className="flex-1 min-w-0 space-y-1">
-                                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider flex items-center gap-1">
+                                        <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider flex items-center gap-1">
                                             {room.room_type === "room"
                                                 ? "Phòng trọ"
                                                 : room.room_type === "apartment"
@@ -243,14 +243,14 @@ export default function RoomsTab({
                                                     : "Studio"}{" "}
                                             • {room.area_sqm} m²
                                         </span>
-                                        <h4 className="font-bold text-stone-900 text-sm line-clamp-1 group-hover:text-amber-600 transition-colors leading-snug">
+                                        <h4 className="font-medium text-stone-900 text-sm line-clamp-1 group-hover:text-amber-600 transition-colors leading-snug">
                                             {room.title}
                                         </h4>
                                         <div className="flex items-center gap-1.5 text-stone-500 text-[0.8rem] mb-1">
                                             <TbMapPin size={12} className="shrink-0 text-stone-400" />
                                             <span className="truncate">{room.address}</span>
                                         </div>
-                                        <div className="text-amber-600 font-bold text-[0.9rem]">{formatPrice(room.price_monthly)}</div>
+                                        <div className="text-amber-600 font-medium text-[0.9rem]">{formatPrice(room.price_monthly)}</div>
                                     </div>
                                 </div>
 
@@ -261,13 +261,13 @@ export default function RoomsTab({
                                         {room.owner_avatar ? (
                                             <img src={room.owner_avatar} alt={room.owner} className="w-6 h-6 rounded-full object-cover shrink-0" />
                                         ) : (
-                                            <div className="w-6 h-6 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 font-bold text-[10px] shrink-0">
+                                            <div className="w-6 h-6 rounded-full bg-stone-200 flex items-center justify-center text-stone-600 font-medium text-[10px] shrink-0">
                                                 {(room.owner || "U").charAt(0).toUpperCase()}
                                             </div>
                                         )}
                                         <div className="text-[10px]">
-                                            <div className="font-bold text-stone-800 leading-tight truncate max-w-[100px]">{room.owner}</div>
-                                            <div className="text-stone-400 font-bold flex items-center gap-1">
+                                            <div className="font-medium text-stone-800 leading-tight truncate max-w-[100px]">{room.owner}</div>
+                                            <div className="text-stone-400 font-medium flex items-center gap-1">
                                                 <TbPhone size={10} />
                                                 {room.owner_phone}
                                             </div>
@@ -279,7 +279,7 @@ export default function RoomsTab({
                                         <button
                                             onClick={() => onOpenRoomPreview(room.id)}
                                             disabled={loadingPreviewRoom}
-                                            className="flex items-center gap-1 px-3 py-1.5 border border-stone-200 rounded-full text-[0.75rem] font-bold text-stone-600 hover:bg-stone-50 hover:text-stone-900 cursor-pointer transition-colors"
+                                            className="flex items-center gap-1 px-3 py-1.5 border border-stone-200 rounded-full text-[0.75rem] font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 cursor-pointer transition-colors"
                                         >
                                             <TbEye size={12} />
                                             Xem
@@ -289,14 +289,14 @@ export default function RoomsTab({
                                             <>
                                                 <button
                                                     onClick={() => onRejectRoom(room.id, room.title)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 border border-red-100 bg-red-50 rounded-full text-[0.75rem] font-bold text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
+                                                    className="flex items-center gap-1 px-3 py-1.5 border border-red-100 bg-red-50 rounded-full text-[0.75rem] font-medium text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
                                                 >
                                                     <TbX size={12} />
                                                     Từ chối
                                                 </button>
                                                 <button
                                                     onClick={() => onApprovePublish(room.id, room.title)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 border border-amber-500 rounded-full text-[0.75rem] font-bold text-white hover:bg-amber-600 cursor-pointer transition-colors shadow-sm"
+                                                    className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 border border-amber-500 rounded-full text-[0.75rem] font-medium text-white hover:bg-amber-600 cursor-pointer transition-colors shadow-sm"
                                                 >
                                                     <TbCheck size={12} />
                                                     Duyệt
@@ -308,14 +308,14 @@ export default function RoomsTab({
                                             <>
                                                 <button
                                                     onClick={() => onRejectRoom(room.id, room.title)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 border border-red-100 bg-red-50 rounded-full text-[0.75rem] font-bold text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
+                                                    className="flex items-center gap-1 px-3 py-1.5 border border-red-100 bg-red-50 rounded-full text-[0.75rem] font-medium text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
                                                 >
                                                     <TbX size={12} />
                                                     Gỡ tin
                                                 </button>
                                                 <button
                                                     onClick={() => onApproveRoom(room.id, room.title)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 border border-amber-500 rounded-full text-[0.75rem] font-bold text-white hover:bg-amber-600 cursor-pointer transition-colors shadow-sm"
+                                                    className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 border border-amber-500 rounded-full text-[0.75rem] font-medium text-white hover:bg-amber-600 cursor-pointer transition-colors shadow-sm"
                                                 >
                                                     <TbCheck size={12} />
                                                     Xác thực
@@ -327,14 +327,14 @@ export default function RoomsTab({
                                             <>
                                                 <button
                                                     onClick={() => onRejectRoom(room.id, room.title)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 border border-red-100 bg-red-50 rounded-full text-[0.75rem] font-bold text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
+                                                    className="flex items-center gap-1 px-3 py-1.5 border border-red-100 bg-red-50 rounded-full text-[0.75rem] font-medium text-red-600 hover:bg-red-100 cursor-pointer transition-colors"
                                                 >
                                                     <TbX size={12} />
                                                     Gỡ tin
                                                 </button>
                                                 <button
                                                     onClick={() => onCancelVerification(room.id, room.title)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 border border-amber-200 bg-amber-50 rounded-full text-[0.75rem] font-bold text-amber-600 hover:bg-amber-100 cursor-pointer transition-colors"
+                                                    className="flex items-center gap-1 px-3 py-1.5 border border-amber-200 bg-amber-50 rounded-full text-[0.75rem] font-medium text-amber-600 hover:bg-amber-100 cursor-pointer transition-colors"
                                                 >
                                                     <TbX size={12} />
                                                     Hủy xác thực
@@ -373,7 +373,7 @@ export default function RoomsTab({
                                     <button
                                         key={pageNum}
                                         onClick={() => setCurrentPage(pageNum)}
-                                        className={`w-8 h-8 flex items-center justify-center rounded-full border text-xs font-bold transition-colors cursor-pointer ${
+                                        className={`w-8 h-8 flex items-center justify-center rounded-full border text-xs font-medium transition-colors cursor-pointer ${
                                             currentPage === pageNum
                                                 ? "border-amber-500 bg-amber-50 text-amber-600"
                                                 : "border-stone-200 text-stone-600 hover:bg-stone-50"

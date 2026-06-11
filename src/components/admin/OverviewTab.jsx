@@ -50,18 +50,18 @@ export default function OverviewTab({
         <div className="space-y-6 animate-fade-in-up">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-xl font-extrabold text-stone-900 font-heading">Tổng quan hệ thống</h3>
+                    <h3 className="text-xl font-semibold text-stone-900 font-heading">Tổng quan hệ thống</h3>
                     <p className="text-stone-500 text-xs mt-1">Thống kê tổng quan hệ thống quản lý TroTot.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-stone-200 rounded-lg text-xs text-stone-600 bg-stone-50 font-medium">
+                    <div className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-stone-200 rounded-lg text-xs text-stone-600 bg-stone-50 font-normal">
                         <TbClock size={14} className="text-stone-400" />
                         05/06/2025 - 05/06/2026
                     </div>
                     <button
                         onClick={onRefresh}
                         disabled={loadingStats}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-white border border-stone-200 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-50 cursor-pointer transition-colors disabled:opacity-50 shadow-sm"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-white border border-stone-200 rounded-xl text-xs font-medium text-stone-600 hover:bg-stone-50 cursor-pointer transition-colors disabled:opacity-50 shadow-sm"
                     >
                         <TbRefresh size={14} className={loadingStats ? 'animate-spin' : ''} />
                         Làm mới
@@ -83,15 +83,15 @@ export default function OverviewTab({
                                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white mb-3 shadow-sm border border-white/20`}>
                                     <stat.icon size={20} />
                                 </div>
-                                <span className="text-stone-500 text-[11px] font-bold uppercase tracking-wider">{stat.label} {stat.isMock && <span className="text-[9px] lowercase italic text-stone-400 font-normal ml-1">(ưu đãi)</span>}</span>
-                                <div className="text-2xl font-black text-stone-900 tracking-tight font-heading mt-1">
+                                <span className="text-stone-500 text-[11px] font-medium uppercase tracking-wider">{stat.label} {stat.isMock && <span className="text-[9px] lowercase italic text-stone-400 font-light ml-1">(ưu đãi)</span>}</span>
+                                <div className="text-2xl font-bold text-stone-900 tracking-tight font-heading mt-1">
                                     {stat.value}
                                 </div>
                             </div>
                         </div>
-                        <div className="text-[10px] font-bold text-emerald-600 mt-3 flex items-center gap-1 z-10 relative">
+                        <div className="text-[10px] font-medium text-emerald-600 mt-3 flex items-center gap-1 z-10 relative">
                             <span className="bg-emerald-50 px-1.5 py-0.5 rounded text-emerald-600">{stat.change}</span>
-                            <span className="text-stone-400 font-medium">so với tháng trước</span>
+                            <span className="text-stone-400 font-normal">so với tháng trước</span>
                         </div>
                     </div>
                 ))}
@@ -103,8 +103,8 @@ export default function OverviewTab({
                     {/* Revenue Chart */}
                     <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm flex-1">
                         <div className="flex justify-between items-center mb-6">
-                            <h4 className="font-bold text-stone-900 text-sm">Doanh thu theo tháng</h4>
-                            <span className="text-[10px] font-bold text-stone-500 bg-stone-100 px-2 py-1 rounded-md border border-stone-200">6 tháng gần đây</span>
+                            <h4 className="font-medium text-stone-900 text-sm">Doanh thu theo tháng</h4>
+                            <span className="text-[10px] font-medium text-stone-500 bg-stone-100 px-2 py-1 rounded-md border border-stone-200">6 tháng gần đây</span>
                         </div>
                         <div className="h-48 flex items-end justify-between gap-2 relative">
                             {/* Grid lines */}
@@ -115,7 +115,7 @@ export default function OverviewTab({
                                 <div className="border-t border-stone-100 w-full h-0"></div>
                             </div>
                             {/* Y axis labels */}
-                            <div className="absolute -left-1 inset-y-0 flex flex-col justify-between py-1 pb-[18px] text-[9px] text-stone-400 font-bold">
+                            <div className="absolute -left-1 inset-y-0 flex flex-col justify-between py-1 pb-[18px] text-[9px] text-stone-400 font-medium">
                                 <span>20tr</span>
                                 <span>15tr</span>
                                 <span>10tr</span>
@@ -135,7 +135,7 @@ export default function OverviewTab({
                                 ))}
                             </div>
                         </div>
-                        <div className="flex justify-around pl-6 text-[10px] text-stone-500 font-bold mt-2">
+                        <div className="flex justify-around pl-6 text-[10px] text-stone-500 font-medium mt-2">
                             {chartData.map((d, i) => <span key={i}>{d.month}</span>)}
                         </div>
                     </div>
@@ -143,8 +143,8 @@ export default function OverviewTab({
                     {/* Recent Activities */}
                     <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm flex-1">
                         <div className="flex justify-between items-center mb-5">
-                            <h4 className="font-bold text-stone-900 text-sm">Hoạt động gần đây</h4>
-                            <button className="text-[10px] font-bold text-amber-600 hover:text-amber-700 cursor-pointer">Xem tất cả</button>
+                            <h4 className="font-medium text-stone-900 text-sm">Hoạt động gần đây</h4>
+                            <button className="text-[10px] font-medium text-amber-600 hover:text-amber-700 cursor-pointer">Xem tất cả</button>
                         </div>
                         <div className="space-y-4">
                             {recentActivities.map(activity => (
@@ -153,10 +153,10 @@ export default function OverviewTab({
                                         <activity.icon size={16} />
                                     </div>
                                     <div className="flex-1 min-w-0 pt-0.5">
-                                        <div className="font-bold text-stone-800 text-xs truncate leading-none">{activity.text}</div>
+                                        <div className="font-medium text-stone-800 text-xs truncate leading-none">{activity.text}</div>
                                         <div className="text-[10px] text-stone-500 mt-1 truncate">{activity.sub}</div>
                                     </div>
-                                    <div className="text-[9px] text-stone-400 font-medium shrink-0 pt-0.5">{activity.time}</div>
+                                    <div className="text-[9px] text-stone-400 font-normal shrink-0 pt-0.5">{activity.time}</div>
                                 </div>
                             ))}
                         </div>
@@ -167,10 +167,10 @@ export default function OverviewTab({
                 <div className="lg:col-span-3">
                     <div className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm h-full flex flex-col">
                         <div className="flex justify-between items-center mb-5">
-                            <h4 className="font-bold text-stone-900 text-sm">Tin chờ duyệt mới nhất</h4>
+                            <h4 className="font-medium text-stone-900 text-sm">Tin chờ duyệt mới nhất</h4>
                             <button 
                                 onClick={onViewAllPending}
-                                className="text-[10px] font-bold text-amber-600 hover:text-amber-700 cursor-pointer border-none bg-transparent"
+                                className="text-[10px] font-medium text-amber-600 hover:text-amber-700 cursor-pointer border-none bg-transparent"
                             >
                                 Xem tất cả ({pendingRooms?.length || 0})
                             </button>
@@ -188,21 +188,21 @@ export default function OverviewTab({
                                                 onError={e => { e.currentTarget.src = '/images/placeholder.png'; }}
                                             />
                                             <div className="min-w-0">
-                                                <div className="font-bold text-stone-900 text-sm truncate group-hover:text-amber-600 transition-colors">{room.title}</div>
+                                                <div className="font-medium text-stone-900 text-sm truncate group-hover:text-amber-600 transition-colors">{room.title}</div>
                                                 <div className="text-[11px] text-stone-500 mt-0.5 truncate">{room.address}</div>
-                                                <div className="text-[10px] font-bold text-stone-400 mt-1">{room.owner}</div>
+                                                <div className="text-[10px] font-medium text-stone-400 mt-1">{room.owner}</div>
                                             </div>
                                         </div>
                                         <div className="text-right shrink-0 flex flex-col justify-between items-end h-full">
                                             <div className="flex flex-col items-end">
-                                                <div className="font-bold text-amber-600 text-sm">{formatPrice(room.price_monthly)}</div>
+                                                <div className="font-medium text-amber-600 text-sm">{formatPrice(room.price_monthly)}</div>
                                                 <div className="text-[9px] text-stone-400 mt-0.5">{room.date}</div>
                                             </div>
                                             <div className="flex gap-1.5 justify-end mt-2 items-center">
                                                 <button 
                                                     onClick={() => onOpenRoomPreview && onOpenRoomPreview(room.id)}
                                                     disabled={loadingPreviewRoom}
-                                                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border border-stone-200 text-stone-600 hover:bg-stone-50 cursor-pointer transition-colors disabled:opacity-50"
+                                                    className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border border-stone-200 text-stone-600 hover:bg-stone-50 cursor-pointer transition-colors disabled:opacity-50"
                                                 >
                                                     <TbEye size={12} />
                                                     Xem
@@ -214,7 +214,7 @@ export default function OverviewTab({
                             ) : (
                                 <div className="h-full flex flex-col items-center justify-center text-stone-400 py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl">
                                     <TbClock size={32} className="mb-3 opacity-50" />
-                                    <p className="text-sm font-bold text-stone-500">Không có tin mới nào đang chờ duyệt</p>
+                                    <p className="text-sm font-medium text-stone-500">Không có tin mới nào đang chờ duyệt</p>
                                     <p className="text-xs text-stone-400 mt-1">Các tin đã xử lý sẽ không xuất hiện ở đây.</p>
                                 </div>
                             )}
@@ -226,40 +226,40 @@ export default function OverviewTab({
             {/* Quick Stats Bottom Row */}
             <div className="bg-white border border-stone-200 rounded-2xl p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-4 px-2">
-                    <h4 className="font-bold text-stone-900 text-sm">Thống kê nhanh</h4>
+                    <h4 className="font-medium text-stone-900 text-sm">Thống kê nhanh</h4>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 divide-x divide-stone-100">
                     <div className="px-4 text-center">
                         <div className="w-8 h-8 mx-auto rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-2">
                             <TbBuildingWarehouse size={16} />
                         </div>
-                        <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Chủ trọ</div>
-                        <div className="text-xl font-black text-stone-900 font-heading mt-0.5">{stats?.totalLandlords || '...'}</div>
-                        <div className="text-[9px] font-bold text-emerald-500 mt-1">▲ 8,2%</div>
+                        <div className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">Chủ trọ</div>
+                        <div className="text-xl font-bold text-stone-900 font-heading mt-0.5">{stats?.totalLandlords || '...'}</div>
+                        <div className="text-[9px] font-medium text-emerald-500 mt-1">▲ 8,2%</div>
                     </div>
                     <div className="px-4 text-center">
                         <div className="w-8 h-8 mx-auto rounded-full bg-sky-50 text-sky-600 flex items-center justify-center mb-2">
                             <TbEye size={16} />
                         </div>
-                        <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Lượt xem</div>
-                        <div className="text-xl font-black text-stone-900 font-heading mt-0.5">125.300</div>
-                        <div className="text-[9px] font-bold text-emerald-500 mt-1">▲ 12,7%</div>
+                        <div className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">Lượt xem</div>
+                        <div className="text-xl font-bold text-stone-900 font-heading mt-0.5">125.300</div>
+                        <div className="text-[9px] font-medium text-emerald-500 mt-1">▲ 12,7%</div>
                     </div>
                     <div className="px-4 text-center">
                         <div className="w-8 h-8 mx-auto rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-2">
                             <TbHeart size={16} />
                         </div>
-                        <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tin yêu thích</div>
-                        <div className="text-xl font-black text-stone-900 font-heading mt-0.5">8.450</div>
-                        <div className="text-[9px] font-bold text-emerald-500 mt-1">▲ 9,1%</div>
+                        <div className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">Tin yêu thích</div>
+                        <div className="text-xl font-bold text-stone-900 font-heading mt-0.5">8.450</div>
+                        <div className="text-[9px] font-medium text-emerald-500 mt-1">▲ 9,1%</div>
                     </div>
                     <div className="px-4 text-center">
                         <div className="w-8 h-8 mx-auto rounded-full bg-orange-50 text-orange-600 flex items-center justify-center mb-2">
                             <TbFlag size={16} />
                         </div>
-                        <div className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Báo cáo</div>
-                        <div className="text-xl font-black text-stone-900 font-heading mt-0.5">45</div>
-                        <div className="text-[9px] font-bold text-red-500 mt-1">▼ 5,6%</div>
+                        <div className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">Báo cáo</div>
+                        <div className="text-xl font-bold text-stone-900 font-heading mt-0.5">45</div>
+                        <div className="text-[9px] font-medium text-red-500 mt-1">▼ 5,6%</div>
                     </div>
                 </div>
             </div>

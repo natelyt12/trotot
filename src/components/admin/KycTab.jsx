@@ -5,7 +5,7 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-xl font-extrabold text-stone-900 font-heading">Xác thực hồ sơ KYC</h3>
+                <h3 className="text-xl font-semibold text-stone-900 font-heading">Xác thực hồ sơ KYC</h3>
                 <p className="text-stone-500 text-xs mt-1">Duyệt yêu cầu nâng cấp vai trò từ Người thuê lên Bên cho thuê (Chủ nhà).</p>
             </div>
 
@@ -14,7 +14,7 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                     <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300 shadow-sm border border-stone-100">
                         <TbUserCheck size={32} />
                     </div>
-                    <p className="text-stone-500 font-bold text-sm">Không còn hồ sơ KYC chờ duyệt</p>
+                    <p className="text-stone-500 font-medium text-sm">Không còn hồ sơ KYC chờ duyệt</p>
                     <p className="text-stone-400 text-xs mt-1">Hệ thống đã đạt trạng thái sạch.</p>
                 </div>
             ) : (
@@ -24,12 +24,12 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                             {/* User Info card */}
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-stone-100">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-sm font-black">
+                                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-sm font-bold">
                                         {(req.full_name || "U").charAt(0).toUpperCase()}
                                     </div>
                                     <div>
-                                        <h4 className="font-extrabold text-stone-900 text-sm font-heading">{req.full_name}</h4>
-                                        <div className="flex items-center gap-3 flex-wrap text-stone-500 text-[10px] font-bold mt-0.5">
+                                        <h4 className="font-semibold text-stone-900 text-sm font-heading">{req.full_name}</h4>
+                                        <div className="flex items-center gap-3 flex-wrap text-stone-500 text-[10px] font-medium mt-0.5">
                                             <span className="flex items-center gap-1">
                                                 <TbMail size={12} /> {req.email}
                                             </span>
@@ -39,7 +39,7 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="text-[10px] text-stone-400 font-bold flex items-center gap-1">
+                                <div className="text-[10px] text-stone-400 font-medium flex items-center gap-1">
                                     <TbCalendar size={13} />
                                     Gửi yêu cầu: {req.submitted_at}
                                 </div>
@@ -49,7 +49,7 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {/* Front CCCD */}
                                 <div className="space-y-1.5">
-                                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+                                    <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">
                                         Mặt trước CCCD (Số: {req.document_id})
                                     </span>
                                     <div className="h-44 border border-stone-200 rounded-xl overflow-hidden bg-stone-50 group relative">
@@ -61,7 +61,7 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                                                 e.currentTarget.src = "/images/placeholder.png";
                                             }}
                                         />
-                                        <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-[11px] font-bold">
+                                        <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-[11px] font-medium">
                                             Xem ảnh lớn
                                         </div>
                                     </div>
@@ -69,7 +69,7 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
 
                                 {/* House ownership Doc */}
                                 <div className="space-y-1.5">
-                                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tài liệu sở hữu / Giấy kinh doanh</span>
+                                    <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">Tài liệu sở hữu / Giấy kinh doanh</span>
                                     <div className="h-44 border border-stone-200 rounded-xl overflow-hidden bg-stone-50 group relative">
                                         <img
                                             src={req.doc_house}
@@ -79,7 +79,7 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                                                 e.currentTarget.src = "/images/placeholder.png";
                                             }}
                                         />
-                                        <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-[11px] font-bold">
+                                        <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-[11px] font-medium">
                                             Xem ảnh lớn
                                         </div>
                                     </div>
@@ -90,14 +90,14 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                             <div className="flex items-center justify-end gap-2 pt-2">
                                 <button
                                     onClick={() => onRejectKYC(req.id, req.full_name)}
-                                    className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl text-xs font-bold border border-red-100 cursor-pointer transition-colors flex items-center gap-1.5"
+                                    className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl text-xs font-medium border border-red-100 cursor-pointer transition-colors flex items-center gap-1.5"
                                 >
                                     <TbX size={14} />
                                     <span>Bác bỏ hồ sơ</span>
                                 </button>
                                 <button
                                     onClick={() => onApproveKYC(req.id, req.full_name)}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold border-none cursor-pointer shadow-md shadow-emerald-600/10 transition-all flex items-center gap-1.5"
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-medium border-none cursor-pointer shadow-md shadow-emerald-600/10 transition-all flex items-center gap-1.5"
                                 >
                                     <TbCheck size={14} />
                                     <span>Phê duyệt KYC</span>

@@ -38,12 +38,12 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
 
     return (
         <div className="min-h-screen bg-stone-50 pt-20 pb-20 md:pb-10">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+            <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-8">
                 {/* Back button */}
                 <div className="mb-6">
                     <button
                         onClick={() => navigate("home")}
-                        className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
+                        className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-medium hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
                     >
                         <div className="w-7 h-7 rounded-full! bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
                             <AppIcon name="chevronLeft" size={14} strokeWidth={3.5} />
@@ -54,217 +54,209 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
 
                 {/* Page title */}
                 <div className="mb-8">
-                    <h1 className="text-2xl font-extrabold text-stone-900 tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
+                    <h1 className="text-2xl font-semibold text-stone-900 tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
                         Quản lý
                     </h1>
                     <p className="text-stone-500 text-sm mt-1">Quản lý tin đăng, khách thuê và các thông tin liên quan của bạn.</p>
                 </div>
 
-                <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] items-stretch min-h-[500px]">
-                        {/* Sidebar */}
-                        <aside className="lg:border-r border-stone-100 bg-stone-50/30 p-6 flex flex-col justify-between">
-                            <div className="space-y-6">
-                                <div className="space-y-2">
-                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Tổng quan</div>
-                                    <div className="space-y-1">
-                                        <button
-                                            onClick={() => {
-                                                setActiveTab("overview");
-                                                setIsCreating(false);
-                                                setEditingRoom(null);
-                                            }}
-                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                activeTab === "overview"
-                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
-                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
-                                            }`}
-                                        >
-                                            <AppIcon name="home" size={18} strokeWidth={activeTab === "overview" ? 2.5 : 2} />
-                                            <span>Xem tổng quan</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Quản lý tin đăng</div>
-                                    <div className="space-y-1">
-                                        {/* Đăng sửa tin button */}
-                                        <button
-                                            onClick={() => setActiveTab("post_room")}
-                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                activeTab === "post_room"
-                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
-                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
-                                            }`}
-                                        >
-                                            <AppIcon name="edit" size={18} strokeWidth={activeTab === "post_room" ? 2.5 : 2} />
-                                            <span>Đăng / Sửa tin</span>
-                                        </button>
-
-                                        <hr className="my-4 border-stone-200" />
-
-                                        {/* Subtabs for status filtering */}
-                                        {[
-                                            { id: "verified", label: "Tin đã xác thực", icon: "verified" },
-                                            { id: "published", label: "Tin đã công khai", icon: "home" },
-                                            { id: "pending_verification", label: "Tin đang chờ duyệt", icon: "clock" },
-                                            { id: "expired", label: "Tin hết hạn", icon: "alert" },
-                                            { id: "draft", label: "Tin nháp", icon: "file-text" },
-                                        ].map((subItem) => {
-                                            const isActive = activeTab === "manage_rooms" && subTab === subItem.id;
-                                            return (
-                                                <button
-                                                    key={subItem.id}
-                                                    onClick={() => {
-                                                        setActiveTab("manage_rooms");
-                                                        setSubTab(subItem.id);
-                                                        setCurrentPage(1);
-                                                    }}
-                                                    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                        isActive
-                                                            ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
-                                                            : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
-                                                    }`}
-                                                >
-                                                    <AppIcon name={subItem.icon} size={18} strokeWidth={isActive ? 2.5 : 2} />
-                                                    <span>{subItem.label}</span>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Quản lý khách thuê</div>
-                                    <div className="space-y-1">
-                                        <button
-                                            onClick={() => {
-                                                setActiveTab("occupied_rooms");
-                                                setCurrentPage(1);
-                                            }}
-                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                activeTab === "occupied_rooms"
-                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
-                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
-                                            }`}
-                                        >
-                                            <AppIcon name="users" size={18} strokeWidth={activeTab === "occupied_rooms" ? 2.5 : 2} />
-                                            <span>Phòng đang có người ở</span>
-                                        </button>
-
-                                        <button
-                                            onClick={() => {
-                                                setActiveTab("requests");
-                                                setCurrentPage(1);
-                                            }}
-                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                activeTab === "requests"
-                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
-                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
-                                            }`}
-                                        >
-                                            <AppIcon name="messages" size={18} strokeWidth={activeTab === "requests" ? 2.5 : 2} />
-                                            <span>Yêu cầu</span>
-                                        </button>
-                                    </div>
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 items-start">
+                    {/* Sidebar */}
+                    <aside className="w-full lg:w-[260px] shrink-0 bg-white border border-stone-200 rounded-xl p-6 flex flex-col justify-between h-auto shadow-sm">
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <div className="px-3 py-1 text-[10px] font-medium text-stone-400 uppercase tracking-widest">Tổng quan</div>
+                                <div className="space-y-1">
+                                    <button
+                                        onClick={() => {
+                                            setActiveTab("overview");
+                                            setIsCreating(false);
+                                            setEditingRoom(null);
+                                        }}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left font-medium text-sm border cursor-pointer transition-all duration-200 ${
+                                            activeTab === "overview"
+                                                ? "bg-amber-50 border-amber-200 text-amber-700"
+                                                : "bg-transparent border-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
+                                        }`}
+                                    >
+                                        <AppIcon name="home" size={18} strokeWidth={activeTab === "overview" ? 2.5 : 2} />
+                                        <span>Xem tổng quan</span>
+                                    </button>
                                 </div>
                             </div>
-                        </aside>
 
-                        {/* Content panel */}
-                        <main className="p-6 md:p-10 bg-white min-w-0">
-                            {/* ---- TAB: OVERVIEW ---- */}
-                            {activeTab === "overview" && (
-                                <LandlordOverviewTab
-                                    user={user}
+                            <div className="space-y-2">
+                                <div className="px-3 py-1 text-[10px] font-medium text-stone-400 uppercase tracking-widest">Quản lý tin đăng</div>
+                                <div className="space-y-1">
+                                    {/* Đăng sửa tin button */}
+                                    <button
+                                        onClick={() => setActiveTab("post_room")}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left font-medium text-sm border cursor-pointer transition-all duration-200 ${
+                                            activeTab === "post_room"
+                                                ? "bg-amber-50 border-amber-200 text-amber-700"
+                                                : "bg-transparent border-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
+                                        }`}
+                                    >
+                                        <AppIcon name="edit" size={18} strokeWidth={activeTab === "post_room" ? 2.5 : 2} />
+                                        <span>Đăng / Sửa tin</span>
+                                    </button>
+
+                                    <hr className="my-4 border-stone-200" />
+
+                                    {/* Subtabs for status filtering */}
+                                    {[
+                                        { id: "verified", label: "Tin đã xác thực", icon: "verified" },
+                                        { id: "published", label: "Tin đã công khai", icon: "home" },
+                                        { id: "pending_verification", label: "Tin đang chờ duyệt", icon: "clock" },
+                                        { id: "expired", label: "Tin hết hạn", icon: "alert" },
+                                        { id: "draft", label: "Tin nháp", icon: "file-text" },
+                                    ].map((subItem) => {
+                                        const isActive = activeTab === "manage_rooms" && subTab === subItem.id;
+                                        return (
+                                            <button
+                                                key={subItem.id}
+                                                onClick={() => {
+                                                    setActiveTab("manage_rooms");
+                                                    setSubTab(subItem.id);
+                                                    setCurrentPage(1);
+                                                }}
+                                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left font-medium text-sm border cursor-pointer transition-all duration-200 ${
+                                                    isActive
+                                                        ? "bg-amber-50 border-amber-200 text-amber-700"
+                                                        : "bg-transparent border-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
+                                                }`}
+                                            >
+                                                <AppIcon name={subItem.icon} size={18} strokeWidth={isActive ? 2.5 : 2} />
+                                                <span>{subItem.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <div className="px-3 py-1 text-[10px] font-medium text-stone-400 uppercase tracking-widest">Quản lý khách thuê</div>
+                                <div className="space-y-1">
+                                    <button
+                                        onClick={() => {
+                                            setActiveTab("occupied_rooms");
+                                            setCurrentPage(1);
+                                        }}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left font-medium text-sm border cursor-pointer transition-all duration-200 ${
+                                            activeTab === "occupied_rooms"
+                                                ? "bg-amber-50 border-amber-200 text-amber-700"
+                                                : "bg-transparent border-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
+                                        }`}
+                                    >
+                                        <AppIcon name="users" size={18} strokeWidth={activeTab === "occupied_rooms" ? 2.5 : 2} />
+                                        <span>Quản lý phòng đang có người thuê</span>
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setActiveTab("requests");
+                                            setCurrentPage(1);
+                                        }}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left font-medium text-sm border cursor-pointer transition-all duration-200 ${
+                                            activeTab === "requests"
+                                                ? "bg-amber-50 border-amber-200 text-amber-700"
+                                                : "bg-transparent border-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
+                                        }`}
+                                    >
+                                        <AppIcon name="messages" size={18} strokeWidth={activeTab === "requests" ? 2.5 : 2} />
+                                        <span>Yêu cầu</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Content panel */}
+                    <main className="flex-1 w-full bg-white border border-stone-200 rounded-xl shadow-sm p-6 md:p-10 min-h-md min-w-0">
+                        {/* ---- TAB: OVERVIEW ---- */}
+                        {activeTab === "overview" && (
+                            <LandlordOverviewTab user={user} rooms={rooms} setActiveTab={setActiveTab} setSubTab={setSubTab} setIsCreating={setIsCreating} />
+                        )}
+
+                        {/* ---- TAB: MANAGE ROOMS ---- */}
+                        {activeTab === "manage_rooms" && (
+                            <div>
+                                <ManageRoomsTab
                                     rooms={rooms}
-                                    setActiveTab={setActiveTab}
+                                    loadingRooms={loadingRooms}
+                                    currentPage={currentPage}
+                                    setCurrentPage={setCurrentPage}
+                                    subTab={subTab}
                                     setSubTab={setSubTab}
+                                    handlePublishFromDraft={handlePublishFromDraft}
+                                    handleUnpublish={handleUnpublish}
+                                    handleMockVerify={handleMockVerify}
+                                    handleDeleteRoom={handleDeleteRoom}
+                                    handleDuplicateRoom={handleDuplicateRoom}
+                                    setPreviewRoom={setPreviewRoom}
+                                    setEditingRoom={setEditingRoom}
                                     setIsCreating={setIsCreating}
+                                    setActiveTab={setActiveTab}
+                                    handleRenewRoom={handleRenewRoom}
+                                    onRefresh={fetchUserRooms}
                                 />
-                            )}
+                            </div>
+                        )}
 
-                            {/* ---- TAB: MANAGE ROOMS ---- */}
-                            {activeTab === "manage_rooms" && (
-                                <div>
-                                    <ManageRoomsTab
-                                        rooms={rooms}
-                                        loadingRooms={loadingRooms}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        subTab={subTab}
-                                        setSubTab={setSubTab}
-                                        handlePublishFromDraft={handlePublishFromDraft}
-                                        handleUnpublish={handleUnpublish}
-                                        handleMockVerify={handleMockVerify}
-                                        handleDeleteRoom={handleDeleteRoom}
-                                        handleDuplicateRoom={handleDuplicateRoom}
-                                        setPreviewRoom={setPreviewRoom}
-                                        setEditingRoom={setEditingRoom}
-                                        setIsCreating={setIsCreating}
-                                        setActiveTab={setActiveTab}
-                                        handleRenewRoom={handleRenewRoom}
-                                        onRefresh={fetchUserRooms}
-                                    />
+                        {/* ---- TAB: OCCUPIED ROOMS ---- */}
+                        {activeTab === "occupied_rooms" && (
+                            <div className="flex flex-col items-center justify-center py-20">
+                                <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mb-4">
+                                    <AppIcon name="users" size={32} className="text-stone-400" />
                                 </div>
-                            )}
+                                <h3 className="text-lg font-medium text-stone-900 mb-2">Quản lý phòng đang có người thuê</h3>
+                                <p className="text-stone-500 text-sm max-w-md text-center">
+                                    Tính năng này đang được phát triển. Sắp tới bạn có thể quản lý danh sách khách thuê hiện tại ở đây.
+                                </p>
+                            </div>
+                        )}
 
-                            {/* ---- TAB: OCCUPIED ROOMS ---- */}
-                            {activeTab === "occupied_rooms" && (
-                                <div className="flex flex-col items-center justify-center py-20">
-                                    <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mb-4">
-                                        <AppIcon name="users" size={32} className="text-stone-400" />
-                                    </div>
-                                    <h3 className="text-lg font-bold text-stone-900 mb-2">Phòng đang có người ở</h3>
-                                    <p className="text-stone-500 text-sm max-w-md text-center">
-                                        Tính năng này đang được phát triển. Sắp tới bạn có thể quản lý danh sách khách thuê hiện tại ở đây.
-                                    </p>
-                                </div>
-                            )}
+                        {/* ---- TAB: REQUESTS ---- */}
+                        {activeTab === "requests" && <RequestsTab user={user} />}
 
-                            {/* ---- TAB: REQUESTS ---- */}
-                            {activeTab === "requests" && <RequestsTab user={user} />}
-
-                            {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}
-                            {activeTab === "post_room" && (
-                                <div>
-                                    {!editingRoom && !isCreating ? (
-                                        <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
-                                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
-                                                <AppIcon name="edit" size={32} />
-                                            </div>
-                                            <h3 className="text-lg font-bold text-stone-900 mb-2">Không có yêu cầu chỉnh sửa tin đăng nào</h3>
-                                            <p className="text-stone-500 text-sm max-w-sm px-6 mb-6">
-                                                Bạn có thể chọn một tin đăng để chỉnh sửa từ danh sách, hoặc bạn có thể{" "}
-                                                <button
-                                                    onClick={() => setIsCreating(true)}
-                                                    className="text-amber-600 font-bold hover:text-amber-700 cursor-pointer bg-transparent border-none p-0 inline"
-                                                >
-                                                    tạo tin đăng mới
-                                                </button>
-                                            </p>
+                        {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}
+                        {activeTab === "post_room" && (
+                            <div>
+                                {!editingRoom && !isCreating ? (
+                                    <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
+                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
+                                            <AppIcon name="edit" size={32} />
                                         </div>
-                                    ) : (
-                                        <RoomPostForm
-                                            user={user}
-                                            roomToEdit={editingRoom}
-                                            onClear={() => {
-                                                setEditingRoom(null);
-                                                setIsCreating(false);
-                                                setActiveTab("manage_rooms");
-                                            }}
-                                            onSuccess={() => {
-                                                setEditingRoom(null);
-                                                setIsCreating(false);
-                                                setActiveTab("manage_rooms");
-                                            }}
-                                        />
-                                    )}
-                                </div>
-                            )}
-                        </main>
-                    </div>
+                                        <h3 className="text-lg font-medium text-stone-900 mb-2">Không có yêu cầu chỉnh sửa tin đăng nào</h3>
+                                        <p className="text-stone-500 text-sm max-w-sm px-6 mb-6">
+                                            Bạn có thể chọn một tin đăng để chỉnh sửa từ danh sách, hoặc bạn có thể{" "}
+                                            <button
+                                                onClick={() => setIsCreating(true)}
+                                                className="text-amber-600 font-medium hover:text-amber-700 cursor-pointer bg-transparent border-none p-0 inline"
+                                            >
+                                                tạo tin đăng mới
+                                            </button>
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <RoomPostForm
+                                        user={user}
+                                        roomToEdit={editingRoom}
+                                        onClear={() => {
+                                            setEditingRoom(null);
+                                            setIsCreating(false);
+                                            setActiveTab("manage_rooms");
+                                        }}
+                                        onSuccess={() => {
+                                            setEditingRoom(null);
+                                            setIsCreating(false);
+                                            setActiveTab("manage_rooms");
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        )}
+                    </main>
                 </div>
             </div>
             {previewRoom && (
@@ -330,7 +322,7 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                         <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
                             <AppIcon name="calendar" size={18} />
                         </div>
-                        <h3 className="text-lg font-bold text-stone-900 font-heading">Gia hạn tin đăng</h3>
+                        <h3 className="text-lg font-medium text-stone-900 font-heading">Gia hạn tin đăng</h3>
                     </div>
                     <button onClick={onClose} className="text-stone-400 hover:text-stone-600 transition-colors border-none bg-transparent cursor-pointer p-1">
                         <AppIcon name="plus" size={18} className="rotate-45" />
@@ -340,11 +332,11 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                 <div className="space-y-4 mb-6">
                     <p className="text-sm text-stone-600 leading-relaxed">
                         Bạn đang gia hạn hiển thị cho tin trọ: <br />
-                        <span className="font-bold text-stone-900">"{room.title}"</span>
+                        <span className="font-medium text-stone-900">"{room.title}"</span>
                     </p>
 
                     <div>
-                        <label className="block text-[0.7rem] font-bold text-stone-400 uppercase tracking-wider mb-2.5">Chọn gói gia hạn hiển thị</label>
+                        <label className="block text-[0.7rem] font-medium text-stone-400 uppercase tracking-wider mb-2.5">Chọn gói gia hạn hiển thị</label>
                         <div className="grid grid-cols-3 gap-3">
                             {RENEW_OPTIONS.map((opt) => (
                                 <button
@@ -358,12 +350,12 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                                     }`}
                                 >
                                     {opt.popular && (
-                                        <span className="absolute -top-2.5 bg-amber-500 text-white text-[0.55rem] font-bold px-1.5 py-0.5 rounded-full border border-white shadow-xs">
+                                        <span className="absolute -top-2.5 bg-amber-500 text-white text-[0.55rem] font-medium px-1.5 py-0.5 rounded-full border border-white shadow-xs">
                                             Phổ biến
                                         </span>
                                     )}
-                                    <span className="text-sm font-black tracking-tight">{opt.label}</span>
-                                    <span className="text-[0.65rem] text-stone-400 font-medium mt-1 uppercase">{opt.price}</span>
+                                    <span className="text-sm font-bold tracking-tight">{opt.label}</span>
+                                    <span className="text-[0.65rem] text-stone-400 font-normal mt-1 uppercase">{opt.price}</span>
                                 </button>
                             ))}
                         </div>
@@ -372,11 +364,11 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                     <div className="bg-stone-50 border border-stone-100 rounded-xl p-4 space-y-2">
                         <div className="flex justify-between text-xs text-stone-500">
                             <span>Thời hạn mới:</span>
-                            <span className="font-bold text-stone-800">{getNewExpiryDate()}</span>
+                            <span className="font-medium text-stone-800">{getNewExpiryDate()}</span>
                         </div>
                         <div className="flex justify-between text-xs text-stone-500">
                             <span>Trạng thái sau gia hạn:</span>
-                            <span className="font-bold text-green-600 uppercase">Hoạt động (Còn phòng)</span>
+                            <span className="font-medium text-green-600 uppercase">Hoạt động (Còn phòng)</span>
                         </div>
                     </div>
 
@@ -392,7 +384,7 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                     <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 py-3 border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors font-bold text-sm rounded-xl cursor-pointer bg-white"
+                        className="flex-1 py-3 border border-stone-200 text-stone-600 hover:bg-stone-50 transition-colors font-medium text-sm rounded-xl cursor-pointer bg-white"
                     >
                         Hủy
                     </button>
@@ -400,7 +392,7 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                         type="button"
                         disabled={isSubmitting}
                         onClick={handleConfirm}
-                        className="flex-1 py-3 bg-amber-500 text-white hover:bg-amber-600 transition-colors font-bold text-sm rounded-xl cursor-pointer border-none shadow-lg shadow-amber-500/25 flex items-center justify-center gap-1.5"
+                        className="flex-1 py-3 bg-amber-500 text-white hover:bg-amber-600 transition-colors font-medium text-sm rounded-xl cursor-pointer border-none shadow-lg shadow-amber-500/25 flex items-center justify-center gap-1.5"
                     >
                         {isSubmitting ? "Đang xử lý..." : "Xác nhận gia hạn"}
                     </button>

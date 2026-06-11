@@ -60,7 +60,7 @@ export default function RoomCard({ room, onClick, style }) {
                 ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-stone-400 gap-1 bg-stone-100">
                         <AppIcon name="home" size={28} className="text-stone-300" />
-                        <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Không có ảnh</span>
+                        <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">Không có ảnh</span>
                     </div>
                 )}
 
@@ -78,8 +78,8 @@ export default function RoomCard({ room, onClick, style }) {
                 {/* Status + Verified badges */}
                 <div className="absolute top-2 left-2 flex flex-col gap-1.5">
                     <span
-                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full w-fit text-[0.7rem] font-semibold ${
-                            isAvailable ? "bg-green-100 text-green-700" : isExpired ? "bg-red-100 text-red-700" : "bg-stone-100 text-stone-700"
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full w-fit text-[0.7rem] font-medium border ${
+                            isAvailable ? "bg-green-50 text-green-700 border-green-200" : isExpired ? "bg-red-50 text-red-700 border-red-200" : "bg-stone-50 text-stone-700 border-stone-200"
                         }`}
                     >
                         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isAvailable ? "bg-green-600" : isExpired ? "bg-red-600" : "bg-stone-600"}`} />
@@ -87,7 +87,7 @@ export default function RoomCard({ room, onClick, style }) {
                     </span>
 
                     {metadata.is_verified && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold bg-blue-100 text-blue-700">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-medium bg-blue-50 text-blue-700 border border-blue-200">
                             <AppIcon name="verified" size={12} strokeWidth={2.5} />
                             Đã xác thực
                         </span>
@@ -96,7 +96,7 @@ export default function RoomCard({ room, onClick, style }) {
 
                 {/* Media count badge */}
                 {mediaCount > 1 && (
-                    <div className="absolute bottom-2 right-2 bg-black/60 text-white rounded-full px-1.5 py-0.5 text-[0.65rem] font-medium flex items-center gap-1">
+                    <div className="absolute bottom-2 right-2 bg-black/60 text-white rounded-full px-1.5 py-0.5 text-[0.65rem] font-normal flex items-center gap-1">
                         <AppIcon name={hasVideo ? "play" : "photo"} size={11} />
                         <span>{mediaCount}</span>
                     </div>
@@ -107,7 +107,7 @@ export default function RoomCard({ room, onClick, style }) {
             <div className="p-3 sm:p-4 flex flex-col gap-1.5 flex-1 min-w-0">
                 {/* Price */}
                 <span
-                    className="text-[1.1rem] sm:text-[1.2rem] font-bold text-amber-600 tracking-tight leading-none"
+                    className="text-[1.1rem] sm:text-[1.2rem] font-medium text-amber-600 tracking-tight leading-none"
                     style={{ fontFamily: "var(--font-heading)" }}
                 >
                     {formatPriceShort(basic_info.price_monthly)}
@@ -115,7 +115,7 @@ export default function RoomCard({ room, onClick, style }) {
 
                 {/* Title */}
                 <h3
-                    className="text-sm font-semibold text-stone-900 leading-snug m-0 line-clamp-2 sm:truncate"
+                    className="text-sm font-medium text-stone-900 leading-snug m-0 line-clamp-2 sm:truncate"
                     style={{ fontFamily: "var(--font-heading)" }}
                     title={basic_info.title}
                 >
@@ -136,10 +136,10 @@ export default function RoomCard({ room, onClick, style }) {
                 {/* Room type + Area + Amenities */}
                 <div className="flex flex-col gap-2 mt-auto">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[0.65rem] font-bold uppercase tracking-wider text-stone-500 bg-stone-100 px-2.5 py-1 rounded-full ">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.7rem] font-medium text-stone-600 bg-stone-50 border border-stone-200">
                             {ROOM_TYPES[basic_info.room_type] || "Phòng"}
                         </span>
-                        <span className="inline-flex items-center gap-1 text-[0.75rem] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-medium text-amber-700 bg-amber-50 border border-amber-200">
                             <AppIcon name="area" size={11} />
                             {formatArea(basic_info.area_sqm)}
                         </span>
@@ -164,11 +164,11 @@ export default function RoomCard({ room, onClick, style }) {
                             className="w-5 h-5 rounded-full object-cover border border-stone-200"
                         />
                     ) : (
-                        <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center text-[0.55rem] font-bold text-amber-700 shrink-0">
+                        <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center text-[0.55rem] font-medium text-amber-700 shrink-0">
                             {media_contact.contact.name?.charAt(0)}
                         </div>
                     )}
-                    <span className="text-[0.72rem] text-stone-400 font-medium truncate">{media_contact.contact.name}</span>
+                    <span className="text-[0.72rem] text-stone-400 font-normal truncate">{media_contact.contact.name}</span>
                     <div className="ml-auto flex items-center gap-0.5 text-[0.65rem] text-stone-300">
                         <AppIcon name="eye" size={10} />
                         {metadata.total_views || 0}

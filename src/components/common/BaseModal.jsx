@@ -46,7 +46,7 @@ export default function BaseModal({ isOpen, onClose, children, title, showClose 
                         {/* Header if title exists */}
                         {(title || showClose) && (
                             <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 shrink-0">
-                                {title ? <h3 className="text-lg font-bold text-stone-900 font-heading">{title}</h3> : <div />}
+                                {title ? <h3 className="text-lg font-medium text-stone-900 font-heading">{title}</h3> : <div />}
 
                                 {showClose && (
                                     <button

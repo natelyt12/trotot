@@ -34,17 +34,17 @@ export default function SearchTrigger({
                 </div>
 
                 <div className="flex flex-col items-start truncate text-left min-w-0 flex-1">
-                    <span className={`${labelSize} font-bold text-stone-400 uppercase tracking-widest mb-0`}>
+                    <span className={`${labelSize} font-medium text-stone-400 uppercase tracking-widest mb-0`}>
                         Khu vực tìm kiếm
                     </span>
-                    <span className={`${textSize} font-bold truncate w-full ${isFilled ? 'text-stone-900' : 'text-stone-400'}`}>
+                    <span className={`${textSize} font-medium truncate w-full ${isFilled ? 'text-stone-900' : 'text-stone-400'}`}>
                         {displayText}
                     </span>
                 </div>
             </div>
 
             {showButton && !isNavbar && (
-                <div className="bg-amber-500 text-white px-7 py-3 rounded-full font-bold text-sm transition-colors duration-200 shrink-0 hover:bg-amber-600">
+                <div className="bg-amber-500 text-white px-7 py-3 rounded-full font-medium text-sm transition-colors duration-200 shrink-0 hover:bg-amber-600">
                     Tìm ngay
                 </div>
             )}

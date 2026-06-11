@@ -68,33 +68,32 @@ export default function BottomNav({ currentPage, navigate, user, onFilterClick }
                         <div key={item.id} className="relative flex items-center justify-center">
                             <button
                                 onClick={() => handleNavigate(item)}
-                                className={`relative flex flex-col items-center justify-center border-none cursor-pointer transition-all duration-200 ${
+                                className={`relative flex border-none cursor-pointer transition-colors duration-200 group ${
                                     isCenter
-                                        ? "w-12 h-12 bg-linear-to-br from-amber-400 to-orange-500 text-white rounded-full hover:from-amber-500 hover:to-orange-600"
-                                        : "gap-0.5"
+                                        ? "w-12 h-12 bg-amber-500 text-white rounded-full hover:bg-amber-600 shadow-sm shrink-0 items-center justify-center"
+                                        : "flex-col gap-0.5 items-center justify-center bg-transparent"
                                 }`}
-                                style={{ background: isCenter ? undefined : "transparent" }}
                             >
                                 {isCenter && currentPage !== "dashboard" && activeFilterCount > 0 && (
-                                    <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-red-500 border-2 border-white rounded-full z-10 animate-pulse" />
+                                    <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full z-10 animate-pulse" />
                                 )}
-                                {/* Micro-animation for icon on active */}
-                                <motion.div
-                                    className="flex items-center justify-center"
-                                    animate={isActive ? { scale: [1, 1.15, 1] } : {}}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <AppIcon
-                                        name={item.icon}
-                                        size={isCenter ? 24 : 22}
-                                        strokeWidth={isActive || isCenter ? 2.5 : 2}
-                                        color={isCenter ? "#ffffff" : isActive ? "#d97706" : "#a8a29e"}
-                                    />
-                                </motion.div>
 
-                                {/* Label below icon (not for center item) */}
-                                {!isCenter && (
-                                    <span className={`text-[0.7rem] font-medium mt-0.5 ${isActive ? "text-amber-600" : "text-stone-400"}`}>{item.label}</span>
+                                {isCenter ? (
+                                    <AppIcon name={item.icon} size={20} strokeWidth={2.5} color="#ffffff" />
+                                ) : (
+                                    <>
+                                        {/* Micro-animation for icon on active */}
+                                        <motion.div
+                                            className="flex items-center justify-center"
+                                            animate={isActive ? { scale: [1, 1.15, 1] } : {}}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            <AppIcon name={item.icon} size={22} strokeWidth={isActive ? 2.5 : 2} color={isActive ? "#d97706" : "#a8a29e"} />
+                                        </motion.div>
+                                        <span className={`text-[0.7rem] font-light mt-0.5 ${isActive ? "text-amber-600" : "text-stone-400"}`}>
+                                            {item.label}
+                                        </span>
+                                    </>
                                 )}
                             </button>
                         </div>

@@ -191,7 +191,7 @@ export default function ForumCommentSection({ postId, post, user, navigate }) {
 
     return (
         <div className="mt-4 pt-4 border-t border-stone-100">
-            <h3 className="font-bold text-[0.95rem] text-stone-900 flex items-center gap-2 mb-4">
+            <h3 className="font-medium text-[0.95rem] text-stone-900 flex items-center gap-2 mb-4">
                 <AppIcon name="messages" color="#d97706" size={16} />
                 Bình luận ({comments.length > 0 ? comments.reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0) : 0})
             </h3>
@@ -200,8 +200,8 @@ export default function ForumCommentSection({ postId, post, user, navigate }) {
             <div className="mb-6 relative">
                 {!user && (
                     <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-lg border border-stone-200">
-                        <p className="text-stone-700 font-medium mb-2 text-sm">Đăng nhập để tham gia thảo luận</p>
-                        <button onClick={() => navigate('login')} className="px-4 py-1.5 bg-amber-500 text-white rounded-full text-sm font-bold hover:bg-amber-600 transition-colors cursor-pointer border-none">
+                        <p className="text-stone-700 font-normal mb-2 text-sm">Đăng nhập để tham gia thảo luận</p>
+                        <button onClick={() => navigate('login')} className="px-4 py-1.5 bg-amber-500 text-white rounded-full text-sm font-medium hover:bg-amber-600 transition-colors cursor-pointer border-none">
                             Đăng nhập ngay
                         </button>
                     </div>
@@ -219,7 +219,7 @@ export default function ForumCommentSection({ postId, post, user, navigate }) {
                     <button
                         onClick={handleCommentSubmit}
                         disabled={!user || submitting || !newComment.trim()}
-                        className="inline-flex items-center gap-1.5 bg-amber-500 text-white rounded-full px-5 py-1.5 hover:bg-amber-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-none font-bold text-sm"
+                        className="inline-flex items-center gap-1.5 bg-amber-500 text-white rounded-full px-5 py-1.5 hover:bg-amber-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-none font-medium text-sm"
                     >
                         {submitting ? 'Đang gửi...' : 'Gửi'}
                     </button>
@@ -279,7 +279,7 @@ export default function ForumCommentSection({ postId, post, user, navigate }) {
                                         <div className="bg-stone-50 rounded-xl border border-stone-200 overflow-hidden focus-within:border-amber-500 transition-colors">
                                             {replyTo.userName && (
                                                 <div className="px-3 py-1.5 bg-amber-50 border-b border-stone-200 flex items-center justify-between">
-                                                    <span className="text-[0.72rem] text-amber-700 font-bold flex items-center gap-1.5">
+                                                    <span className="text-[0.72rem] text-amber-700 font-medium flex items-center gap-1.5">
                                                         <AppIcon name="messages" size={12} />
                                                         Đang phản hồi @{replyTo.userName}
                                                     </span>
@@ -300,8 +300,8 @@ export default function ForumCommentSection({ postId, post, user, navigate }) {
                                         <div className="flex justify-between items-center mt-2">
                                             <span className="text-stone-400 text-xs ml-2">{replyContent.length}/500</span>
                                             <div className="flex gap-2">
-                                                <button onClick={() => { setReplyTo(null); setReplyContent(''); }} className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1">Hủy</button>
-                                                <button onClick={handleReplySubmit} disabled={submitting || !replyContent.trim()} className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none">
+                                                <button onClick={() => { setReplyTo(null); setReplyContent(''); }} className="text-stone-500 text-xs font-medium hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1">Hủy</button>
+                                                <button onClick={handleReplySubmit} disabled={submitting || !replyContent.trim()} className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-medium hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none">
                                                     {submitting ? 'Đang gửi...' : 'Gửi trả lời'}
                                                 </button>
                                             </div>
@@ -357,7 +357,7 @@ export default function ForumCommentSection({ postId, post, user, navigate }) {
                                                         <div className="bg-stone-50 rounded-xl border border-stone-200 overflow-hidden focus-within:border-amber-500 transition-colors">
                                                             {replyTo.userName && (
                                                                 <div className="px-3 py-1.5 bg-amber-50 border-b border-stone-200 flex items-center justify-between">
-                                                                    <span className="text-[0.72rem] text-amber-700 font-bold flex items-center gap-1.5">
+                                                                    <span className="text-[0.72rem] text-amber-700 font-medium flex items-center gap-1.5">
                                                                         <AppIcon name="messages" size={12} />
                                                                         Đang phản hồi @{replyTo.userName}
                                                                     </span>
@@ -378,8 +378,8 @@ export default function ForumCommentSection({ postId, post, user, navigate }) {
                                                         <div className="flex justify-between items-center mt-2">
                                                             <span className="text-stone-400 text-xs ml-2">{replyContent.length}/500</span>
                                                             <div className="flex gap-2">
-                                                                <button onClick={() => { setReplyTo(null); setReplyContent(''); }} className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1">Hủy</button>
-                                                                <button onClick={handleReplySubmit} disabled={submitting || !replyContent.trim()} className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none">
+                                                                <button onClick={() => { setReplyTo(null); setReplyContent(''); }} className="text-stone-500 text-xs font-medium hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1">Hủy</button>
+                                                                <button onClick={handleReplySubmit} disabled={submitting || !replyContent.trim()} className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-medium hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none">
                                                                     {submitting ? 'Đang gửi...' : 'Gửi trả lời'}
                                                                 </button>
                                                             </div>
@@ -424,7 +424,7 @@ function CommentItem({ comment, user, isReply = false, activeMenuId, setActiveMe
         >
             <div
                 onClick={() => !isDeletedUser && navigate && navigate('public-profile', { userId: comment.user_id })}
-                className={`${isReply ? 'w-7 h-7' : 'w-9 h-9'} rounded-full flex items-center justify-center font-bold text-white text-xs shrink-0 overflow-hidden ${isDeletedUser ? 'bg-stone-300' : 'bg-amber-500 hover:opacity-85 cursor-pointer transition-opacity'}`}
+                className={`${isReply ? 'w-7 h-7' : 'w-9 h-9'} rounded-full flex items-center justify-center font-medium text-white text-xs shrink-0 overflow-hidden ${isDeletedUser ? 'bg-stone-300' : 'bg-amber-500 hover:opacity-85 cursor-pointer transition-opacity'}`}
                 style={avatarUrl ? { backgroundImage: `url(${avatarUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
             >
                 {!avatarUrl && initial}
@@ -434,7 +434,7 @@ function CommentItem({ comment, user, isReply = false, activeMenuId, setActiveMe
                     <div>
                         <span
                             onClick={() => !isDeletedUser && navigate && navigate('public-profile', { userId: comment.user_id })}
-                            className={`text-[0.85rem] font-bold ${isDeletedUser ? 'text-stone-400 italic' : 'text-stone-900 hover:text-amber-600 cursor-pointer transition-colors'}`}
+                            className={`text-[0.85rem] font-medium ${isDeletedUser ? 'text-stone-400 italic' : 'text-stone-900 hover:text-amber-600 cursor-pointer transition-colors'}`}
                         >
                             {displayName}
                         </span>
@@ -487,7 +487,7 @@ function CommentItem({ comment, user, isReply = false, activeMenuId, setActiveMe
                         <div className="bg-stone-50 rounded-xl border border-stone-200 overflow-hidden focus-within:border-amber-500 transition-colors">
                             {editingTag && (
                                 <div className="px-3 py-1.5 bg-amber-50 border-b border-stone-200 flex items-center justify-between">
-                                    <span className="text-[0.72rem] text-amber-700 font-bold">Gắn thẻ @{editingTag}</span>
+                                    <span className="text-[0.72rem] text-amber-700 font-medium">Gắn thẻ @{editingTag}</span>
                                     <button onClick={() => setEditingTag(null)} className="text-stone-400 hover:text-stone-600 cursor-pointer border-none bg-transparent"><AppIcon name="close" size={14} /></button>
                                 </div>
                             )}
@@ -496,14 +496,14 @@ function CommentItem({ comment, user, isReply = false, activeMenuId, setActiveMe
                         <div className="flex justify-between items-center mt-2">
                             <span className="text-stone-400 text-xs ml-2">{editingContent.length}/500</span>
                             <div className="flex gap-2">
-                                <button onClick={() => setEditingId(null)} className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1">Hủy</button>
-                                <button onClick={() => onUpdate(comment.id)} disabled={!editingContent.trim()} className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none">Cập nhật</button>
+                                <button onClick={() => setEditingId(null)} className="text-stone-500 text-xs font-medium hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1">Hủy</button>
+                                <button onClick={() => onUpdate(comment.id)} disabled={!editingContent.trim()} className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-medium hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none">Cập nhật</button>
                             </div>
                         </div>
                     </motion.div>
                 ) : (
                     <p className="text-[0.88rem] text-stone-700 leading-relaxed whitespace-pre-wrap">
-                        {tag && <span className="text-amber-600 font-bold mr-1.5">@{tag}</span>}
+                        {tag && <span className="text-amber-600 font-medium mr-1.5">@{tag}</span>}
                         {displayContent}
                     </p>
                 )}
@@ -513,16 +513,16 @@ function CommentItem({ comment, user, isReply = false, activeMenuId, setActiveMe
                         <div className="flex items-center bg-stone-100 rounded-full px-2 py-0.5">
                             <button onClick={() => onVote(comment.id, 1)} className={`p-1 rounded-full border-none bg-transparent cursor-pointer flex items-center gap-1 transition-colors ${comment.userVote === 1 ? 'text-amber-600' : 'text-stone-400 hover:text-stone-600'}`}>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill={comment.userVote === 1 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
-                                <span className="text-[0.65rem] font-bold">{comment.likeCount || 0}</span>
+                                <span className="text-[0.65rem] font-medium">{comment.likeCount || 0}</span>
                             </button>
                             <div className="w-px h-3 bg-stone-300 mx-1" />
                             <button onClick={() => onVote(comment.id, -1)} className={`p-1 rounded-full border-none bg-transparent cursor-pointer flex items-center gap-1 transition-colors ${comment.userVote === -1 ? 'text-red-500' : 'text-stone-400 hover:text-stone-600'}`}>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill={comment.userVote === -1 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="rotate-180"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/></svg>
-                                <span className="text-[0.65rem] font-bold">{comment.dislikeCount || 0}</span>
+                                <span className="text-[0.65rem] font-medium">{comment.dislikeCount || 0}</span>
                             </button>
                         </div>
                         {user && (
-                            <button onClick={onReplyClick} className="text-stone-500 text-[0.72rem] font-bold hover:text-amber-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1">
+                            <button onClick={onReplyClick} className="text-stone-500 text-[0.72rem] font-medium hover:text-amber-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1">
                                 <AppIcon name="messages" size={12} />Phản hồi
                             </button>
                         )}

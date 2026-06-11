@@ -69,7 +69,6 @@ export default function HeroSection({ user, onSearchClick, filters, getLocationD
             <div className="flex-1 flex items-center justify-center relative z-10 w-full">
                 <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                     <div className="grid grid-cols-1 lg:grid-cols-[50%_50%] gap-10 items-center">
-                        
                         {/* LEFT COLUMN - Centered on Mobile, Aligned Left on Desktop */}
                         <div className="text-center lg:text-left w-full">
                             {/* Badge */}
@@ -78,12 +77,12 @@ export default function HeroSection({ user, onSearchClick, filters, getLocationD
                                 className="inline-flex items-center gap-1.5 bg-amber-500/15 border border-amber-500/25 rounded-full px-3 py-1 mb-6"
                             >
                                 <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-                                <span className="text-amber-300 text-xs font-semibold">Nền tảng tìm trọ #1 Việt Nam</span>
+                                <span className="text-amber-300 text-xs font-medium">Nền tảng tìm trọ #1 Việt Nam</span>
                             </motion.div>
 
                             <motion.h1
                                 variants={itemVariants}
-                                className="text-[clamp(2.35rem,5vw,3.75rem)] font-extrabold text-white! leading-[1.1] mb-5 tracking-tight lg:max-w-[560px] mx-auto lg:mx-0"
+                                className="text-[clamp(2.35rem,5vw,3.75rem)] font-medium text-white! leading-[1.1] mb-5 tracking-tight lg:max-w-[560px] mx-auto lg:mx-0"
                                 style={{ fontFamily: "var(--font-heading)" }}
                             >
                                 Tìm phòng{" "}
@@ -95,7 +94,7 @@ export default function HeroSection({ user, onSearchClick, filters, getLocationD
 
                             <motion.p
                                 variants={itemVariants}
-                                className="text-stone-300 text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8 md:mb-10 font-medium text-center lg:text-left"
+                                className="text-stone-300 text-base md:text-lg leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8 md:mb-10 font-light text-center lg:text-left"
                             >
                                 Hàng nghìn phòng được xác thực tại Hà Nội, TP. Hồ Chí Minh và khắp cả nước. Miễn phí tìm kiếm, không phí trung gian.
                             </motion.p>
@@ -113,23 +112,23 @@ export default function HeroSection({ user, onSearchClick, filters, getLocationD
                             {/* Stats bar */}
                             <motion.div
                                 variants={itemVariants}
-                                className="grid grid-cols-2 md:grid-cols-4 bg-stone-800/60 backdrop-blur-md border border-stone-700/50 rounded-xl overflow-hidden max-w-2xl mx-auto lg:mx-0 mt-12"
+                                className="grid grid-cols-2 md:grid-cols-4 bg-stone-800 border border-stone-700 rounded-2xl overflow-hidden max-w-2xl mx-auto lg:mx-0 mt-12"
                             >
                                 {stats.map((stat, idx) => (
                                     <div
                                         key={stat.label}
-                                        className={`p-4 md:p-5 text-center border-stone-700/50 
+                                        className={`p-4 md:p-4 text-center border-stone-700/50 
                                             ${idx % 2 === 0 ? "border-r" : ""} 
                                             ${idx < 2 ? "border-b" : ""} 
                                             md:border-b-0 md:border-r md:last:border-r-0`}
                                     >
                                         <div
-                                            className="font-extrabold text-[1.4rem] md:text-[1.6rem] text-amber-400 leading-none"
+                                            className="font-medium text-[2.4rem] md:text-[1.6rem] text-amber-400 leading-none"
                                             style={{ fontFamily: "var(--font-heading)" }}
                                         >
                                             {stat.value}
                                         </div>
-                                        <div className="text-[11px] md:text-xs text-stone-300 mt-1.5 font-medium">{stat.label}</div>
+                                        <div className="text-[11px] md:text-xs text-stone-300 mt-1.5 font-light">{stat.label}</div>
                                     </div>
                                 ))}
                             </motion.div>

@@ -5,6 +5,7 @@ import { formatDate, formatRelativeTime } from "../../utils/formatters.js";
 import AppIcon from "../common/AppIcon.jsx";
 import RoomAttachCard from "./RoomAttachCard.jsx";
 import ForumCommentSection from "./ForumCommentSection.jsx";
+import ImagePreviewModal from "../common/ImagePreviewModal.jsx";
 import { useModal } from "../../context/ModalContext.jsx";
 import { useNotification } from "../../context/NotificationContext.jsx";
 
@@ -28,6 +29,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
     const [showComments, setShowComments] = useState(defaultShowComments || false);
     const [commentCount, setCommentCount] = useState(post.commentCount || 0);
     const [deleted, setDeleted] = useState(false);
+    const [previewImageIndex, setPreviewImageIndex] = useState(null);
 
     if (deleted) return null;
 
@@ -41,14 +43,14 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
     const roleLabel = role === "landlord" ? "Chủ trọ" : role === "admin" ? "Quản trị" : "Người thuê";
     const roleBadgeClass =
         role === "landlord"
-            ? "bg-amber-100 text-amber-700 border-amber-200"
+            ? "bg-amber-50 text-amber-700 border-amber-200"
             : role === "admin"
-              ? "bg-purple-100 text-purple-700 border-purple-200"
-              : "bg-stone-100 text-stone-600 border-stone-200";
+              ? "bg-purple-50 text-purple-700 border-purple-200"
+              : "bg-stone-50 text-stone-600 border-stone-200";
 
-    const category = post.category || 'general';
-    const categoryLabel = category === 'transfer' ? 'Sang nhượng' : category === 'roommate' ? 'Tìm người ở cùng' : null;
-    const categoryBadgeClass = category === 'transfer' ? 'bg-purple-100 text-purple-700 border-purple-200' : 'bg-sky-100 text-sky-700 border-sky-200';
+    const category = post.category || "general";
+    const categoryLabel = category === "transfer" ? "Sang nhượng" : category === "roommate" ? "Tìm người ở cùng" : null;
+    const categoryBadgeClass = category === "transfer" ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-sky-50 text-sky-700 border-sky-200";
 
     const handleLike = async () => {
         if (!user) {
@@ -102,18 +104,22 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
             showModal({
                 title: "Yêu cầu đăng nhập",
                 message: "Vui lòng đăng nhập để xin sang nhượng!",
-                type: "warning", confirmText: "Đăng nhập", onConfirm: () => navigate("login"),
+                type: "warning",
+                confirmText: "Đăng nhập",
+                onConfirm: () => navigate("login"),
             });
             return;
         }
         showModal({
             title: "Xin sang nhượng phòng",
             message: `Bạn muốn gửi yêu cầu sang nhượng phòng này đến ${displayName}?`,
-            type: "info", confirmText: "Gửi yêu cầu", cancelText: "Hủy",
+            type: "info",
+            confirmText: "Gửi yêu cầu",
+            cancelText: "Hủy",
             onConfirm: async () => {
-                const { error } = await createRoomRequest({ postId: post.id, requesterId: user.id, type: 'transfer' });
+                const { error } = await createRoomRequest({ postId: post.id, requesterId: user.id, type: "transfer" });
                 if (error) {
-                    if (error.code === '23505') {
+                    if (error.code === "23505") {
                         addNotification("Bạn đã gửi yêu cầu cho bài viết này rồi!", "warning");
                     } else {
                         addNotification("Có lỗi xảy ra khi gửi yêu cầu.", "error");
@@ -121,7 +127,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                     return;
                 }
                 addNotification("Đã gửi yêu cầu sang nhượng! Vui lòng chờ người cho thuê phản hồi.", "success");
-            }
+            },
         });
     };
 
@@ -151,7 +157,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                 <div className="flex items-center gap-3">
                     <div
                         onClick={() => navigate("public-profile", { userId: post.user_id })}
-                        className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden cursor-pointer hover:opacity-85 transition-opacity"
+                        className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center font-medium text-sm shrink-0 overflow-hidden cursor-pointer hover:opacity-85 transition-opacity"
                         style={avatarUrl ? { backgroundImage: `url(${avatarUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}
                     >
                         {!avatarUrl && displayName.charAt(0).toUpperCase()}
@@ -160,13 +166,13 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                         <div className="flex items-center gap-2 flex-wrap">
                             <button
                                 onClick={() => navigate("public-profile", { userId: post.user_id })}
-                                className="font-bold text-stone-900 text-[0.9rem] hover:text-amber-600 transition-colors cursor-pointer border-none bg-transparent p-0 leading-none"
+                                className="font-medium text-stone-900 text-[0.9rem] hover:text-amber-600 transition-colors cursor-pointer border-none bg-transparent p-0 leading-none"
                             >
                                 {displayName}
                             </button>
-                            <span className={`px-1.5 py-0.5 rounded-full text-[0.65rem] font-bold tracking-wide border ${roleBadgeClass}`}>{roleLabel}</span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-[0.65rem] font-medium tracking-wide border ${roleBadgeClass}`}>{roleLabel}</span>
                             {categoryLabel && (
-                                <span className={`px-1.5 py-0.5 rounded-full text-[0.65rem] font-bold tracking-wide border ${categoryBadgeClass}`}>
+                                <span className={`px-1.5 py-0.5 rounded-full text-[0.65rem] font-medium tracking-wide border ${categoryBadgeClass}`}>
                                     {categoryLabel}
                                 </span>
                             )}
@@ -249,18 +255,17 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                 {imgCount > 0 && (
                     <div
                         className={`grid gap-1 rounded-xl overflow-hidden mb-3 ${
-                            imgCount === 1 ? "grid-cols-1" : imgCount === 2 ? "grid-cols-2" : "grid-cols-2"
+                            imgCount === 1 ? "grid-cols-1" : imgCount === 2 ? "grid-cols-2" : "grid-cols-3"
                         }`}
                     >
                         {images.map((img, idx) => (
                             <div
                                 key={idx}
-                                className={`relative overflow-hidden bg-stone-100 ${
-                                    imgCount === 3 && idx === 0 ? "row-span-2" : ""
-                                } ${imgCount === 1 ? "aspect-video" : "aspect-square"}`}
+                                className={`relative overflow-hidden bg-stone-100 ${imgCount === 1 ? "aspect-video" : "aspect-square"}`}
+                                onClick={() => setPreviewImageIndex(idx)}
                             >
                                 <img
-                                    src={img.url}
+                                    src={img.url || img}
                                     alt={`Ảnh ${idx + 1}`}
                                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
                                 />
@@ -298,10 +303,10 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
             )}
 
             {/* Action bar */}
-            <div className="flex items-center border-t border-stone-100 mx-5 mb-3 flex-wrap">
+            <div className="flex items-center border-t border-stone-100 mx-5 py-2 flex-wrap">
                 <button
                     onClick={handleLike}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-colors cursor-pointer border-none bg-transparent ${liked ? "text-amber-500" : "text-stone-500 hover:bg-stone-50 hover:text-amber-500"}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border-none bg-transparent ${liked ? "text-amber-500" : "text-stone-500 hover:bg-stone-50 hover:text-amber-500"}`}
                 >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
@@ -311,24 +316,24 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
 
                 <button
                     onClick={() => setShowComments((v) => !v)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-stone-500 hover:bg-stone-50 hover:text-amber-500 transition-colors cursor-pointer border-none bg-transparent"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-stone-500 hover:bg-stone-50 hover:text-amber-500 transition-colors cursor-pointer border-none bg-transparent"
                 >
                     <AppIcon name="messages" size={16} />
                     <span>Bình luận</span>
                 </button>
 
-                {post.category === 'transfer' && !isOwner && !isAdmin && post.status === 'published' ? (
+                {post.category === "transfer" && !isOwner && !isAdmin && post.status === "published" ? (
                     <button
                         onClick={handleRequestTransfer}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-purple-600 hover:bg-purple-50 transition-colors cursor-pointer border-none bg-transparent"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-purple-600 hover:bg-purple-50 transition-colors cursor-pointer border-none bg-transparent"
                     >
                         <AppIcon name="home" size={16} />
-                        <span>Xin sang nhượng</span>
+                        <span>Gửi yêu cầu</span>
                     </button>
                 ) : (
                     <button
                         onClick={handleShare}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-stone-500 hover:bg-stone-50 hover:text-amber-500 transition-colors cursor-pointer border-none bg-transparent"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-stone-500 hover:bg-stone-50 hover:text-amber-500 transition-colors cursor-pointer border-none bg-transparent"
                     >
                         <AppIcon name="share" size={16} />
                         <span>Chia sẻ</span>
@@ -339,7 +344,12 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
             {/* Comment section */}
             <AnimatePresence>
                 {showComments && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="px-5 pb-5 overflow-hidden">
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="px-5 pb-5 overflow-hidden"
+                    >
                         <ForumCommentSection
                             postId={post.id}
                             post={post}
@@ -350,6 +360,13 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <ImagePreviewModal
+                isOpen={previewImageIndex !== null}
+                onClose={() => setPreviewImageIndex(null)}
+                images={images}
+                initialIndex={previewImageIndex || 0}
+            />
         </article>
     );
 }

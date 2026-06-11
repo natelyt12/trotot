@@ -120,19 +120,19 @@ export default function RequestsTab({ user }) {
 
     return (
         <div className="h-full flex flex-col">
-            <h2 className="text-xl font-bold text-stone-900 mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
+            <h2 className="text-xl font-medium text-stone-900 mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
                 Yêu cầu từ khách thuê
             </h2>
 
             <div className="flex border-b border-stone-200 mb-6">
                 <button
-                    className={`px-4 py-3 font-bold text-sm border-b-2 transition-colors cursor-pointer bg-transparent ${activeSubTab === 'bookings' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
+                    className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors cursor-pointer bg-transparent ${activeSubTab === 'bookings' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
                     onClick={() => setActiveSubTab('bookings')}
                 >
                     Yêu cầu đặt lịch ({bookings.filter(b => b.status === 'pending').length})
                 </button>
                 <button
-                    className={`px-4 py-3 font-bold text-sm border-b-2 transition-colors cursor-pointer bg-transparent ${activeSubTab === 'transfers' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
+                    className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors cursor-pointer bg-transparent ${activeSubTab === 'transfers' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
                     onClick={() => setActiveSubTab('transfers')}
                 >
                     Yêu cầu sang nhượng ({transfers.filter(t => t.status === 'pending').length})
@@ -155,27 +155,27 @@ export default function RequestsTab({ user }) {
                                                 <AppIcon name="calendar" size={20} />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-stone-800">{booking.rooms?.title}</p>
+                                                <p className="font-medium text-stone-800">{booking.rooms?.title}</p>
                                                 <p className="text-sm text-stone-500 mt-1">
-                                                    Khách: <span className="font-semibold text-stone-700">{booking.requester?.full_name}</span> - SĐT: {booking.requester?.phone || 'Chưa cập nhật'}
+                                                    Khách: <span className="font-medium text-stone-700">{booking.requester?.full_name}</span> - SĐT: {booking.requester?.phone || 'Chưa cập nhật'}
                                                 </p>
                                                 <p className="text-sm text-stone-500 mt-1">
-                                                    Giờ hẹn: <span className="font-semibold text-amber-600">{new Date(booking.booking_time).toLocaleString('vi-VN')}</span>
+                                                    Giờ hẹn: <span className="font-medium text-amber-600">{new Date(booking.booking_time).toLocaleString('vi-VN')}</span>
                                                 </p>
                                             </div>
                                         </div>
                                         {booking.status === 'pending' && (
                                             <div className="flex gap-2 self-end md:self-center shrink-0">
-                                                <button onClick={() => handleRejectBooking(booking)} className="px-4 py-2 border-none rounded-lg text-sm font-bold bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer transition-colors">
+                                                <button onClick={() => handleRejectBooking(booking)} className="px-4 py-2 border-none rounded-lg text-sm font-medium bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer transition-colors">
                                                     Từ chối
                                                 </button>
-                                                <button onClick={() => handleApproveBooking(booking)} className="px-4 py-2 border-none rounded-lg text-sm font-bold bg-amber-500 text-white hover:bg-amber-600 cursor-pointer transition-colors shadow-sm shadow-amber-500/20">
+                                                <button onClick={() => handleApproveBooking(booking)} className="px-4 py-2 border-none rounded-lg text-sm font-medium bg-amber-500 text-white hover:bg-amber-600 cursor-pointer transition-colors shadow-sm shadow-amber-500/20">
                                                     Duyệt
                                                 </button>
                                             </div>
                                         )}
-                                        {booking.status === 'approved' && <span className="text-green-600 font-bold text-sm bg-green-50 px-3 py-1.5 rounded-lg">Đã duyệt</span>}
-                                        {booking.status === 'rejected' && <span className="text-red-600 font-bold text-sm bg-red-50 px-3 py-1.5 rounded-lg">Đã từ chối</span>}
+                                        {booking.status === 'approved' && <span className="text-green-600 font-medium text-sm bg-green-50 px-3 py-1.5 rounded-lg">Đã duyệt</span>}
+                                        {booking.status === 'rejected' && <span className="text-red-600 font-medium text-sm bg-red-50 px-3 py-1.5 rounded-lg">Đã từ chối</span>}
                                     </div>
                                 ))}
                             </div>
@@ -194,12 +194,12 @@ export default function RequestsTab({ user }) {
                                                 <AppIcon name="users" size={20} />
                                             </div>
                                             <div>
-                                                <p className="font-bold text-stone-800">{request.post?.rooms?.title}</p>
+                                                <p className="font-medium text-stone-800">{request.post?.rooms?.title}</p>
                                                 <p className="text-sm text-stone-500 mt-1">
-                                                    Người thuê cũ: <span className="font-semibold text-stone-700">{request.post?.tenant?.full_name}</span>
+                                                    Người thuê cũ: <span className="font-medium text-stone-700">{request.post?.tenant?.full_name}</span>
                                                 </p>
                                                 <p className="text-sm text-stone-500 mt-1">
-                                                    Khách thuê mới: <span className="font-semibold text-blue-600">{request.requester?.full_name}</span> - SĐT: {request.requester?.phone || 'Chưa cập nhật'}
+                                                    Khách thuê mới: <span className="font-medium text-blue-600">{request.requester?.full_name}</span> - SĐT: {request.requester?.phone || 'Chưa cập nhật'}
                                                 </p>
                                                 {request.message && (
                                                     <p className="text-sm text-stone-500 mt-2 p-2 bg-stone-50 rounded-lg italic">
@@ -210,16 +210,16 @@ export default function RequestsTab({ user }) {
                                         </div>
                                         {request.status === 'pending' && (
                                             <div className="flex gap-2 self-end md:self-center shrink-0">
-                                                <button onClick={() => handleRejectTransfer(request)} className="px-4 py-2 border-none rounded-lg text-sm font-bold bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer transition-colors">
+                                                <button onClick={() => handleRejectTransfer(request)} className="px-4 py-2 border-none rounded-lg text-sm font-medium bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer transition-colors">
                                                     Từ chối
                                                 </button>
-                                                <button onClick={() => handleApproveTransfer(request)} className="px-4 py-2 border-none rounded-lg text-sm font-bold bg-amber-500 text-white hover:bg-amber-600 cursor-pointer transition-colors shadow-sm shadow-amber-500/20">
+                                                <button onClick={() => handleApproveTransfer(request)} className="px-4 py-2 border-none rounded-lg text-sm font-medium bg-amber-500 text-white hover:bg-amber-600 cursor-pointer transition-colors shadow-sm shadow-amber-500/20">
                                                     Duyệt
                                                 </button>
                                             </div>
                                         )}
-                                        {request.status === 'approved' && <span className="text-green-600 font-bold text-sm bg-green-50 px-3 py-1.5 rounded-lg">Đã duyệt</span>}
-                                        {request.status === 'rejected' && <span className="text-red-600 font-bold text-sm bg-red-50 px-3 py-1.5 rounded-lg">Đã từ chối</span>}
+                                        {request.status === 'approved' && <span className="text-green-600 font-medium text-sm bg-green-50 px-3 py-1.5 rounded-lg">Đã duyệt</span>}
+                                        {request.status === 'rejected' && <span className="text-red-600 font-medium text-sm bg-red-50 px-3 py-1.5 rounded-lg">Đã từ chối</span>}
                                     </div>
                                 ))}
                             </div>

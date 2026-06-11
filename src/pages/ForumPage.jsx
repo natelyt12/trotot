@@ -71,11 +71,11 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
         async (pageNum = 0, append = false) => {
             pageNum === 0 ? setLoading(true) : setLoadingMore(true);
             try {
-                const { data, count, error } = await getForumPosts({ 
-                    page: pageNum, 
-                    limit: PAGE_SIZE, 
+                const { data, count, error } = await getForumPosts({
+                    page: pageNum,
+                    limit: PAGE_SIZE,
                     userId: user?.id,
-                    category: categoryFilter !== "all" ? categoryFilter : null
+                    category: categoryFilter !== "all" ? categoryFilter : null,
                 });
                 if (error) throw error;
                 if (append) {
@@ -262,37 +262,39 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
 
     return (
         <div className="min-h-screen bg-stone-50 pb-24 md:pb-10">
-            {/* Ambient Black Hero Banner */}
-            <div className="bg-stone-900 relative overflow-hidden text-center">
-                {/* Navbar Placeholder */}
-                <div className="h-14 md:h-16 shrink-0 w-full" />
-                {/* Glow spots */}
-                <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-gradient-to-br from-amber-500/10 via-orange-600/5 to-transparent rounded-full pointer-events-none blur-[100px] z-0" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-gradient-to-tl from-amber-500/10 via-transparent to-transparent pointer-events-none blur-[100px] z-0" />
-                <div className="absolute top-[20%] left-[30%] w-[400px] h-[400px] bg-gradient-to-tr from-amber-600/8 via-transparent to-transparent rounded-full pointer-events-none blur-[120px] z-0" />
+            {/* Hero Banner */}
+            <div className="relative h-[220px] md:h-[280px] bg-stone-900 overflow-hidden w-full">
+                {/* Background Image */}
+                <div
+                    className="absolute inset-0 bg-cover bg-center md:bg-[center_30%] opacity-90"
+                    style={{ backgroundImage: "url('/forum-placeholder-compressed.jpg')" }}
+                />
+                {/* Gradient Fade to Left (Text on Left) */}
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-stone-900/70 to-stone-950" />
 
                 {/* Banner Content */}
-                <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 md:py-16 flex flex-col items-center justify-center">
-                    <motion.div initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div className="relative z-10 w-full h-full max-w-5xl mx-auto px-4 sm:px-6 flex flex-col justify-center items-start pt-12 md:pt-16">
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="text-left max-w-lg">
                         <h1
-                            className="text-4xl md:text-5xl font-extrabold text-white! tracking-tight leading-none mb-4"
+                            className="text-3xl md:text-4xl font-semibold text-white! tracking-tight leading-tight mb-2 md:mb-3 flex items-baseline gap-2"
                             style={{ fontFamily: "var(--font-heading)" }}
                         >
-                            Diễn đàn
+                            Cộng đồng Trọ
+                            <span className="text-amber-500 font-bold text-4xl md:text-5xl" style={{ fontFamily: "'Dancing Script', cursive" }}>
+                                Tốt
+                            </span>
                         </h1>
-                        <p className="text-stone-300 text-sm md:text-base font-medium max-w-md mx-auto leading-relaxed">
-                            Chia sẻ, tìm bạn ở ghép và kết nối cộng đồng thuê trọ.
-                        </p>
+                        <p className="text-stone-300 text-sm md:text-base font-normal leading-relaxed">Nơi chia sẻ kinh nghiệm, tìm bạn ở ghép và kết nối.</p>
                     </motion.div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
                 {/* Mobile Tab Swiper/Navbar */}
                 <div className="lg:hidden flex gap-2 pb-2.5 mb-6 overflow-x-auto no-scrollbar">
                     <button
                         onClick={() => handleTabClick("feed")}
-                        className={`px-4.5 py-2.5 rounded-full font-bold text-xs shrink-0 cursor-pointer border transition-all ${
+                        className={`px-4.5 py-2.5 rounded-full font-medium text-xs shrink-0 cursor-pointer border transition-all ${
                             activeTab === "feed"
                                 ? "bg-amber-50 text-amber-600 border-amber-200 shadow-sm shadow-amber-500/5"
                                 : "bg-white text-stone-500 border-stone-200 hover:bg-stone-55"
@@ -302,7 +304,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                     </button>
                     <button
                         onClick={() => handleTabClick("search")}
-                        className={`px-4.5 py-2.5 rounded-full font-bold text-xs shrink-0 cursor-pointer border transition-all ${
+                        className={`px-4.5 py-2.5 rounded-full font-medium text-xs shrink-0 cursor-pointer border transition-all ${
                             activeTab === "search"
                                 ? "bg-amber-50 text-amber-600 border-amber-200 shadow-sm shadow-amber-500/5"
                                 : "bg-white text-stone-500 border-stone-200 hover:bg-stone-55"
@@ -312,7 +314,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                     </button>
                     <button
                         onClick={() => handleTabClick("my-posts")}
-                        className={`px-4.5 py-2.5 rounded-full font-bold text-xs shrink-0 cursor-pointer border transition-all flex items-center gap-1 ${
+                        className={`px-4.5 py-2.5 rounded-full font-medium text-xs shrink-0 cursor-pointer border transition-all flex items-center gap-1 ${
                             activeTab === "my-posts"
                                 ? "bg-amber-50 text-amber-600 border-amber-200 shadow-sm shadow-amber-500/5"
                                 : "bg-white text-stone-500 border-stone-200 hover:bg-stone-55"
@@ -322,7 +324,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                     </button>
                     <button
                         onClick={() => handleTabClick("my-comments")}
-                        className={`px-4.5 py-2.5 rounded-full font-bold text-xs shrink-0 cursor-pointer border transition-all flex items-center gap-1 ${
+                        className={`px-4.5 py-2.5 rounded-full font-medium text-xs shrink-0 cursor-pointer border transition-all flex items-center gap-1 ${
                             activeTab === "my-comments"
                                 ? "bg-amber-50 text-amber-600 border-amber-200 shadow-sm shadow-amber-500/5"
                                 : "bg-white text-stone-500 border-stone-200 hover:bg-stone-55"
@@ -333,134 +335,143 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                 </div>
 
                 {/* Bố cục Grid 2 cột trên Desktop */}
-                <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 items-start">
                     {/* CỘT 1: Navigation Panel */}
-                    <div className="hidden lg:flex flex-col gap-5 lg:sticky lg:top-24">
-                        {/* Accent Create Post Button */}
-                        <button
-                            onClick={handleCreatePostClick}
-                            className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-sm rounded-xl cursor-pointer border-none shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
-                        >
-                            <AppIcon name="plus" size={16} />
-                            Đăng bài mới
-                        </button>
-
-                        {/* Navigation List */}
-                        <div className="bg-white border border-stone-200/80 rounded-2xl p-2 shadow-sm flex flex-col gap-1.5">
-                            {/* Bảng tin */}
+                    <div className="hidden lg:flex flex-col gap-6 lg:sticky lg:top-24">
+                        <div className="bg-white border border-stone-200 rounded-xl shadow-sm p-4 flex flex-col gap-4">
+                            {/* Accent Create Post Button */}
                             <button
-                                onClick={() => handleTabClick("feed")}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm border-none cursor-pointer text-left transition-all duration-200 ${
-                                    activeTab === "feed"
-                                        ? "bg-amber-50 text-amber-600 border-l-4 border-amber-500 pl-3 shadow-xs"
-                                        : "bg-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
-                                }`}
+                                onClick={handleCreatePostClick}
+                                className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-medium text-sm rounded-full cursor-pointer border-none shadow-sm transition-colors flex items-center justify-center gap-2"
                             >
-                                <AppIcon name="messages" size={18} className={activeTab === "feed" ? "text-amber-500" : "text-stone-400"} />
-                                Bảng tin
+                                <AppIcon name="plus" size={16} />
+                                Đăng bài mới
                             </button>
 
-                            {/* Tìm kiếm */}
-                            <button
-                                onClick={() => handleTabClick("search")}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm border-none cursor-pointer text-left transition-all duration-200 ${
-                                    activeTab === "search"
-                                        ? "bg-amber-50 text-amber-600 border-l-4 border-amber-500 pl-3 shadow-xs"
-                                        : "bg-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
-                                }`}
-                            >
-                                <AppIcon name="search" size={18} className={activeTab === "search" ? "text-amber-500" : "text-stone-400"} />
-                                Tìm kiếm
-                            </button>
+                            {/* Navigation List */}
+                            <div className="flex flex-col gap-1">
+                                {/* Bảng tin */}
+                                <button
+                                    onClick={() => handleTabClick("feed")}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm border cursor-pointer text-left transition-all duration-200 ${
+                                        activeTab === "feed"
+                                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                                            : "bg-transparent text-stone-600 border-transparent hover:bg-stone-50 hover:text-stone-900"
+                                    }`}
+                                >
+                                    <AppIcon name="messages" size={18} className={activeTab === "feed" ? "text-amber-500" : "text-stone-400"} />
+                                    Bảng tin
+                                </button>
 
-                            <div className="h-px bg-stone-100 my-1 mx-2" />
+                                {/* Tìm kiếm */}
+                                <button
+                                    onClick={() => handleTabClick("search")}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg font-medium text-sm border cursor-pointer text-left transition-all duration-200 ${
+                                        activeTab === "search"
+                                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                                            : "bg-transparent text-stone-600 border-transparent hover:bg-stone-50 hover:text-stone-900"
+                                    }`}
+                                >
+                                    <AppIcon name="search" size={18} className={activeTab === "search" ? "text-amber-500" : "text-stone-400"} />
+                                    Tìm kiếm
+                                </button>
 
-                            {/* Bài đăng của bạn */}
-                            <button
-                                onClick={() => handleTabClick("my-posts")}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm border-none cursor-pointer text-left transition-all duration-200 ${
-                                    activeTab === "my-posts"
-                                        ? "bg-amber-50 text-amber-600 border-l-4 border-amber-500 pl-3 shadow-xs"
-                                        : "bg-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
-                                }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <AppIcon name="file-text" size={18} className={activeTab === "my-posts" ? "text-amber-500" : "text-stone-400"} />
-                                    Bài đăng của bạn
-                                </div>
-                                {!user && <TbLock size={14} className="text-stone-400/80" />}
-                            </button>
+                                <div className="h-px bg-stone-100 my-1 mx-2" />
 
-                            {/* Bình luận của bạn */}
-                            <button
-                                onClick={() => handleTabClick("my-comments")}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-bold text-sm border-none cursor-pointer text-left transition-all duration-200 ${
-                                    activeTab === "my-comments"
-                                        ? "bg-amber-50 text-amber-600 border-l-4 border-amber-500 pl-3 shadow-xs"
-                                        : "bg-transparent text-stone-500 hover:bg-stone-50 hover:text-stone-800"
-                                }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <AppIcon name="messages" size={18} className={activeTab === "my-comments" ? "text-amber-500" : "text-stone-400"} />
-                                    Bình luận của bạn
-                                </div>
-                                {!user && <TbLock size={14} className="text-stone-400/80" />}
-                            </button>
+                                {/* Bài đăng của bạn */}
+                                <button
+                                    onClick={() => handleTabClick("my-posts")}
+                                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg font-medium text-sm border cursor-pointer text-left transition-all duration-200 ${
+                                        activeTab === "my-posts"
+                                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                                            : "bg-transparent text-stone-600 border-transparent hover:bg-stone-50 hover:text-stone-900"
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <AppIcon name="file-text" size={18} className={activeTab === "my-posts" ? "text-amber-500" : "text-stone-400"} />
+                                        Bài đăng của bạn
+                                    </div>
+                                    {!user && <TbLock size={14} className="text-stone-400/80" />}
+                                </button>
+
+                                {/* Bình luận của bạn */}
+                                <button
+                                    onClick={() => handleTabClick("my-comments")}
+                                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg font-medium text-sm border cursor-pointer text-left transition-all duration-200 ${
+                                        activeTab === "my-comments"
+                                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                                            : "bg-transparent text-stone-600 border-transparent hover:bg-stone-50 hover:text-stone-900"
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <AppIcon name="messages" size={18} className={activeTab === "my-comments" ? "text-amber-500" : "text-stone-400"} />
+                                        Bình luận của bạn
+                                    </div>
+                                    {!user && <TbLock size={14} className="text-stone-400/80" />}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     {/* CỘT 2: Nội dung chính */}
-                    <div className="flex-1 min-w-0 flex flex-col gap-5">
+                    <div className="flex-1 min-w-0 flex flex-col gap-4">
                         {/* Tab Content Rendering */}
                         {activeTab === "feed" && (
                             <>
                                 {/* Bộ lọc Thẻ phân loại */}
-                                <div className="bg-white rounded-2xl border border-stone-200/80 p-3 shadow-sm flex items-center gap-2 overflow-x-auto no-scrollbar">
-                                    <button 
+                                <div className="hidden md:flex items-center gap-2 pb-1 overflow-x-auto no-scrollbar">
+                                    <button
                                         onClick={() => setCategoryFilter("all")}
-                                        className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors border cursor-pointer ${categoryFilter === "all" ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"}`}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border cursor-pointer ${categoryFilter === "all" ? "bg-amber-50 border-amber-200 text-amber-700 shadow-xs" : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50 shadow-xs"}`}
                                     >
                                         Tất cả
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setCategoryFilter("general")}
-                                        className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors border cursor-pointer ${categoryFilter === "general" ? "bg-amber-50 border-amber-200 text-amber-700" : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"}`}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border cursor-pointer ${categoryFilter === "general" ? "bg-amber-50 border-amber-200 text-amber-700 shadow-xs" : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50 shadow-xs"}`}
                                     >
                                         Thảo luận chung
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setCategoryFilter("roommate")}
-                                        className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors border cursor-pointer ${categoryFilter === "roommate" ? "bg-sky-50 border-sky-200 text-sky-700" : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"}`}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border cursor-pointer ${categoryFilter === "roommate" ? "bg-sky-50 border-sky-200 text-sky-700 shadow-xs" : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50 shadow-xs"}`}
                                     >
                                         Tìm người ở cùng
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setCategoryFilter("transfer")}
-                                        className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors border cursor-pointer ${categoryFilter === "transfer" ? "bg-purple-50 border-purple-200 text-purple-700" : "bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100"}`}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors border cursor-pointer ${categoryFilter === "transfer" ? "bg-purple-50 border-purple-200 text-purple-700 shadow-xs" : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50 shadow-xs"}`}
                                     >
                                         Sang nhượng
                                     </button>
                                 </div>
-
-                                {/* Feed Header */}
-                                <div className="mb-6 flex items-center justify-between">
-                                    <h2
-                                        className="text-lg font-extrabold text-stone-900 tracking-tight flex items-center gap-2"
-                                        style={{ fontFamily: "var(--font-heading)" }}
+                                <div className="md:hidden mb-1">
+                                    <select
+                                        value={categoryFilter}
+                                        onChange={(e) => setCategoryFilter(e.target.value)}
+                                        className="w-full bg-white border border-stone-200 text-stone-700 text-sm font-medium rounded-xl px-4 py-2.5 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 appearance-none shadow-sm cursor-pointer"
+                                        style={{
+                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                                            backgroundRepeat: "no-repeat",
+                                            backgroundPosition: "right 1rem center",
+                                            backgroundSize: "1em",
+                                        }}
                                     >
-                                        <span className="w-2 h-5 bg-amber-500 rounded-sm" />
-                                        Bản tin diễn đàn
-                                    </h2>
+                                        <option value="all">Tất cả chủ đề</option>
+                                        <option value="general">Thảo luận chung</option>
+                                        <option value="roommate">Tìm người ở cùng</option>
+                                        <option value="transfer">Sang nhượng phòng</option>
+                                    </select>
                                 </div>
 
                                 {/* Create post quick bar */}
                                 {user && (
                                     <div
                                         onClick={handleCreatePostClick}
-                                        className="bg-white border border-stone-200 rounded-2xl p-4 flex items-center gap-3 cursor-pointer hover:border-amber-300 hover:shadow-sm transition-all mb-6"
+                                        className="bg-white border border-stone-200 rounded-2xl px-4 py-3 flex items-center gap-3 cursor-pointer hover:border-amber-300 hover:shadow-sm transition-all"
                                     >
                                         <div
-                                            className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden"
+                                            className="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-white font-medium text-sm shrink-0 overflow-hidden"
                                             style={
                                                 user.user_metadata?.avatar_url
                                                     ? { backgroundImage: `url(${user.user_metadata.avatar_url})`, backgroundSize: "cover" }
@@ -469,7 +480,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                         >
                                             {!user.user_metadata?.avatar_url && (user.user_metadata?.full_name || "U").charAt(0).toUpperCase()}
                                         </div>
-                                        <div className="flex-1 bg-stone-100 rounded-full px-4 py-2.5 text-stone-400 text-sm hover:bg-stone-50 transition-colors select-none">
+                                        <div className="flex-1 bg-stone-100 rounded-full px-4 py-2 text-stone-500 text-[0.9rem] hover:bg-stone-50 transition-colors select-none">
                                             {user.user_metadata?.full_name} ơi, bạn đang nghĩ gì vậy?
                                         </div>
                                     </div>
@@ -499,12 +510,12 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                         <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
                                             <AppIcon name="messages" size={32} />
                                         </div>
-                                        <p className="text-stone-700 font-bold text-base mb-1">Diễn đàn đang chờ bạn!</p>
+                                        <p className="text-stone-700 font-medium text-base mb-1">Diễn đàn đang chờ bạn!</p>
                                         <p className="text-stone-400 text-sm mb-5">Hãy là người đầu tiên chia sẻ câu chuyện của bạn.</p>
                                         {user && (
                                             <button
                                                 onClick={handleCreatePostClick}
-                                                className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl border-none cursor-pointer transition-colors shadow-sm"
+                                                className="bg-amber-500 hover:bg-amber-600 text-white font-medium text-sm px-6 py-2.5 rounded-xl border-none cursor-pointer transition-colors shadow-sm"
                                             >
                                                 Đăng bài đầu tiên
                                             </button>
@@ -529,7 +540,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                                 <button
                                                     onClick={handleLoadMore}
                                                     disabled={loadingMore}
-                                                    className="inline-flex items-center gap-2 px-8 py-2.5 bg-white border border-stone-200 text-stone-700 rounded-full font-bold text-sm cursor-pointer hover:border-amber-500 hover:text-amber-600 hover:shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="inline-flex items-center gap-2 px-8 py-2.5 bg-white border border-stone-200 text-stone-700 rounded-full font-medium text-sm cursor-pointer hover:border-amber-500 hover:text-amber-600 hover:shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     {loadingMore ? (
                                                         <>
@@ -552,7 +563,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                 {/* Search Header */}
                                 <div className="flex items-center justify-between">
                                     <h2
-                                        className="text-lg font-extrabold text-stone-900 tracking-tight flex items-center gap-2"
+                                        className="text-lg font-semibold text-stone-900 tracking-tight flex items-center gap-2"
                                         style={{ fontFamily: "var(--font-heading)" }}
                                     >
                                         <span className="w-2 h-5 bg-amber-500 rounded-sm" />
@@ -583,7 +594,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                                 setSearchPage(0);
                                                 fetchSearchResults(searchQuery, 0, false);
                                             }}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg border-none cursor-pointer transition-colors shadow-sm"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-medium text-xs rounded-lg border-none cursor-pointer transition-colors shadow-sm"
                                         >
                                             Tìm kiếm
                                         </button>
@@ -613,7 +624,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                         <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
                                             <AppIcon name="search" size={32} />
                                         </div>
-                                        <p className="text-stone-700 font-bold text-base mb-1">Không tìm thấy kết quả</p>
+                                        <p className="text-stone-700 font-medium text-base mb-1">Không tìm thấy kết quả</p>
                                         <p className="text-stone-400 text-sm">Thử tìm kiếm với từ khóa khác xem sao nhé.</p>
                                     </div>
                                 ) : !searchQuery.trim() ? (
@@ -621,7 +632,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                         <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
                                             <AppIcon name="search" size={32} />
                                         </div>
-                                        <p className="text-stone-700 font-bold text-base mb-1">Tìm kiếm trên diễn đàn</p>
+                                        <p className="text-stone-700 font-medium text-base mb-1">Tìm kiếm trên diễn đàn</p>
                                         <p className="text-stone-400 text-sm">Nhập từ khóa phía trên để bắt đầu tìm các bài đăng liên quan.</p>
                                     </div>
                                 ) : (
@@ -647,7 +658,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                                         fetchSearchResults(searchQuery, nextPage, true);
                                                     }}
                                                     disabled={loadingMore}
-                                                    className="inline-flex items-center gap-2 px-8 py-2.5 bg-white border border-stone-200 text-stone-700 rounded-full font-bold text-sm cursor-pointer hover:border-amber-500 hover:text-amber-600 hover:shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    className="inline-flex items-center gap-2 px-8 py-2.5 bg-white border border-stone-200 text-stone-700 rounded-full font-medium text-sm cursor-pointer hover:border-amber-500 hover:text-amber-600 hover:shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     {loadingMore ? (
                                                         <>
@@ -670,7 +681,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                 {/* My Posts Header */}
                                 <div className="flex items-center justify-between">
                                     <h2
-                                        className="text-lg font-extrabold text-stone-900 tracking-tight flex items-center gap-2"
+                                        className="text-lg font-semibold text-stone-900 tracking-tight flex items-center gap-2"
                                         style={{ fontFamily: "var(--font-heading)" }}
                                     >
                                         <span className="w-2 h-5 bg-amber-500 rounded-sm" />
@@ -701,11 +712,11 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                         <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
                                             <AppIcon name="file-text" size={32} />
                                         </div>
-                                        <p className="text-stone-700 font-bold text-base mb-1">Chưa có bài viết nào</p>
+                                        <p className="text-stone-700 font-medium text-base mb-1">Chưa có bài viết nào</p>
                                         <p className="text-stone-400 text-sm mb-5">Bạn chưa chia sẻ bài đăng nào trên diễn đàn.</p>
                                         <button
                                             onClick={handleCreatePostClick}
-                                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl border-none cursor-pointer transition-colors shadow-sm"
+                                            className="bg-amber-500 hover:bg-amber-600 text-white font-medium text-sm px-6 py-2.5 rounded-xl border-none cursor-pointer transition-colors shadow-sm"
                                         >
                                             Đăng bài viết mới
                                         </button>
@@ -733,7 +744,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                 {/* My Comments Header */}
                                 <div className="flex items-center justify-between">
                                     <h2
-                                        className="text-lg font-extrabold text-stone-900 tracking-tight flex items-center gap-2"
+                                        className="text-lg font-semibold text-stone-900 tracking-tight flex items-center gap-2"
                                         style={{ fontFamily: "var(--font-heading)" }}
                                     >
                                         <span className="w-2 h-5 bg-amber-500 rounded-sm" />
@@ -760,7 +771,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                         <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
                                             <AppIcon name="messages" size={32} />
                                         </div>
-                                        <p className="text-stone-700 font-bold text-base mb-1">Chưa có bình luận nào</p>
+                                        <p className="text-stone-700 font-medium text-base mb-1">Chưa có bình luận nào</p>
                                         <p className="text-stone-400 text-sm">Bạn chưa viết bình luận nào trên các bài đăng của người khác.</p>
                                     </div>
                                 ) : (
@@ -773,7 +784,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                                 {/* Author details */}
                                                 <div className="flex items-center gap-2.5">
                                                     <div
-                                                        className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden"
+                                                        className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-medium text-xs shrink-0 overflow-hidden"
                                                         style={
                                                             comment.post?.profile?.avatar_url
                                                                 ? { backgroundImage: `url(${comment.post.profile.avatar_url})`, backgroundSize: "cover" }
@@ -784,8 +795,8 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                                             (comment.post?.profile?.full_name || "Người dùng").charAt(0).toUpperCase()}
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <span className="text-xs text-stone-500 font-medium">Bạn đã bình luận trên bài viết của</span>{" "}
-                                                        <span className="text-xs font-bold text-stone-900">
+                                                        <span className="text-xs text-stone-500 font-normal">Bạn đã bình luận trên bài viết của</span>{" "}
+                                                        <span className="text-xs font-medium text-stone-900">
                                                             {comment.post?.profile?.full_name || "Người dùng"}
                                                         </span>
                                                         <span className="text-[10px] text-stone-400 block mt-0.5">
@@ -805,7 +816,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                                 {/* Comment Content */}
                                                 <div className="flex gap-2.5 items-start bg-amber-50/30 rounded-xl p-3 border border-amber-100/20">
                                                     <div
-                                                        className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-[10px] shrink-0 overflow-hidden"
+                                                        className="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center font-medium text-[10px] shrink-0 overflow-hidden"
                                                         style={
                                                             user?.user_metadata?.avatar_url
                                                                 ? { backgroundImage: `url(${user.user_metadata.avatar_url})`, backgroundSize: "cover" }
@@ -815,7 +826,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                                         {!user?.user_metadata?.avatar_url && (user?.user_metadata?.full_name || "U").charAt(0).toUpperCase()}
                                                     </div>
                                                     <div className="flex-1">
-                                                        <div className="text-xs font-bold text-stone-850 mb-0.5">
+                                                        <div className="text-xs font-medium text-stone-850 mb-0.5">
                                                             {user?.user_metadata?.full_name || "Bạn"}
                                                         </div>
                                                         <p className="text-stone-800 text-[0.85rem] leading-relaxed m-0 whitespace-pre-wrap">
@@ -828,7 +839,7 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
                                                 <div className="flex justify-end pt-1">
                                                     <button
                                                         onClick={() => setSelectedPost(comment.post)}
-                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-xs rounded-xl cursor-pointer border-none transition-colors"
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium text-xs rounded-xl cursor-pointer border-none transition-colors"
                                                     >
                                                         <AppIcon name="messages" size={12} />
                                                         Xem bài đăng & bình luận
@@ -858,15 +869,12 @@ export default function ForumPage({ user, navigate, preAttachRoom = null, openCr
             {selectedPost && (
                 <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
                     {/* Backdrop */}
-                    <div
-                        onClick={() => setSelectedPost(null)}
-                        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                    />
+                    <div onClick={() => setSelectedPost(null)} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
                     {/* Modal Content */}
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10 p-5 flex flex-col gap-4 animate-scale-up">
                         <div className="flex justify-between items-center pb-2 border-b border-stone-100">
-                            <h3 className="font-extrabold text-stone-900 text-sm">Xem chi tiết bài đăng</h3>
+                            <h3 className="font-semibold text-stone-900 text-sm">Xem chi tiết bài đăng</h3>
                             <button
                                 onClick={() => setSelectedPost(null)}
                                 className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 cursor-pointer border-none transition-colors"

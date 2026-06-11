@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
  * @param {boolean} props.loading - Submission loading state
  */
 export default function VerificationForm({ onSubmit, onBack, loading, submitText = "Hoàn tất & Đăng ký" }) {
-    const labelCls = "block text-sm font-semibold text-stone-700 mb-1.5";
+    const labelCls = "block text-sm font-medium text-stone-700 mb-1.5";
 
     return (
         <motion.div
@@ -36,7 +36,7 @@ export default function VerificationForm({ onSubmit, onBack, loading, submitText
                                 <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
                         </div>
-                        <p className="text-xs font-bold text-stone-500 m-0 group-hover:text-amber-700">Tải ảnh lên</p>
+                        <p className="text-xs font-medium text-stone-500 m-0 group-hover:text-amber-700">Tải ảnh lên</p>
                         <p className="text-[10px] text-stone-400 mt-1">Hỗ trợ JPG, PNG (Tối đa 5MB)</p>
                     </div>
                 </div>
@@ -51,7 +51,7 @@ export default function VerificationForm({ onSubmit, onBack, loading, submitText
                                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                             </svg>
                         </div>
-                        <p className="text-xs font-bold text-stone-500 m-0 group-hover:text-amber-700">Tải tài liệu lên</p>
+                        <p className="text-xs font-medium text-stone-500 m-0 group-hover:text-amber-700">Tải tài liệu lên</p>
                     </div>
                 </div>
             </div>
@@ -60,13 +60,13 @@ export default function VerificationForm({ onSubmit, onBack, loading, submitText
                 <button
                     onClick={onSubmit}
                     disabled={loading}
-                    className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-bold py-3 rounded-full cursor-pointer border-none transition-colors shadow-lg shadow-amber-200"
+                    className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-medium py-3 rounded-full cursor-pointer border-none transition-colors shadow-lg shadow-amber-200"
                 >
                     {loading ? "Đang gửi hồ sơ..." : submitText}
                 </button>
                 <button
                     onClick={onBack}
-                    className="w-full bg-transparent text-stone-400 text-xs font-bold py-2 cursor-pointer border-none hover:text-stone-600 transition-colors"
+                    className="w-full bg-transparent text-stone-400 text-xs font-medium py-2 cursor-pointer border-none hover:text-stone-600 transition-colors"
                 >
                     Quay lại bước trước
                 </button>

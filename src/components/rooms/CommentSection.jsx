@@ -338,7 +338,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
 
     return (
         <div className={isGridMode ? "p-6" : "bg-white border border-stone-200 p-6 rounded-xl"}>
-            <h2 className={`font-bold text-[1.05rem] text-stone-900 flex items-center gap-2 font-heading ${previewMode ? "mb-6" : ""}`}>
+            <h2 className={`font-medium text-[1.05rem] text-stone-900 flex items-center gap-2 font-heading ${previewMode ? "mb-6" : ""}`}>
                 <AppIcon name="messages" color="#d97706" />
                 Bình luận & Hỏi đáp ({comments.reduce((acc, c) => acc + 1 + (c.replies?.length || 0), 0)})
             </h2>
@@ -348,10 +348,10 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                 <div className="mt-6 mb-8 relative">
                     {!user && (
                         <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center rounded-lg border border-stone-200">
-                            <p className="text-stone-700 font-medium mb-2">Đăng nhập để tham gia thảo luận</p>
+                            <p className="text-stone-700 font-normal mb-2">Đăng nhập để tham gia thảo luận</p>
                             <button
                                 onClick={() => navigate("login")}
-                                className="px-4 py-1.5 bg-amber-500 text-white rounded-full text-sm font-bold hover:bg-amber-600 transition-colors cursor-pointer border-none"
+                                className="px-4 py-1.5 bg-amber-500 text-white rounded-full text-sm font-medium hover:bg-amber-600 transition-colors cursor-pointer border-none"
                             >
                                 Đăng nhập ngay
                             </button>
@@ -370,7 +370,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                         <button
                             onClick={handleCommentSubmit}
                             disabled={!user || submitting || !newComment.trim()}
-                            className="inline-flex items-center justify-center bg-amber-500 text-white rounded-full px-6 py-2 hover:bg-amber-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-none font-bold text-sm"
+                            className="inline-flex items-center justify-center bg-amber-500 text-white rounded-full px-6 py-2 hover:bg-amber-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-none font-medium text-sm"
                         >
                             {submitting ? "Đang gửi..." : "Gửi bình luận"}
                         </button>
@@ -438,7 +438,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                     <div className="bg-stone-50 rounded-lg border border-stone-200 overflow-hidden focus-within:border-amber-500 transition-colors">
                                         {replyTo.userName && (
                                             <div className="px-3 py-1.5 bg-amber-50 border-b border-stone-200 flex items-center justify-between">
-                                                <span className="text-[0.75rem] text-amber-700 font-bold flex items-center gap-1.5">
+                                                <span className="text-[0.75rem] text-amber-700 font-medium flex items-center gap-1.5">
                                                     <AppIcon name="messages" size={12} />
                                                     Đang phản hồi @{replyTo.userName}
                                                 </span>
@@ -468,14 +468,14 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                                     setReplyTo(null);
                                                     setReplyContent("");
                                                 }}
-                                                className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
+                                                className="text-stone-500 text-xs font-medium hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
                                             >
                                                 Hủy
                                             </button>
                                             <button
                                                 onClick={handleReplySubmit}
                                                 disabled={submitting || !replyContent.trim()}
-                                                className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
+                                                className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-medium hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
                                             >
                                                 {submitting ? "Đang gửi..." : "Gửi trả lời"}
                                             </button>
@@ -534,7 +534,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                                     <div className="bg-stone-50 rounded-lg border border-stone-200 overflow-hidden focus-within:border-amber-500 transition-colors">
                                                         {replyTo.userName && (
                                                             <div className="px-3 py-1.5 bg-amber-50 border-b border-stone-200 flex items-center justify-between">
-                                                                <span className="text-[0.75rem] text-amber-700 font-bold flex items-center gap-1.5">
+                                                                <span className="text-[0.75rem] text-amber-700 font-medium flex items-center gap-1.5">
                                                                     <AppIcon name="messages" size={12} />
                                                                     Đang phản hồi @{replyTo.userName}
                                                                 </span>
@@ -564,14 +564,14 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
                                                                     setReplyTo(null);
                                                                     setReplyContent("");
                                                                 }}
-                                                                className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
+                                                                className="text-stone-500 text-xs font-medium hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
                                                             >
                                                                 Hủy
                                                             </button>
                                                             <button
                                                                 onClick={handleReplySubmit}
                                                                 disabled={submitting || !replyContent.trim()}
-                                                                className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
+                                                                className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-medium hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
                                                             >
                                                                 {submitting ? "Đang gửi..." : "Gửi trả lời"}
                                                             </button>
@@ -640,7 +640,7 @@ function CommentItem({
         <div className="flex gap-4 group relative animate-fade-in">
             <div
                 onClick={() => !isDeletedUser && navigate && navigate('public-profile', { userId: comment.user_id })}
-                className={`${isReply ? "w-8 h-8" : "w-10 h-10"} rounded-full flex items-center justify-center font-bold text-white ${isReply ? "text-xs" : "text-sm"} shrink-0 overflow-hidden ${isDeletedUser ? "bg-stone-300" : "bg-amber-500 hover:opacity-85 cursor-pointer transition-opacity"}`}
+                className={`${isReply ? "w-8 h-8" : "w-10 h-10"} rounded-full flex items-center justify-center font-medium text-white ${isReply ? "text-xs" : "text-sm"} shrink-0 overflow-hidden ${isDeletedUser ? "bg-stone-300" : "bg-amber-500 hover:opacity-85 cursor-pointer transition-opacity"}`}
                 style={avatarUrl ? { backgroundImage: `url(${avatarUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}
             >
                 {!avatarUrl && initial}
@@ -650,7 +650,7 @@ function CommentItem({
                     <div>
                         <h4
                             onClick={() => !isDeletedUser && navigate && navigate('public-profile', { userId: comment.user_id })}
-                            className={`${isReply ? "text-[0.85rem]" : "text-[0.9rem]"} font-bold ${isDeletedUser ? "text-stone-400 italic" : "text-stone-900 hover:text-amber-600 hover:underline cursor-pointer transition-colors"}`}
+                            className={`${isReply ? "text-[0.85rem]" : "text-[0.9rem]"} font-medium ${isDeletedUser ? "text-stone-400 italic" : "text-stone-900 hover:text-amber-600 hover:underline cursor-pointer transition-colors"}`}
                         >
                             {displayName}
                         </h4>
@@ -724,7 +724,7 @@ function CommentItem({
                         <div className="bg-stone-50 rounded-lg border border-stone-200 overflow-hidden focus-within:border-amber-500 transition-colors">
                             {editingTag && (
                                 <div className="px-3 py-1.5 bg-amber-50 border-b border-stone-200 flex items-center justify-between">
-                                    <span className="text-[0.75rem] text-amber-700 font-bold flex items-center gap-1.5">
+                                    <span className="text-[0.75rem] text-amber-700 font-medium flex items-center gap-1.5">
                                         <AppIcon name="messages" size={12} />
                                         Gắn thẻ @{editingTag}
                                     </span>
@@ -750,14 +750,14 @@ function CommentItem({
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setEditingId(null)}
-                                    className="text-stone-500 text-xs font-bold hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
+                                    className="text-stone-500 text-xs font-medium hover:text-stone-700 cursor-pointer border-none bg-transparent px-3 py-1"
                                 >
                                     Hủy
                                 </button>
                                 <button
                                     onClick={() => onUpdate(comment.id)}
                                     disabled={!editingContent.trim()}
-                                    className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-bold hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
+                                    className="bg-amber-500 text-white rounded-full px-4 py-1 text-xs font-medium hover:bg-amber-600 disabled:opacity-50 cursor-pointer border-none"
                                 >
                                     Cập nhật
                                 </button>
@@ -766,7 +766,7 @@ function CommentItem({
                     </div>
                 ) : (
                     <p className={`${isReply ? "text-[0.85rem]" : "text-[0.9rem]"} text-stone-700 leading-relaxed whitespace-pre-wrap`}>
-                        {tag && <span className="tag text-amber-600 font-bold mr-1.5 cursor-default">@{tag}</span>}
+                        {tag && <span className="tag text-amber-600 font-medium mr-1.5 cursor-default">@{tag}</span>}
                         <span className="comment-content">{displayContent}</span>
                     </p>
                 )}
@@ -792,7 +792,7 @@ function CommentItem({
                                     >
                                         <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                                     </svg>
-                                    <span className="text-[0.7rem] font-bold">{comment.likeCount || 0}</span>
+                                    <span className="text-[0.7rem] font-medium">{comment.likeCount || 0}</span>
                                 </button>
                                 <div className="w-px h-3 bg-stone-300 mx-1"></div>
                                 <button
@@ -813,7 +813,7 @@ function CommentItem({
                                         <path d="M7 10v12" />
                                         <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z" />
                                     </svg>
-                                    <span className="text-[0.7rem] font-bold">{comment.dislikeCount || 0}</span>
+                                    <span className="text-[0.7rem] font-medium">{comment.dislikeCount || 0}</span>
                                 </button>
                             </div>
                         )}
@@ -821,7 +821,7 @@ function CommentItem({
                         {user && !previewMode && (
                             <button
                                 onClick={onReplyClick}
-                                className="text-stone-500 text-[0.75rem] font-bold hover:text-amber-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1"
+                                className="text-stone-500 text-[0.75rem] font-medium hover:text-amber-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-1"
                             >
                                 <AppIcon name="messages" size={13} />
                                 Phản hồi

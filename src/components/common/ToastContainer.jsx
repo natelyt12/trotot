@@ -44,7 +44,7 @@ const ToastItem = ({ id, message, type, duration, onRemove }) => {
                 {icons[type]}
             </div>
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold leading-tight text-stone-800">{message}</p>
+                <p className="text-sm font-medium leading-tight text-stone-800">{message}</p>
             </div>
             <button
                 onClick={() => onRemove(id)}

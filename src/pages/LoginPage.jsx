@@ -62,13 +62,13 @@ export default function LoginPage({ navigate }) {
                         <img src="/logo.png" alt="Logo" className="w-14 h-14 object-contain rounded-lg" />
                         <span className="flex items-baseline">
                             <span
-                                className="font-semibold text-[2rem] text-white tracking-tight"
+                                className="font-medium text-[2rem] text-white tracking-tight"
                                 style={{ fontFamily: 'var(--font-heading)' }}
                             >
                                 Trọ
                             </span>
                             <span
-                                className="text-amber-500 text-[2.5rem] font-bold ml-1"
+                                className="text-amber-500 text-[2.5rem] font-medium ml-1"
                                 style={{ fontFamily: 'var(--font-script)' }}
                             >
                                 Tốt
@@ -83,7 +83,7 @@ export default function LoginPage({ navigate }) {
                 {/* Card */}
                 <div className="bg-white rounded-xl p-8 border border-stone-200 shadow-xl shadow-black/20">
                     <h1
-                        className="text-xl font-bold text-stone-900 mb-6 text-center"
+                        className="text-xl font-medium text-stone-900 mb-6 text-center"
                         style={{ fontFamily: 'var(--font-heading)' }}
                     >
                         {view === 'login' ? 'Đăng nhập' : 'Quên mật khẩu'}
@@ -109,7 +109,7 @@ export default function LoginPage({ navigate }) {
                         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                             {/* Email */}
                             <div>
-                                <label htmlFor="email" className="block text-sm font-semibold text-stone-700 mb-1.5">
+                                <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
                                     Email
                                 </label>
                                 <div className="relative">
@@ -134,7 +134,7 @@ export default function LoginPage({ navigate }) {
 
                             {/* Password */}
                             <div>
-                                <label htmlFor="password" className="block text-sm font-semibold text-stone-700 mb-1.5">
+                                <label htmlFor="password" className="block text-sm font-medium text-stone-700 mb-1.5">
                                     Mật khẩu
                                 </label>
                                 <div className="relative">
@@ -175,7 +175,7 @@ export default function LoginPage({ navigate }) {
                                 <button
                                     type="button"
                                     onClick={() => { setView('forgot-password'); setError(''); }}
-                                    className="bg-transparent border-none text-amber-600 text-sm font-semibold cursor-pointer hover:text-amber-700 transition-colors"
+                                    className="bg-transparent border-none text-amber-600 text-sm font-medium cursor-pointer hover:text-amber-700 transition-colors"
                                 >
                                     Quên mật khẩu?
                                 </button>
@@ -185,7 +185,7 @@ export default function LoginPage({ navigate }) {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-bold py-2.5 rounded-full cursor-pointer border-none transition-colors duration-200 mt-2"
+                                className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-full cursor-pointer border-none transition-colors duration-200 mt-2"
                             >
                                 {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                             </button>
@@ -200,7 +200,7 @@ export default function LoginPage({ navigate }) {
                     {/* Divider */}
                     <div className="flex items-center gap-3 my-6">
                         <div className="flex-1 h-px bg-stone-100" />
-                        <span className="text-xs text-stone-400 font-medium uppercase tracking-widest">hoặc</span>
+                        <span className="text-xs text-stone-400 font-normal uppercase tracking-widest">hoặc</span>
                         <div className="flex-1 h-px bg-stone-100" />
                     </div>
 
@@ -208,7 +208,7 @@ export default function LoginPage({ navigate }) {
                         Chưa có tài khoản?{' '}
                         <button
                             onClick={() => navigate('register')}
-                            className="bg-transparent border-none text-amber-600 font-bold cursor-pointer text-sm hover:text-amber-700 transition-colors"
+                            className="bg-transparent border-none text-amber-600 font-medium cursor-pointer text-sm hover:text-amber-700 transition-colors"
                         >
                             Đăng ký ngay
                         </button>
@@ -218,7 +218,7 @@ export default function LoginPage({ navigate }) {
                     <div className="mt-6 flex justify-center">
                         <button
                             onClick={() => navigate('home')}
-                            className="flex items-center gap-2.5 bg-transparent border-none text-stone-400 text-xs font-bold cursor-pointer py-1.5 px-4 rounded-full hover:text-stone-900 hover:bg-stone-50 transition-all group"
+                            className="flex items-center gap-2.5 bg-transparent border-none text-stone-400 text-xs font-medium cursor-pointer py-1.5 px-4 rounded-full hover:text-stone-900 hover:bg-stone-50 transition-all group"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform">
                                 <polyline points="15 18 9 12 15 6" />

@@ -8,6 +8,7 @@ import AppIcon from "../components/common/AppIcon.jsx";
 import { useFavorites } from "../context/FavoritesContext.jsx";
 import CommentSection from "../components/rooms/CommentSection.jsx";
 import LandlordCard from "../components/rooms/LandlordCard.jsx";
+import ImagePreviewModal from "../components/common/ImagePreviewModal.jsx";
 
 /* ============================================
    Helper to parse and extract embeddable video URL for YouTube & TikTok
@@ -59,6 +60,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
     const { showModal } = useModal();
     const { isFavorite, toggleFavorite } = useFavorites();
     const [activeImage, setActiveImage] = useState(0);
+    const [previewModalOpen, setPreviewModalOpen] = useState(false);
     const [showPhone, setShowPhone] = useState(false);
     const [views, setViews] = useState(0);
     const lastIncrementedRoomId = useRef(null);
@@ -159,7 +161,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
         return (
             <div className="min-h-screen bg-stone-50 pt-20 flex flex-col items-center justify-center gap-3">
                 <AppIcon name="reload" size={32} className="text-amber-500 animate-spin" />
-                <span className="text-stone-500 text-sm font-semibold">Đang tải chi tiết phòng trọ...</span>
+                <span className="text-stone-500 text-sm font-medium">Đang tải chi tiết phòng trọ...</span>
             </div>
         );
     }
@@ -187,7 +189,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
     return (
         <div className="min-h-screen bg-stone-50 pt-16 md:pt-20 pb-24 md:pb-0">
             {previewMode && (
-                <div className="bg-amber-100 text-amber-800 text-center py-2 text-sm font-bold sticky top-0 z-50">
+                <div className="bg-amber-100 text-amber-800 text-center py-2 text-sm font-medium sticky top-0 z-50">
                     Bạn đang ở chế độ xem trước (Có thể chỉnh sửa bình luận)
                 </div>
             )}
@@ -208,7 +210,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                 window.history.back();
                             }
                         }}
-                        className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
+                        className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-medium hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
                     >
                         <div className="w-7 h-7 rounded-full! bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
                             <AppIcon name="chevronLeft" size={14} strokeWidth={3.5} />
@@ -250,14 +252,15 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                     ) : mediaItems[activeImage].type === "placeholder" ? (
                                         <div className="w-full h-full bg-stone-100 flex flex-col items-center justify-center text-stone-400 gap-2">
                                             <AppIcon name="home" size={48} className="text-stone-300 animate-pulse" />
-                                            <span className="text-sm font-semibold text-stone-400">Tin đăng chưa có hình ảnh</span>
+                                            <span className="text-sm font-medium text-stone-400">Tin đăng chưa có hình ảnh</span>
                                         </div>
                                     ) : (
                                         <img
                                             key={activeImage}
                                             src={mediaItems[activeImage].url}
                                             alt={`${basic_info.title} - ảnh ${activeImage + 1}`}
-                                            className="w-full h-full object-cover animate-fade-in"
+                                            className="w-full h-full object-cover animate-fade-in cursor-pointer"
+                                            onClick={() => setPreviewModalOpen(true)}
                                             onError={(e) => {
                                                 e.currentTarget.src = "/images/placeholder.png";
                                             }}
@@ -266,16 +269,16 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                     {/* Status badges grouped */}
                                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                                         <span
-                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold ${
+                                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-medium border ${
                                                 showAsPublished
-                                                    ? "bg-blue-100 text-blue-700"
+                                                    ? "bg-blue-50 text-blue-700 border-blue-200"
                                                     : isAvailable
-                                                      ? "bg-green-100 text-green-700"
+                                                      ? "bg-green-50 text-green-700 border-green-200"
                                                       : isExpired
-                                                        ? "bg-red-100 text-red-700"
+                                                        ? "bg-red-50 text-red-700 border-red-200"
                                                         : metadata.status === "pending"
-                                                          ? "bg-amber-100 text-amber-700"
-                                                          : "bg-stone-100 text-stone-700"
+                                                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                                                          : "bg-stone-50 text-stone-700 border-stone-200"
                                             }`}
                                         >
                                             <span
@@ -305,7 +308,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         </span>
 
                                         {metadata.is_verified && !showAsPublished && (
-                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-bold bg-blue-100 text-blue-700">
+                                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-medium bg-blue-50 text-blue-700 border border-blue-200">
                                                 <AppIcon name="verified" size={13} strokeWidth={2.5} />
                                                 Đã xác thực
                                             </span>
@@ -360,13 +363,13 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
                             {/* Main Info Section */}
                             <div className="p-6 border-b border-stone-100">
-                                <h1 className="text-2xl md:text-3xl font-extrabold text-stone-900 mb-3 leading-tight font-heading">{basic_info.title}</h1>
+                                <h1 className="text-2xl md:text-3xl font-semibold text-stone-900 mb-3 leading-tight font-heading">{basic_info.title}</h1>
 
                                 <div className="flex items-center gap-4 mb-5 flex-wrap">
                                     <button
                                         onClick={previewMode ? undefined : handleToggleFavorite}
                                         disabled={previewMode}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-full! font-bold text-sm transition-all border ${previewMode ? "opacity-50 cursor-not-allowed bg-stone-100 border-stone-200 text-stone-400" : "cursor-pointer"} ${
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-full! font-medium text-sm transition-all border ${previewMode ? "opacity-50 cursor-not-allowed bg-stone-100 border-stone-200 text-stone-400" : "cursor-pointer"} ${
                                             !previewMode && favorited
                                                 ? "bg-red-50 border-red-200 text-red-600"
                                                 : !previewMode
@@ -383,19 +386,19 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         {favorited && !previewMode ? "Đã lưu tin" : "Lưu tin"}
                                     </button>
 
-                                    <div className="flex items-center gap-1.5 text-stone-500 text-sm font-medium">
+                                    <div className="flex items-center gap-1.5 text-stone-500 text-sm font-normal">
                                         <AppIcon name="eye" size={16} />
                                         <span>{displayViews.toLocaleString()} lượt xem</span>
                                     </div>
 
                                     <div className="hidden sm:block h-3 w-px bg-stone-200" />
 
-                                    <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
+                                    <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-normal">
                                         <AppIcon name="clock" size={16} />
                                         <span>Cập nhật: {formatDate(metadata.updated_at)}</span>
                                     </div>
 
-                                    <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-medium">
+                                    <div className="flex items-center gap-1.5 text-stone-400 text-[0.85rem] font-normal">
                                         <AppIcon name="calendar" size={16} />
                                         <span>Hết hạn: {activeRoom.available_until ? formatDate(activeRoom.available_until) : "Không xác định"}</span>
                                     </div>
@@ -403,7 +406,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                 <div className="flex items-start gap-2 text-stone-500 text-[0.925rem] mb-6">
                                     <AppIcon name="location" size={18} className="text-stone-400 mt-1" />
                                     <div className="flex flex-col">
-                                        <span className="text-stone-900 font-bold text-[1rem] leading-tight mb-1">{basic_info.address}</span>
+                                        <span className="text-stone-900 font-medium text-[1rem] leading-tight mb-1">{basic_info.address}</span>
                                         <span className="text-stone-400 text-[0.85rem]">
                                             {basic_info.ward && `${basic_info.ward}, `}
                                             {basic_info.district}, {basic_info.city}
@@ -427,7 +430,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                             {nearby.map((u) => (
                                                 <span
                                                     key={u.name}
-                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[0.75rem] font-bold border border-amber-100"
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-600 text-[0.75rem] font-medium border border-amber-100"
                                                 >
                                                     <AppIcon name="verified" size={12} />
                                                     Gần {u.name}
@@ -484,12 +487,12 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
                                         {monthly_costs.extra_services.length > 0 && (
                                             <div className="pt-2">
-                                                <p className="text-[0.8rem] font-bold text-stone-400 uppercase tracking-wider mb-2">Dịch vụ thêm:</p>
+                                                <p className="text-[0.8rem] font-medium text-stone-400 uppercase tracking-wider mb-2">Dịch vụ thêm:</p>
                                                 <div className="flex flex-wrap gap-2">
                                                     {monthly_costs.extra_services.map((s) => (
                                                         <span
                                                             key={s.name}
-                                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 text-sm font-medium"
+                                                            className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700 text-sm font-normal"
                                                         >
                                                             {s.name}: {new Intl.NumberFormat("vi-VN").format(s.price)} đ
                                                         </span>
@@ -530,7 +533,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                                 className={`flex items-center gap-2 p-2 px-3 rounded-md border transition-all duration-200 ${has ? "bg-amber-50 border-amber-200 opacity-100" : "bg-stone-50 border-stone-200 opacity-45"}`}
                                             >
                                                 <AppIcon name={key} size={16} color={has ? "#d97706" : "#a8a29e"} />
-                                                <span className={`text-[0.85rem] ${has ? "text-amber-900 font-medium" : "text-stone-400 font-normal"}`}>
+                                                <span className={`text-[0.85rem] ${has ? "text-amber-900 font-normal" : "text-stone-400 font-light"}`}>
                                                     {label}
                                                 </span>
                                             </div>
@@ -560,7 +563,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mb-3">
                                             <AppIcon name="location" size={24} />
                                         </div>
-                                        <p className="text-amber-900 font-bold mb-1">Bản đồ đang được cập nhật</p>
+                                        <p className="text-amber-900 font-medium mb-1">Bản đồ đang được cập nhật</p>
                                         <p className="text-amber-700/70 text-sm max-w-[280px]">
                                             Vị trí chính xác sẽ được hiển thị khi Bên cho thuê hoàn tất xác thực tọa độ.
                                         </p>
@@ -586,6 +589,13 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                     </div>
                 </div>
             </div>
+
+            <ImagePreviewModal
+                isOpen={previewModalOpen}
+                onClose={() => setPreviewModalOpen(false)}
+                images={mediaItems.filter(m => m.type === "image")}
+                initialIndex={Math.max(0, activeImage - videos.length)}
+            />
         </div>
     );
 }
@@ -593,7 +603,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 /* Sub-components */
 function SectionTitle({ icon, children }) {
     return (
-        <h2 className="font-bold text-[1.05rem] text-stone-900 flex items-center gap-2 font-heading">
+        <h2 className="font-medium text-[1.05rem] text-stone-900 flex items-center gap-2 font-heading">
             <AppIcon name={icon} color="#d97706" />
             {children}
         </h2>
@@ -607,8 +617,8 @@ function StatItem({ icon, label, value, highlight }) {
                 <AppIcon name={icon} size={26} />
             </div>
             <div className="flex flex-col">
-                <p className="text-[0.72rem] text-stone-400 font-medium uppercase tracking-wider mb-0.5">{label}</p>
-                <p className={`text-[0.9rem] font-bold ${highlight ? "text-amber-600" : "text-stone-900"} font-heading`}>{value}</p>
+                <p className="text-[0.72rem] text-stone-400 font-normal uppercase tracking-wider mb-0.5">{label}</p>
+                <p className={`text-[0.9rem] font-medium ${highlight ? "text-amber-600" : "text-stone-900"} font-heading`}>{value}</p>
             </div>
         </div>
     );
@@ -617,8 +627,8 @@ function StatItem({ icon, label, value, highlight }) {
 function InfoRow({ label, value, isStatus, ok }) {
     return (
         <div className="flex justify-between items-baseline gap-4">
-            <span className="text-[0.875rem] text-stone-400 font-medium shrink-0">{label}</span>
-            <span className={`text-[0.925rem] font-bold text-right ${isStatus ? (ok ? "text-green-600" : "text-red-600") : "text-stone-900"}`}>{value}</span>
+            <span className="text-[0.875rem] text-stone-400 font-normal shrink-0">{label}</span>
+            <span className={`text-[0.925rem] font-medium text-right ${isStatus ? (ok ? "text-green-600" : "text-red-600") : "text-stone-900"}`}>{value}</span>
         </div>
     );
 }

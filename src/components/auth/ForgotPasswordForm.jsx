@@ -38,12 +38,12 @@ export default function ForgotPasswordForm({ onBack, initialEmail }) {
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                     </div>
-                    <p className="text-sm text-stone-700 font-medium leading-relaxed">
+                    <p className="text-sm text-stone-700 font-normal leading-relaxed">
                         {success}
                     </p>
                     <button
                         onClick={onBack}
-                        className="mt-2 text-amber-600 font-bold text-sm hover:text-amber-700 transition-colors bg-transparent border-none cursor-pointer"
+                        className="mt-2 text-amber-600 font-medium text-sm hover:text-amber-700 transition-colors bg-transparent border-none cursor-pointer"
                     >
                         Quay lại đăng nhập
                     </button>
@@ -64,7 +64,7 @@ export default function ForgotPasswordForm({ onBack, initialEmail }) {
                     )}
 
                     <div>
-                        <label htmlFor="forgot-email" className="block text-sm font-semibold text-stone-700 mb-1.5">
+                        <label htmlFor="forgot-email" className="block text-sm font-medium text-stone-700 mb-1.5">
                             Email khôi phục
                         </label>
                         <input
@@ -81,7 +81,7 @@ export default function ForgotPasswordForm({ onBack, initialEmail }) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-bold py-3 rounded-full cursor-pointer border-none transition-colors shadow-lg shadow-amber-200"
+                        className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white text-sm font-medium py-3 rounded-full cursor-pointer border-none transition-colors shadow-lg shadow-amber-200"
                     >
                         {loading ? 'Đang gửi yêu cầu...' : 'Gửi yêu cầu khôi phục'}
                     </button>
@@ -89,7 +89,7 @@ export default function ForgotPasswordForm({ onBack, initialEmail }) {
                     <button
                         type="button"
                         onClick={onBack}
-                        className="w-full bg-transparent text-stone-500 text-sm font-semibold py-1 cursor-pointer border-none hover:text-stone-900 transition-colors"
+                        className="w-full bg-transparent text-stone-500 text-sm font-medium py-1 cursor-pointer border-none hover:text-stone-900 transition-colors"
                     >
                         ← Quay lại đăng nhập
                     </button>

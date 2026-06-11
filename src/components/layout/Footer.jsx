@@ -66,13 +66,13 @@ export default function Footer({ navigate }) {
                             <img src="/logo.png" alt="Logo" className="w-7 h-7 object-contain rounded" />
                             <span className="flex items-baseline">
                                 <span
-                                    className="font-semibold text-lg text-white tracking-tight"
+                                    className="font-medium text-lg text-white tracking-tight"
                                     style={{ fontFamily: 'var(--font-heading)' }}
                                 >
                                     Trọ
                                 </span>
                                 <span
-                                    className="text-amber-500 text-xl font-bold ml-0.5"
+                                    className="text-amber-500 text-xl font-medium ml-0.5"
                                     style={{ fontFamily: 'var(--font-script)' }}
                                 >
                                     Tốt
@@ -104,7 +104,7 @@ export default function Footer({ navigate }) {
                     {Object.entries(footerLinks).map(([title, links]) => (
                         <div key={title}>
                             <h4
-                                className="text-white font-semibold text-sm mb-4"
+                                className="text-white font-medium text-sm mb-4"
                                 style={{ fontFamily: 'var(--font-heading)' }}
                             >
                                 {title}
@@ -127,7 +127,7 @@ export default function Footer({ navigate }) {
                     {/* Contact */}
                     <div>
                         <h4
-                            className="text-white font-semibold text-sm mb-4"
+                            className="text-white font-medium text-sm mb-4"
                             style={{ fontFamily: 'var(--font-heading)' }}
                         >
                             Liên hệ

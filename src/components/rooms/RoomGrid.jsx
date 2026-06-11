@@ -34,7 +34,7 @@ export default function RoomGrid({ rooms, onRoomClick, isLoading }) {
                     </svg>
                 </div>
                 <h3
-                    className="text-base font-semibold text-stone-900 m-0"
+                    className="text-base font-medium text-stone-900 m-0"
                     style={{ fontFamily: 'var(--font-heading)' }}
                 >
                     Không tìm thấy phòng nào

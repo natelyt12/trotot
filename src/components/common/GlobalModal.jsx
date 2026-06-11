@@ -58,7 +58,7 @@ export default function GlobalModal({ config, onClose }) {
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: "100%", opacity: 0 }}
                         transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.6 }}
-                        className="relative w-full max-w-[360px] bg-white sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col overflow-hidden mt-auto sm:mt-0"
+                        className="relative w-full max-w-[360px] bg-white sm:rounded-2xl rounded-t-2xl shadow-xl border border-stone-100 flex flex-col overflow-hidden mt-auto sm:mt-0"
                     >
                         {/* Drag Handle Bar (Visual only on mobile) */}
                         <div className="flex justify-center py-3 shrink-0 sm:hidden">
@@ -68,16 +68,16 @@ export default function GlobalModal({ config, onClose }) {
                         <div className="p-8">
                             {/* Icon Header */}
                             <div className="flex justify-center mb-5">
-                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${getTypeColor()}`}>
+                                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${getTypeColor()}`}>
                                     {getIcon()}
                                 </div>
                             </div>
 
                             <div className="text-center">
-                                <h3 className="text-xl font-extrabold text-stone-900 mb-2 font-heading">
+                                <h3 className="text-xl font-semibold text-stone-900 mb-2 font-heading">
                                     {title}
                                 </h3>
-                                <p className="text-stone-500 text-[0.9rem] leading-relaxed mb-8 px-2 font-medium whitespace-pre-wrap">
+                                <p className="text-stone-500 text-[0.9rem] leading-relaxed mb-8 px-2 font-normal whitespace-pre-wrap">
                                     {message}
                                 </p>
                             </div>
@@ -85,7 +85,7 @@ export default function GlobalModal({ config, onClose }) {
                             <div className="flex flex-col gap-3">
                                 <button
                                     onClick={handleConfirm}
-                                    className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all cursor-pointer border-none shadow-lg shadow-amber-500/20 ${type === 'error' ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600'
+                                    className={`w-full py-3.5 rounded-full font-medium text-sm transition-all cursor-pointer border-none ${type === 'error' ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600'
                                         } text-white`}
                                 >
                                     {confirmText}
@@ -94,7 +94,7 @@ export default function GlobalModal({ config, onClose }) {
                                 {cancelText && (
                                     <button
                                         onClick={handleCancel}
-                                        className="w-full py-3.5 rounded-xl font-bold text-sm text-stone-600 bg-stone-50 hover:bg-stone-100 transition-all cursor-pointer border-none"
+                                        className="w-full py-3 rounded-full font-medium text-sm text-stone-600 bg-white border border-stone-200 hover:bg-stone-50 transition-all cursor-pointer"
                                     >
                                         {cancelText}
                                     </button>

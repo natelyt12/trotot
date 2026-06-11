@@ -72,7 +72,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
     };
 
     return (
-        <header className="fixed z-100 top-0 left-0 right-0 bg-white border-b border-stone-100 shadow-sm">
+        <header className="fixed z-100 top-0 left-0 right-0 bg-white border-b border-amber-200">
             {/* Main bar */}
             <nav className="flex flex-col md:flex-row w-full px-4 md:px-6">
                 {/* Top Row (Mobile) / Full Row (Desktop) */}
@@ -83,8 +83,8 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                         <button onClick={() => navigate("home")} className="flex items-center gap-2 bg-transparent border-none cursor-pointer p-0 shrink-0">
                             <img src="/logo.png" alt="Trọ Tốt Logo" className="w-8 h-8 object-contain rounded-md" />
                             <span className="flex items-baseline">
-                                <span className="font-semibold text-[1.25rem] text-stone-900 tracking-tight font-heading">Trọ</span>
-                                <span className="text-amber-500 text-[1.45rem] font-bold ml-0.5 font-script">Tốt</span>
+                                <span className="font-bold text-[1.25rem] text-stone-900 tracking-tight font-heading">Trọ</span>
+                                <span className="text-amber-500 text-[1.45rem] font-medium ml-0.5 font-script">Tốt</span>
                             </span>
                         </button>
 
@@ -95,22 +95,26 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                     <>
                                         <button
                                             onClick={() => navigate("dashboard", { tab: "post_room", isCreating: true })}
-                                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5"
+                                            className="bg-amber-500 hover:bg-amber-600 text-white font-normal text-xs pl-1.5 pr-3.5 py-1.5 rounded-full border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5 group shrink-0"
                                         >
-                                            <AppIcon name="plus" size={14} strokeWidth={2.5} />
+                                            <div className="w-6 h-6 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shrink-0">
+                                                <AppIcon name="plus" size={14} strokeWidth={2.5} />
+                                            </div>
                                             <span>Đăng tin phòng trọ</span>
                                         </button>
                                         <button
                                             onClick={() => navigate("forum", { openCreateModal: true })}
-                                            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer transition-all flex items-center gap-1.5"
+                                            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 font-normal text-xs pl-1.5 pr-3.5 py-1.5 rounded-full cursor-pointer transition-all flex items-center gap-1.5 group shrink-0"
                                         >
-                                            <AppIcon name="messages" size={14} />
+                                            <div className="w-6 h-6 rounded-full bg-amber-100 group-hover:bg-amber-200 transition-colors flex items-center justify-center shrink-0">
+                                                <AppIcon name="messages" size={14} />
+                                            </div>
                                             <span>Đăng tin diễn đàn</span>
                                         </button>
                                         <div className="h-4 w-px bg-stone-200 mx-1" />
                                         <button
                                             onClick={() => navigate("home")}
-                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                                 currentPage === "home" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                             }`}
                                         >
@@ -118,7 +122,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         </button>
                                         <button
                                             onClick={() => navigate("forum")}
-                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                                 currentPage === "forum" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                             }`}
                                         >
@@ -126,7 +130,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         </button>
                                         <button
                                             onClick={() => navigate("dashboard")}
-                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                                 currentPage === "dashboard" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                             }`}
                                         >
@@ -137,15 +141,17 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                     <>
                                         <button
                                             onClick={() => navigate("forum", { openCreateModal: true })}
-                                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5"
+                                            className="bg-amber-500 hover:bg-amber-600 text-white font-normal text-xs pl-1.5 pr-3.5 py-1.5 rounded-full border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5 group shrink-0"
                                         >
-                                            <AppIcon name="messages" size={14} />
+                                            <div className="w-6 h-6 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shrink-0">
+                                                <AppIcon name="messages" size={14} />
+                                            </div>
                                             <span>Đăng tin diễn đàn</span>
                                         </button>
                                         <div className="h-4 w-px bg-stone-200 mx-1" />
                                         <button
                                             onClick={() => navigate("home")}
-                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                                 currentPage === "home" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                             }`}
                                         >
@@ -153,7 +159,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         </button>
                                         <button
                                             onClick={() => navigate("forum")}
-                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                                 currentPage === "forum" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                             }`}
                                         >
@@ -161,7 +167,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         </button>
                                         <button
                                             onClick={() => navigate("profile", { tab: "favorites" })}
-                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                                 currentPage === "favorites" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                             }`}
                                         >
@@ -169,11 +175,11 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         </button>
                                         <button
                                             onClick={() => navigate("my-room")}
-                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                                 currentPage === "my-room" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                             }`}
                                         >
-                                            Quản lý phòng của tenant
+                                            Phòng trọ của tôi
                                         </button>
                                     </>
                                 )
@@ -181,22 +187,26 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                 <>
                                     <button
                                         onClick={() => navigate("login")}
-                                        className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5"
+                                        className="bg-amber-500 hover:bg-amber-600 text-white font-normal text-xs pl-1.5 pr-3.5 py-1.5 rounded-full border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5 group shrink-0"
                                     >
-                                        <AppIcon name="plus" size={14} strokeWidth={2.5} />
+                                        <div className="w-6 h-6 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors flex items-center justify-center shrink-0">
+                                            <AppIcon name="plus" size={14} strokeWidth={2.5} />
+                                        </div>
                                         <span>Đăng tin phòng trọ</span>
                                     </button>
                                     <button
                                         onClick={() => navigate("login")}
-                                        className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer transition-all flex items-center gap-1.5"
+                                        className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 font-normal text-xs pl-1.5 pr-3.5 py-1.5 rounded-full cursor-pointer transition-all flex items-center gap-1.5 group shrink-0"
                                     >
-                                        <AppIcon name="messages" size={14} />
+                                        <div className="w-6 h-6 rounded-full bg-amber-100 group-hover:bg-amber-200 transition-colors flex items-center justify-center shrink-0">
+                                            <AppIcon name="messages" size={14} />
+                                        </div>
                                         <span>Đăng tin diễn đàn</span>
                                     </button>
                                     <div className="h-4 w-px bg-stone-200 mx-1" />
                                     <button
                                         onClick={() => navigate("home")}
-                                        className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                        className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                             currentPage === "home" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                         }`}
                                     >
@@ -204,7 +214,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                     </button>
                                     <button
                                         onClick={() => navigate("forum")}
-                                        className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                        className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                             currentPage === "forum" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                         }`}
                                     >
@@ -244,17 +254,17 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
 
                         {user ? (
                             <div className="relative group flex items-center">
-                                <button className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1.5 px-3 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors z-10">
+                                <button className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1.5 px-3 rounded-lg cursor-pointer hover:bg-stone-50 transition-colors z-10">
                                     <div className="text-right">
-                                        <div className="text-sm font-bold text-stone-900 leading-tight truncate max-w-[120px]">
+                                        <div className="text-sm font-normal text-stone-900 leading-tight truncate max-w-[120px]">
                                             {user.user_metadata?.full_name || "Người dùng"}
                                         </div>
-                                        <div className="text-[10px] uppercase tracking-tighter text-stone-500 font-bold">
+                                        <div className="text-[10px] uppercase tracking-tighter text-stone-500 font-normal">
                                             {roleLabel(user.user_metadata?.role)}
                                         </div>
                                     </div>
                                     <div
-                                        className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-white"
+                                        className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-amber-500 text-white font-normal flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-white"
                                         style={
                                             user.user_metadata?.avatar_url
                                                 ? { backgroundImage: `url(${user.user_metadata.avatar_url})`, backgroundSize: "cover" }
@@ -273,7 +283,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
                                                 <button
                                                     onClick={() => navigate("dashboard", { tab: "post_room", isCreating: true })}
-                                                    className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2.5 px-3.5 rounded-xl border-none cursor-pointer transition-colors shadow-sm"
+                                                    className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-normal text-xs py-2.5 px-3.5 rounded-lg border-none cursor-pointer transition-colors shadow-sm"
                                                 >
                                                     <AppIcon name="plus" size={14} />
                                                     <span>Đăng tin phòng trọ</span>
@@ -281,7 +291,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             )}
                                             <button
                                                 onClick={() => navigate("forum", { openCreateModal: true })}
-                                                className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2.5 px-3.5 rounded-xl border-none cursor-pointer transition-colors shadow-sm"
+                                                className="w-full flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 font-normal text-xs py-2.5 px-3.5 rounded-lg cursor-pointer transition-colors shadow-sm"
                                             >
                                                 <AppIcon name="messages" size={14} />
                                                 <span>Đăng tin diễn đàn</span>
@@ -294,14 +304,14 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         <div className="space-y-0.5">
                                             <button
                                                 onClick={() => navigate("public-profile", { userId: user.id })}
-                                                className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-normal text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                             >
                                                 <AppIcon name="user" size={16} />
                                                 <span>Xem trang cá nhân</span>
                                             </button>
                                             <button
                                                 onClick={() => navigate("profile")}
-                                                className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-normal text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                             >
                                                 <AppIcon name="settings" size={16} />
                                                 <span>Cài đặt tài khoản</span>
@@ -309,7 +319,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             {user && user.user_metadata?.role === "tenant" && (
                                                 <button
                                                     onClick={() => navigate("my-room")}
-                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-normal text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                                 >
                                                     <AppIcon name="home" size={16} />
                                                     <span>Phòng trọ của tôi</span>
@@ -318,7 +328,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
                                                 <button
                                                     onClick={() => navigate("dashboard")}
-                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-normal text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                                 >
                                                     <AppIcon name="check-square" size={16} />
                                                     <span>Quản lý</span>
@@ -328,7 +338,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             {user && user.user_metadata?.role === "admin" && (
                                                 <button
                                                     onClick={() => navigate("admin")}
-                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
+                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-normal text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                                 >
                                                     <AppIcon name="settings" size={16} />
                                                     <span>Trang quản trị</span>
@@ -340,7 +350,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
 
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer border-none bg-transparent"
+                                            className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-normal text-red-600 hover:bg-red-50 cursor-pointer border-none bg-transparent"
                                         >
                                             <svg
                                                 width="16"
@@ -365,13 +375,13 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => navigate("login")}
-                                    className="hidden md:flex items-center justify-center bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-bold h-10 px-5 rounded-full cursor-pointer border-none transition-colors"
+                                    className="hidden md:flex items-center justify-center bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-normal h-10 px-5 rounded-full cursor-pointer border-none transition-colors"
                                 >
                                     Đăng nhập
                                 </button>
                                 <button
                                     onClick={() => navigate("register")}
-                                    className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold h-10 px-5 rounded-full cursor-pointer border-none transition-colors"
+                                    className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-normal h-10 px-5 rounded-full cursor-pointer border-none transition-colors"
                                 >
                                     Đăng ký
                                 </button>
@@ -432,10 +442,10 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         navigate("profile");
                                         setMobileOpen(false);
                                     }}
-                                    className="w-full bg-stone-50 border border-stone-200 p-3.5 rounded-xl flex items-center justify-between cursor-pointer text-left hover:bg-amber-50 hover:border-amber-200 transition-colors duration-200"
+                                    className="w-full bg-stone-50 border border-stone-200 p-3.5 rounded-lg flex items-center justify-between cursor-pointer text-left hover:bg-amber-50 hover:border-amber-200 transition-colors duration-200"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-base overflow-hidden shrink-0">
+                                        <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-white font-normal text-base overflow-hidden shrink-0">
                                             {user.user_metadata?.avatar_url ? (
                                                 <img src={user.user_metadata.avatar_url} alt="avatar" className="w-full h-full object-cover" />
                                             ) : (
@@ -443,7 +453,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             )}
                                         </div>
                                         <div>
-                                            <div className="text-sm font-semibold text-stone-900">{user.user_metadata?.full_name || "Người dùng"}</div>
+                                            <div className="text-sm font-medium text-stone-900">{user.user_metadata?.full_name || "Người dùng"}</div>
                                             <div className="text-xs text-stone-500">{roleLabel(user.user_metadata?.role)}</div>
                                         </div>
                                     </div>
@@ -467,7 +477,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         navigate("login");
                                         setMobileOpen(false);
                                     }}
-                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold py-3.5 rounded-full cursor-pointer border-none transition-colors duration-200"
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium py-3.5 rounded-full cursor-pointer border-none transition-colors duration-200"
                                 >
                                     Đăng nhập
                                 </button>
@@ -482,7 +492,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             navigate("dashboard", { tab: "post_room", isCreating: true });
                                             setMobileOpen(false);
                                         }}
-                                        className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 text-center text-xs rounded-xl border-none cursor-pointer shadow-sm transition-colors"
+                                        className="w-full bg-amber-500 hover:bg-amber-600 text-white font-normal py-3 text-center text-xs rounded-lg border-none cursor-pointer shadow-sm transition-colors"
                                     >
                                         Đăng tin phòng trọ
                                     </button>
@@ -492,7 +502,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         navigate("forum", { openCreateModal: true });
                                         setMobileOpen(false);
                                     }}
-                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 text-center text-xs rounded-xl border-none cursor-pointer shadow-sm transition-colors"
+                                    className="w-full flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 font-normal py-3 text-xs rounded-lg cursor-pointer shadow-sm transition-colors"
                                 >
                                     Đăng tin diễn đàn
                                 </button>
@@ -504,7 +514,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                     navigate("dashboard");
                                     setMobileOpen(false);
                                 }}
-                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-normal cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
                             >
                                 Quản lý
                             </button>
@@ -516,7 +526,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                     navigate("my-room");
                                     setMobileOpen(false);
                                 }}
-                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-normal cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
                             >
                                 Phòng trọ của tôi
                             </button>
@@ -528,7 +538,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                     handleNavLinkClick(link);
                                     setMobileOpen(false);
                                 }}
-                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-medium cursor-pointer border-b border-stone-100 last:border-b-0 hover:text-amber-600 transition-colors duration-200"
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-normal cursor-pointer border-b border-stone-100 last:border-b-0 hover:text-amber-600 transition-colors duration-200"
                             >
                                 {link.label}
                             </button>
@@ -539,7 +549,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                     navigate("admin");
                                     setMobileOpen(false);
                                 }}
-                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-stone-900 transition-colors duration-200"
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-normal cursor-pointer border-t border-stone-100 hover:text-stone-900 transition-colors duration-200"
                             >
                                 Trang quản trị
                             </button>
@@ -550,7 +560,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                     handleLogout();
                                     setMobileOpen(false);
                                 }}
-                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-red-600 text-sm font-bold cursor-pointer border-t border-stone-100 hover:text-red-700 transition-colors duration-200"
+                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-red-600 text-sm font-normal cursor-pointer border-t border-stone-100 hover:text-red-700 transition-colors duration-200"
                             >
                                 Đăng xuất
                             </button>

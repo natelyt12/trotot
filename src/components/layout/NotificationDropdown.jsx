@@ -184,10 +184,10 @@ export default function NotificationDropdown({ navigate, user }) {
                     >
                         {/* Header */}
                         <div className="px-4 py-3 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
-                            <h3 className="font-bold text-stone-900 text-sm md:text-base flex items-center gap-1.5">
+                            <h3 className="font-medium text-stone-900 text-sm md:text-base flex items-center gap-1.5">
                                 Thông báo
                                 {unreadCount > 0 && (
-                                    <span className="text-[11px] bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full">
+                                    <span className="text-[11px] bg-red-50 text-red-600 font-medium px-2 py-0.5 rounded-full">
                                         Mới: {unreadCount}
                                     </span>
                                 )}
@@ -196,7 +196,7 @@ export default function NotificationDropdown({ navigate, user }) {
                                 <div className="flex gap-3 text-xs">
                                     <button
                                         onClick={handleMarkAllRead}
-                                        className="text-amber-600 hover:text-amber-700 font-bold bg-transparent border-none cursor-pointer p-0"
+                                        className="text-amber-600 hover:text-amber-700 font-medium bg-transparent border-none cursor-pointer p-0"
                                     >
                                         Đọc tất cả
                                     </button>
@@ -220,7 +220,7 @@ export default function NotificationDropdown({ navigate, user }) {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-2">
                                                 <h4 className={`text-stone-900 text-xs md:text-sm leading-snug truncate ${
-                                                    !notif.read ? "font-bold" : "font-semibold"
+                                                    !notif.read ? "font-medium" : "font-medium"
                                                 }`}>
                                                     {notif.title}
                                                 </h4>
@@ -232,12 +232,12 @@ export default function NotificationDropdown({ navigate, user }) {
                                             </div>
                                             
                                             <p className={`text-stone-500 text-[11px] md:text-[12px] mt-1 leading-normal break-words ${
-                                                !notif.read ? "font-medium text-stone-700" : "font-normal"
+                                                !notif.read ? "font-normal text-stone-700" : "font-light"
                                             }`}>
                                                 {notif.description}
                                             </p>
                                             
-                                            <span className="text-[10px] text-stone-400 font-medium mt-1.5 block">
+                                            <span className="text-[10px] text-stone-400 font-normal mt-1.5 block">
                                                 {notif.time}
                                             </span>
                                         </div>
@@ -248,7 +248,7 @@ export default function NotificationDropdown({ navigate, user }) {
                                     <div className="w-14 h-14 rounded-full bg-stone-50 flex items-center justify-center text-stone-400 mb-3">
                                         <AppIcon name="bell" size={24} />
                                     </div>
-                                    <p className="text-stone-500 text-sm font-semibold">Bạn không có thông báo nào</p>
+                                    <p className="text-stone-500 text-sm font-medium">Bạn không có thông báo nào</p>
                                     <p className="text-stone-400 text-xs mt-1 max-w-[200px]">Mọi cập nhật quan trọng sẽ hiển thị ở đây.</p>
                                 </div>
                             )}
@@ -259,7 +259,7 @@ export default function NotificationDropdown({ navigate, user }) {
                             <div className="px-4 py-2.5 bg-stone-50/50 border-t border-stone-100 flex items-center justify-center">
                                 <button
                                     onClick={handleClearAll}
-                                    className="w-full text-center text-xs font-bold text-stone-500 hover:text-stone-700 bg-transparent border-none cursor-pointer py-1 flex items-center justify-center gap-1"
+                                    className="w-full text-center text-xs font-medium text-stone-500 hover:text-stone-700 bg-transparent border-none cursor-pointer py-1 flex items-center justify-center gap-1"
                                 >
                                     <AppIcon name="trash" size={13} />
                                     Xóa tất cả thông báo
