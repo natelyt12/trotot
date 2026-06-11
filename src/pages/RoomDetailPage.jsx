@@ -69,7 +69,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
 
     useEffect(() => {
         if (!resolvedRoom?.id) return;
-        
+
         // If it is already complete (has listing_id and description), no need to fetch
         if (resolvedRoom.listing_id && resolvedRoom.media_contact?.description !== undefined) {
             return;
@@ -101,15 +101,15 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
     // Thay đổi tiêu đề của tab trình duyệt khi có thông tin phòng
     useEffect(() => {
         if (activeRoom?.basic_info?.title) {
-            document.title = `${activeRoom.basic_info.title} | TrọTốt`;
+            document.title = `${activeRoom.basic_info.title} | Trọ Tốt`;
         }
         return () => {
-            document.title = 'TrọTốt';
+            document.title = "Trọ Tốt";
         };
     }, [activeRoom?.basic_info?.title]);
 
     // Rented room state (only for tenant and admin, and not the landlord/owner of the room)
-    const isTenantOrAdmin = user?.user_metadata?.role === 'tenant' || user?.user_metadata?.role === 'admin';
+    const isTenantOrAdmin = user?.user_metadata?.role === "tenant" || user?.user_metadata?.role === "admin";
     const isOwner = user?.id === activeRoom?.user_id;
 
     const displayViews = views || activeRoom?.metadata?.total_views || 0;
@@ -382,8 +382,6 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                         />
                                         {favorited && !previewMode ? "Đã lưu tin" : "Lưu tin"}
                                     </button>
-
-
 
                                     <div className="flex items-center gap-1.5 text-stone-500 text-sm font-medium">
                                         <AppIcon name="eye" size={16} />

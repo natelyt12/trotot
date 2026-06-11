@@ -1,5 +1,5 @@
 import { ROOM_NOUNS, ROOM_ADJECTIVES, ROOM_LOCATIONS, STREET_NAMES, ROOM_DESCRIPTIONS } from '../constants/names.js';
-import videoLinks from '../../mockData/videoLinks.json';
+import videoLinks from '../../public/mockData/videoLinks.json';
 
 // Predefined counts of images per template room index (p1 to p30) in mockData/image
 const ROOM_IMAGE_COUNTS = {
