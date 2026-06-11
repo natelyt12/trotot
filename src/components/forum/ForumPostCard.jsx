@@ -33,6 +33,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
 
     const profile = post.profile || post.profiles;
     const isOwner = user?.id === post.user_id;
+    const isAdmin = user?.user_metadata?.role === "admin";
     const avatarUrl = profile?.avatar_url;
     const displayName = profile?.full_name || "Người dùng";
     const role = profile?.role;
@@ -120,7 +121,6 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                     return;
                 }
                 addNotification("Đã gửi yêu cầu sang nhượng! Vui lòng chờ người cho thuê phản hồi.", "success");
-                if (onEdit) onEdit();
             }
         });
     };
@@ -317,7 +317,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                     <span>Bình luận</span>
                 </button>
 
-                {post.category === 'transfer' && !isOwner && post.status === 'published' && (
+                {post.category === 'transfer' && !isOwner && !isAdmin && post.status === 'published' ? (
                     <button
                         onClick={handleRequestTransfer}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-purple-600 hover:bg-purple-50 transition-colors cursor-pointer border-none bg-transparent"
@@ -325,9 +325,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                         <AppIcon name="home" size={16} />
                         <span>Xin sang nhượng</span>
                     </button>
-                )}
-                
-                {(!post.category || post.category === 'general') && (
+                ) : (
                     <button
                         onClick={handleShare}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-stone-500 hover:bg-stone-50 hover:text-amber-500 transition-colors cursor-pointer border-none bg-transparent"

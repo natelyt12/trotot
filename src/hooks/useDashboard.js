@@ -10,7 +10,7 @@ export const useDashboard = (user, initialData, routerPage) => {
     const { showModal } = useModal();
     const { addNotification } = useNotification();
 
-    const [activeTab, setActiveTab] = useState(initialData?.tab || "manage_rooms");
+    const [activeTab, setActiveTab] = useState(initialData?.tab || "overview");
     const [editingRoom, setEditingRoom] = useState(initialData?.roomToEdit || null);
     const [isCreating, setIsCreating] = useState(initialData?.isCreating || false);
     const [previewRoom, setPreviewRoom] = useState(null);
@@ -37,7 +37,7 @@ export const useDashboard = (user, initialData, routerPage) => {
 
     useEffect(() => {
         if (routerPage === "dashboard") {
-            const targetTab = initialData?.tab || "manage_rooms";
+            const targetTab = initialData?.tab || "overview";
             setActiveTab(targetTab);
             setEditingRoom(initialData?.roomToEdit || null);
             setIsCreating(initialData?.isCreating || false);
@@ -45,7 +45,7 @@ export const useDashboard = (user, initialData, routerPage) => {
     }, [routerPage, initialData]);
 
     useEffect(() => {
-        if (activeTab === "manage_rooms") {
+        if (activeTab === "manage_rooms" || activeTab === "overview") {
             const timer = setTimeout(() => {
                 fetchUserRooms();
             }, 0);

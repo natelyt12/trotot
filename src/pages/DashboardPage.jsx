@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import AppIcon from '../components/common/AppIcon.jsx';
-import RoomPostForm from '../components/dashboard/RoomPostForm.jsx';
-import ManageRoomsTab from '../components/dashboard/ManageRoomsTab.jsx';
-import RequestsTab from '../components/dashboard/RequestsTab.jsx';
-import RoomDetailPage from './RoomDetailPage.jsx';
-import { useDashboard } from '../hooks/useDashboard.js';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import AppIcon from "../components/common/AppIcon.jsx";
+import RoomPostForm from "../components/dashboard/RoomPostForm.jsx";
+import ManageRoomsTab from "../components/dashboard/ManageRoomsTab.jsx";
+import RequestsTab from "../components/dashboard/RequestsTab.jsx";
+import LandlordOverviewTab from "../components/dashboard/LandlordOverviewTab.jsx";
+import RoomDetailPage from "./RoomDetailPage.jsx";
+import { useDashboard } from "../hooks/useDashboard.js";
 
 export default function DashboardPage({ user, navigate, initialData, routerPage }) {
     const {
@@ -32,18 +33,16 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
         renewingRoom,
         setRenewingRoom,
         handleRenewRoom,
-        executeRenewal
+        executeRenewal,
     } = useDashboard(user, initialData, routerPage);
-
 
     return (
         <div className="min-h-screen bg-stone-50 pt-20 pb-20 md:pb-10">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-
                 {/* Back button */}
                 <div className="mb-6">
                     <button
-                        onClick={() => navigate('home')}
+                        onClick={() => navigate("home")}
                         className="flex items-center gap-2.5 bg-white border border-stone-200 rounded-full! pl-1.5 pr-4 py-1.5 cursor-pointer text-stone-600 text-sm font-bold hover:bg-stone-50 hover:text-stone-900 transition-colors duration-200 group"
                     >
                         <div className="w-7 h-7 rounded-full! bg-stone-100 flex items-center justify-center text-stone-500 transition-colors group-hover:bg-stone-200 group-hover:text-stone-700">
@@ -55,62 +54,77 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
 
                 {/* Page title */}
                 <div className="mb-8">
-                    <h1
-                        className="text-2xl font-extrabold text-stone-900 tracking-tight"
-                        style={{ fontFamily: 'var(--font-heading)' }}
-                    >
-                        Quản lý tin đăng
+                    <h1 className="text-2xl font-extrabold text-stone-900 tracking-tight" style={{ fontFamily: "var(--font-heading)" }}>
+                        Quản lý
                     </h1>
-                    <p className="text-stone-500 text-sm mt-1">Quản lý tin đăng và thông tin thuê phòng của bạn.</p>
+                    <p className="text-stone-500 text-sm mt-1">Quản lý tin đăng, khách thuê và các thông tin liên quan của bạn.</p>
                 </div>
 
                 <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
                     <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] items-stretch min-h-[500px]">
-
                         {/* Sidebar */}
                         <aside className="lg:border-r border-stone-100 bg-stone-50/30 p-6 flex flex-col justify-between">
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                                        Quản lý
+                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Tổng quan</div>
+                                    <div className="space-y-1">
+                                        <button
+                                            onClick={() => {
+                                                setActiveTab("overview");
+                                                setIsCreating(false);
+                                                setEditingRoom(null);
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
+                                                activeTab === "overview"
+                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
+                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
+                                            }`}
+                                        >
+                                            <AppIcon name="home" size={18} strokeWidth={activeTab === "overview" ? 2.5 : 2} />
+                                            <span>Xem tổng quan</span>
+                                        </button>
                                     </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Quản lý tin đăng</div>
                                     <div className="space-y-1">
                                         {/* Đăng sửa tin button */}
                                         <button
-                                            onClick={() => setActiveTab('post_room')}
+                                            onClick={() => setActiveTab("post_room")}
                                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                activeTab === 'post_room'
-                                                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                                                    : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                                activeTab === "post_room"
+                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
+                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
                                             }`}
                                         >
-                                            <AppIcon name="edit" size={18} strokeWidth={activeTab === 'post_room' ? 2.5 : 2} />
+                                            <AppIcon name="edit" size={18} strokeWidth={activeTab === "post_room" ? 2.5 : 2} />
                                             <span>Đăng / Sửa tin</span>
                                         </button>
-                                        
+
                                         <hr className="my-4 border-stone-200" />
-                                        
+
                                         {/* Subtabs for status filtering */}
                                         {[
-                                            { id: 'verified', label: 'Tin đã xác thực', icon: 'verified' },
-                                            { id: 'published', label: 'Tin đã công khai', icon: 'home' },
-                                            { id: 'pending_verification', label: 'Tin đang chờ duyệt', icon: 'clock' },
-                                            { id: 'expired', label: 'Tin hết hạn', icon: 'alert' },
-                                            { id: 'draft', label: 'Tin nháp', icon: 'file-text' }
+                                            { id: "verified", label: "Tin đã xác thực", icon: "verified" },
+                                            { id: "published", label: "Tin đã công khai", icon: "home" },
+                                            { id: "pending_verification", label: "Tin đang chờ duyệt", icon: "clock" },
+                                            { id: "expired", label: "Tin hết hạn", icon: "alert" },
+                                            { id: "draft", label: "Tin nháp", icon: "file-text" },
                                         ].map((subItem) => {
-                                            const isActive = activeTab === 'manage_rooms' && subTab === subItem.id;
+                                            const isActive = activeTab === "manage_rooms" && subTab === subItem.id;
                                             return (
                                                 <button
                                                     key={subItem.id}
                                                     onClick={() => {
-                                                        setActiveTab('manage_rooms');
+                                                        setActiveTab("manage_rooms");
                                                         setSubTab(subItem.id);
                                                         setCurrentPage(1);
                                                     }}
                                                     className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
                                                         isActive
-                                                            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                                                            : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                                            ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
+                                                            : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
                                                     }`}
                                                 >
                                                     <AppIcon name={subItem.icon} size={18} strokeWidth={isActive ? 2.5 : 2} />
@@ -122,37 +136,35 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
                                 </div>
 
                                 <div className="space-y-2">
-                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                                        Khách thuê
-                                    </div>
+                                    <div className="px-3 py-1 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Quản lý khách thuê</div>
                                     <div className="space-y-1">
                                         <button
                                             onClick={() => {
-                                                setActiveTab('occupied_rooms');
+                                                setActiveTab("occupied_rooms");
                                                 setCurrentPage(1);
                                             }}
                                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                activeTab === 'occupied_rooms'
-                                                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                                                    : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                                activeTab === "occupied_rooms"
+                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
+                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
                                             }`}
                                         >
-                                            <AppIcon name="users" size={18} strokeWidth={activeTab === 'occupied_rooms' ? 2.5 : 2} />
+                                            <AppIcon name="users" size={18} strokeWidth={activeTab === "occupied_rooms" ? 2.5 : 2} />
                                             <span>Phòng đang có người ở</span>
                                         </button>
-                                        
+
                                         <button
                                             onClick={() => {
-                                                setActiveTab('requests');
+                                                setActiveTab("requests");
                                                 setCurrentPage(1);
                                             }}
                                             className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-left font-bold text-sm border-none cursor-pointer transition-all duration-200 ${
-                                                activeTab === 'requests'
-                                                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                                                    : 'bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800'
+                                                activeTab === "requests"
+                                                    ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
+                                                    : "bg-transparent text-stone-500 hover:bg-stone-100 hover:text-stone-800"
                                             }`}
                                         >
-                                            <AppIcon name="messages" size={18} strokeWidth={activeTab === 'requests' ? 2.5 : 2} />
+                                            <AppIcon name="messages" size={18} strokeWidth={activeTab === "requests" ? 2.5 : 2} />
                                             <span>Yêu cầu</span>
                                         </button>
                                     </div>
@@ -162,109 +174,107 @@ export default function DashboardPage({ user, navigate, initialData, routerPage 
 
                         {/* Content panel */}
                         <main className="p-6 md:p-10 bg-white min-w-0">
-                                
-                                {/* ---- TAB: MANAGE ROOMS ---- */}
-                                {activeTab === 'manage_rooms' && (
-                                    <div>
-                                        <ManageRoomsTab
-                                            rooms={rooms}
-                                            loadingRooms={loadingRooms}
-                                            currentPage={currentPage}
-                                            setCurrentPage={setCurrentPage}
-                                            subTab={subTab}
-                                            setSubTab={setSubTab}
-                                            handlePublishFromDraft={handlePublishFromDraft}
-                                            handleUnpublish={handleUnpublish}
-                                            handleMockVerify={handleMockVerify}
-                                            handleDeleteRoom={handleDeleteRoom}
-                                            handleDuplicateRoom={handleDuplicateRoom}
-                                            setPreviewRoom={setPreviewRoom}
-                                            setEditingRoom={setEditingRoom}
-                                            setIsCreating={setIsCreating}
-                                            setActiveTab={setActiveTab}
-                                            handleRenewRoom={handleRenewRoom}
-                                            onRefresh={fetchUserRooms}
-                                        />
+                            {/* ---- TAB: OVERVIEW ---- */}
+                            {activeTab === "overview" && (
+                                <LandlordOverviewTab
+                                    user={user}
+                                    rooms={rooms}
+                                    setActiveTab={setActiveTab}
+                                    setSubTab={setSubTab}
+                                    setIsCreating={setIsCreating}
+                                />
+                            )}
+
+                            {/* ---- TAB: MANAGE ROOMS ---- */}
+                            {activeTab === "manage_rooms" && (
+                                <div>
+                                    <ManageRoomsTab
+                                        rooms={rooms}
+                                        loadingRooms={loadingRooms}
+                                        currentPage={currentPage}
+                                        setCurrentPage={setCurrentPage}
+                                        subTab={subTab}
+                                        setSubTab={setSubTab}
+                                        handlePublishFromDraft={handlePublishFromDraft}
+                                        handleUnpublish={handleUnpublish}
+                                        handleMockVerify={handleMockVerify}
+                                        handleDeleteRoom={handleDeleteRoom}
+                                        handleDuplicateRoom={handleDuplicateRoom}
+                                        setPreviewRoom={setPreviewRoom}
+                                        setEditingRoom={setEditingRoom}
+                                        setIsCreating={setIsCreating}
+                                        setActiveTab={setActiveTab}
+                                        handleRenewRoom={handleRenewRoom}
+                                        onRefresh={fetchUserRooms}
+                                    />
+                                </div>
+                            )}
+
+                            {/* ---- TAB: OCCUPIED ROOMS ---- */}
+                            {activeTab === "occupied_rooms" && (
+                                <div className="flex flex-col items-center justify-center py-20">
+                                    <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mb-4">
+                                        <AppIcon name="users" size={32} className="text-stone-400" />
                                     </div>
-                                )}
+                                    <h3 className="text-lg font-bold text-stone-900 mb-2">Phòng đang có người ở</h3>
+                                    <p className="text-stone-500 text-sm max-w-md text-center">
+                                        Tính năng này đang được phát triển. Sắp tới bạn có thể quản lý danh sách khách thuê hiện tại ở đây.
+                                    </p>
+                                </div>
+                            )}
 
-                                {/* ---- TAB: OCCUPIED ROOMS ---- */}
-                                {activeTab === 'occupied_rooms' && (
-                                    <div className="flex flex-col items-center justify-center py-20">
-                                        <div className="w-20 h-20 bg-stone-100 rounded-full flex items-center justify-center mb-4">
-                                            <AppIcon name="users" size={32} className="text-stone-400" />
-                                        </div>
-                                        <h3 className="text-lg font-bold text-stone-900 mb-2">Phòng đang có người ở</h3>
-                                        <p className="text-stone-500 text-sm max-w-md text-center">
-                                            Tính năng này đang được phát triển. Sắp tới bạn có thể quản lý danh sách khách thuê hiện tại ở đây.
-                                        </p>
-                                    </div>
-                                )}
+                            {/* ---- TAB: REQUESTS ---- */}
+                            {activeTab === "requests" && <RequestsTab user={user} />}
 
-                                {/* ---- TAB: REQUESTS ---- */}
-                                {activeTab === 'requests' && (
-                                    <RequestsTab user={user} />
-                                )}
-
-                                {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}
-                                {activeTab === 'post_room' && (
-                                    <div>
-                                        {!editingRoom && !isCreating ? (
-                                            <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
-                                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
-                                                    <AppIcon name="edit" size={32} />
-                                                </div>
-                                                <h3 className="text-lg font-bold text-stone-900 mb-2">Không có yêu cầu chỉnh sửa tin đăng nào</h3>
-                                                <p className="text-stone-500 text-sm max-w-sm px-6 mb-6">
-                                                    Bạn có thể chọn một tin đăng để chỉnh sửa từ danh sách, hoặc bạn có thể{' '}
-                                                    <button
-                                                        onClick={() => setIsCreating(true)}
-                                                        className="text-amber-600 font-bold hover:text-amber-700 cursor-pointer bg-transparent border-none p-0 inline"
-                                                    >
-                                                        tạo tin đăng mới
-                                                    </button>
-                                                </p>
+                            {/* ---- TAB: POST ROOM (FLEXIBLE EDIT) ---- */}
+                            {activeTab === "post_room" && (
+                                <div>
+                                    {!editingRoom && !isCreating ? (
+                                        <div className="flex flex-col items-center justify-center py-20 bg-stone-50 border border-dashed border-stone-200 rounded-xl text-center">
+                                            <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-300">
+                                                <AppIcon name="edit" size={32} />
                                             </div>
-                                        ) : (
-                                            <RoomPostForm
-                                                user={user}
-                                                roomToEdit={editingRoom}
-                                                onClear={() => {
-                                                    setEditingRoom(null);
-                                                    setIsCreating(false);
-                                                    setActiveTab('manage_rooms');
-                                                }}
-                                                onSuccess={() => {
-                                                    setEditingRoom(null);
-                                                    setIsCreating(false);
-                                                    setActiveTab('manage_rooms');
-                                                }}
-                                            />
-                                        )}
-                                    </div>
-                                )}
+                                            <h3 className="text-lg font-bold text-stone-900 mb-2">Không có yêu cầu chỉnh sửa tin đăng nào</h3>
+                                            <p className="text-stone-500 text-sm max-w-sm px-6 mb-6">
+                                                Bạn có thể chọn một tin đăng để chỉnh sửa từ danh sách, hoặc bạn có thể{" "}
+                                                <button
+                                                    onClick={() => setIsCreating(true)}
+                                                    className="text-amber-600 font-bold hover:text-amber-700 cursor-pointer bg-transparent border-none p-0 inline"
+                                                >
+                                                    tạo tin đăng mới
+                                                </button>
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <RoomPostForm
+                                            user={user}
+                                            roomToEdit={editingRoom}
+                                            onClear={() => {
+                                                setEditingRoom(null);
+                                                setIsCreating(false);
+                                                setActiveTab("manage_rooms");
+                                            }}
+                                            onSuccess={() => {
+                                                setEditingRoom(null);
+                                                setIsCreating(false);
+                                                setActiveTab("manage_rooms");
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            )}
                         </main>
                     </div>
                 </div>
             </div>
             {previewRoom && (
                 <div className="fixed inset-0 z-50 overflow-y-auto bg-white">
-                    <RoomDetailPage
-                        room={previewRoom}
-                        navigate={navigate}
-                        user={user}
-                        onClose={() => setPreviewRoom(null)}
-                        previewMode={true}
-                    />
+                    <RoomDetailPage room={previewRoom} navigate={navigate} user={user} onClose={() => setPreviewRoom(null)} previewMode={true} />
                 </div>
             )}
             <AnimatePresence>
                 {renewingRoom && (
-                    <RenewPostModal
-                        room={renewingRoom}
-                        onClose={() => setRenewingRoom(null)}
-                        onConfirm={(days) => executeRenewal(renewingRoom, days)}
-                    />
+                    <RenewPostModal room={renewingRoom} onClose={() => setRenewingRoom(null)} onConfirm={(days) => executeRenewal(renewingRoom, days)} />
                 )}
             </AnimatePresence>
         </div>
@@ -279,15 +289,15 @@ function RenewPostModal({ room, onClose, onConfirm }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const RENEW_OPTIONS = [
-        { days: 7, label: '7 Ngày', price: 'Miễn phí' },
-        { days: 15, label: '15 Ngày', price: 'Miễn phí', popular: true },
-        { days: 30, label: '30 Ngày', price: 'Miễn phí' }
+        { days: 7, label: "7 Ngày", price: "Miễn phí" },
+        { days: 15, label: "15 Ngày", price: "Miễn phí", popular: true },
+        { days: 30, label: "30 Ngày", price: "Miễn phí" },
     ];
 
     const getNewExpiryDate = () => {
         const date = new Date();
         date.setDate(date.getDate() + selectedDays);
-        return date.toLocaleDateString('vi-VN');
+        return date.toLocaleDateString("vi-VN");
     };
 
     const handleConfirm = async () => {
@@ -312,7 +322,7 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md border border-stone-100 p-6 md:p-8 overflow-hidden z-10"
             >
                 <div className="flex items-center justify-between border-b border-stone-100 pb-4 mb-6">
@@ -322,10 +332,7 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                         </div>
                         <h3 className="text-lg font-bold text-stone-900 font-heading">Gia hạn tin đăng</h3>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="text-stone-400 hover:text-stone-600 transition-colors border-none bg-transparent cursor-pointer p-1"
-                    >
+                    <button onClick={onClose} className="text-stone-400 hover:text-stone-600 transition-colors border-none bg-transparent cursor-pointer p-1">
                         <AppIcon name="plus" size={18} className="rotate-45" />
                     </button>
                 </div>
@@ -346,8 +353,8 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                                     onClick={() => setSelectedDays(opt.days)}
                                     className={`relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
                                         selectedDays === opt.days
-                                            ? 'border-amber-500 bg-amber-50/50 text-amber-900'
-                                            : 'border-stone-200 hover:border-stone-300 bg-white text-stone-600'
+                                            ? "border-amber-500 bg-amber-50/50 text-amber-900"
+                                            : "border-stone-200 hover:border-stone-300 bg-white text-stone-600"
                                     }`}
                                 >
                                     {opt.popular && (
@@ -375,7 +382,9 @@ function RenewPostModal({ room, onClose, onConfirm }) {
 
                     <div className="flex items-start gap-2 text-stone-500 text-[0.7rem] leading-relaxed bg-amber-50/40 p-3 rounded-lg border border-amber-100/50">
                         <AppIcon name="verified" size={14} className="text-amber-600 shrink-0 mt-0.5" />
-                        <span>💡 Lưu ý: Hệ thống hỗ trợ gia hạn hoàn toàn miễn phí. Tin đăng của bạn sẽ lập tức hiển thị công khai trở lại trên trang chủ.</span>
+                        <span>
+                            💡 Lưu ý: Hệ thống hỗ trợ gia hạn hoàn toàn miễn phí. Tin đăng của bạn sẽ lập tức hiển thị công khai trở lại trên trang chủ.
+                        </span>
                     </div>
                 </div>
 
@@ -393,7 +402,7 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                         onClick={handleConfirm}
                         className="flex-1 py-3 bg-amber-500 text-white hover:bg-amber-600 transition-colors font-bold text-sm rounded-xl cursor-pointer border-none shadow-lg shadow-amber-500/25 flex items-center justify-center gap-1.5"
                     >
-                        {isSubmitting ? 'Đang xử lý...' : 'Xác nhận gia hạn'}
+                        {isSubmitting ? "Đang xử lý..." : "Xác nhận gia hạn"}
                     </button>
                 </div>
             </motion.div>

@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
-import AppIcon from '../common/AppIcon.jsx';
-import { useRoomFilterContext } from '../../context/RoomFilterContext.jsx';
+import { motion } from "framer-motion";
+import AppIcon from "../common/AppIcon.jsx";
+import { useRoomFilterContext } from "../../context/RoomFilterContext.jsx";
 
 /* ============================================
    BottomNav Component
@@ -10,54 +10,48 @@ import { useRoomFilterContext } from '../../context/RoomFilterContext.jsx';
    - Micro-animations with Framer Motion
    ============================================ */
 export default function BottomNav({ currentPage, navigate, user, onFilterClick }) {
-    const isHost = user && user.user_metadata?.role === 'landlord';
-    const isDashboard = currentPage === 'dashboard';
+    const role = user?.user_metadata?.role;
+    const isLandlord = role === "landlord" || role === "admin";
     const { activeFilterCount } = useRoomFilterContext();
 
     const navItems = [
-        { id: 'home', label: 'Trang chủ', icon: 'home' },
-        isHost 
-            ? { id: 'dashboard', label: 'Quản lý', icon: 'file-text' }
-            : { id: 'forum', label: 'Diễn đàn', icon: 'messages' },
-        { 
-            id: 'search', 
-            label: isDashboard ? 'Đăng tin' : 'Bộ lọc', 
-            icon: isDashboard ? 'plus' : 'filter', 
-            isCenter: true 
+        { id: "home", label: "Trang chủ", icon: "home" },
+        isLandlord ? { id: "dashboard", label: "Quản lý", icon: "file-text" } : { id: "my-room", label: "Quản lý", icon: "file-text" },
+        {
+            id: "search",
+            label: "Bộ lọc",
+            icon: "filter",
+            isCenter: true,
         },
-        { id: 'favorites', label: 'Tin đã lưu', icon: 'heart' },
-        { id: 'profile', label: 'Cá nhân', icon: 'user' },
+        { id: "forum", label: "Diễn đàn", icon: "messages" },
+        { id: "profile", label: "Cá nhân", icon: "user" },
     ];
 
     const handleNavigate = (item) => {
         if (item.isCenter) {
-            if (isDashboard) {
-                navigate('dashboard', { tab: 'post_room' });
-            } else {
-                onFilterClick();
-            }
+            onFilterClick();
             return;
         }
 
-        if (item.id === 'forum') {
-            navigate('forum');
+        if (item.id === "forum") {
+            navigate("forum");
             return;
         }
 
-        if (item.id === 'dashboard') {
-            navigate('dashboard');
+        if (item.id === "dashboard") {
+            navigate("dashboard");
             return;
         }
 
-        if (item.id === 'favorites') {
-            if (!user) navigate('login');
-            else navigate('profile', { tab: 'favorites' });
+        if (item.id === "my-room") {
+            if (!user) navigate("login");
+            else navigate("my-room");
             return;
         }
 
         const page = item.id;
-        if (page === 'profile' && !user) {
-            navigate('login');
+        if (page === "profile" && !user) {
+            navigate("login");
         } else {
             navigate(page);
         }
@@ -74,13 +68,14 @@ export default function BottomNav({ currentPage, navigate, user, onFilterClick }
                         <div key={item.id} className="relative flex items-center justify-center">
                             <button
                                 onClick={() => handleNavigate(item)}
-                                className={`relative flex flex-col items-center justify-center border-none cursor-pointer transition-all duration-200 ${isCenter
-                                    ? 'w-12 h-12 bg-linear-to-br from-amber-400 to-orange-500 text-white rounded-full hover:from-amber-500 hover:to-orange-600'
-                                    : 'gap-0.5'
-                                    }`}
-                                style={{ background: isCenter ? undefined : 'transparent' }}
+                                className={`relative flex flex-col items-center justify-center border-none cursor-pointer transition-all duration-200 ${
+                                    isCenter
+                                        ? "w-12 h-12 bg-linear-to-br from-amber-400 to-orange-500 text-white rounded-full hover:from-amber-500 hover:to-orange-600"
+                                        : "gap-0.5"
+                                }`}
+                                style={{ background: isCenter ? undefined : "transparent" }}
                             >
-                                {isCenter && !isDashboard && activeFilterCount > 0 && (
+                                {isCenter && currentPage !== "dashboard" && activeFilterCount > 0 && (
                                     <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-red-500 border-2 border-white rounded-full z-10 animate-pulse" />
                                 )}
                                 {/* Micro-animation for icon on active */}
@@ -93,15 +88,13 @@ export default function BottomNav({ currentPage, navigate, user, onFilterClick }
                                         name={item.icon}
                                         size={isCenter ? 24 : 22}
                                         strokeWidth={isActive || isCenter ? 2.5 : 2}
-                                        color={isCenter ? '#ffffff' : (isActive ? '#d97706' : '#a8a29e')}
+                                        color={isCenter ? "#ffffff" : isActive ? "#d97706" : "#a8a29e"}
                                     />
                                 </motion.div>
 
                                 {/* Label below icon (not for center item) */}
                                 {!isCenter && (
-                                    <span className={`text-[0.7rem] font-medium mt-0.5 ${isActive ? 'text-amber-600' : 'text-stone-400'}`}>
-                                        {item.label}
-                                    </span>
+                                    <span className={`text-[0.7rem] font-medium mt-0.5 ${isActive ? "text-amber-600" : "text-stone-400"}`}>{item.label}</span>
                                 )}
                             </button>
                         </div>

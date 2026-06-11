@@ -133,7 +133,7 @@ export default function App() {
                         type: "error",
                     });
                     navigate("home");
-                } else if (currentPage === "my-room" && role !== "tenant" && role !== "admin") {
+                } else if (currentPage === "my-room" && role !== "tenant") {
                     showModal({
                         title: "Từ chối truy cập",
                         message: "Chỉ người thuê phòng mới có quyền truy cập trang này.",

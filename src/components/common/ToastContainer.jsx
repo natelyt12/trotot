@@ -14,9 +14,15 @@ const ToastItem = ({ id, message, type, duration, onRemove }) => {
     }, [id, duration, onRemove]);
 
     const styles = {
-        success: "bg-green-50 text-green-700 border-green-100",
-        error: "bg-red-50 text-red-700 border-red-100",
-        info: "bg-blue-50 text-blue-700 border-blue-100",
+        success: "bg-white text-stone-900 border-stone-200/80 shadow-green-500/5",
+        error: "bg-white text-stone-900 border-stone-200/80 shadow-red-500/5",
+        info: "bg-white text-stone-900 border-stone-200/80 shadow-blue-500/5",
+    };
+
+    const iconBg = {
+        success: "bg-green-50 text-green-600 border border-green-100",
+        error: "bg-red-50 text-red-600 border border-red-100",
+        info: "bg-blue-50 text-blue-600 border border-blue-100",
     };
 
     const icons = {
@@ -28,22 +34,23 @@ const ToastItem = ({ id, message, type, duration, onRemove }) => {
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            initial={{ opacity: 0, y: 80, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-            className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border min-w-[280px] max-w-sm shadow-lg ${styles[type] || styles.info}`}
+            exit={{ opacity: 0, y: 80, scale: 0.95, transition: { duration: 0.2 } }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className={`flex items-center gap-3.5 p-4 rounded-2xl border w-full md:w-[360px] shadow-2xl pointer-events-auto ${styles[type] || styles.info}`}
         >
-            <div
-                className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${type === "success" ? "bg-green-100" : type === "error" ? "bg-red-100" : "bg-blue-100"}`}
-            >
+            <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${iconBg[type]}`}>
                 {icons[type]}
             </div>
-            <p className="text-sm font-medium leading-snug">{message}</p>
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold leading-tight text-stone-800">{message}</p>
+            </div>
             <button
                 onClick={() => onRemove(id)}
-                className={`ml-auto bg-transparent border-none p-1 cursor-pointer opacity-50 hover:opacity-100 transition-opacity ${type === "success" ? "text-green-700" : type === "error" ? "text-red-700" : "text-blue-700"}`}
+                className="shrink-0 bg-transparent border-none p-1 cursor-pointer text-stone-400 hover:text-stone-700 transition-colors"
             >
-                <AppIcon name="x" size={12} />
+                <AppIcon name="x" size={14} strokeWidth={2.5} />
             </button>
         </motion.div>
     );
@@ -53,10 +60,10 @@ export default function ToastContainer() {
     const { notifications, removeNotification } = useNotification();
 
     return (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 md:bottom-6 md:right-6 md:left-auto md:translate-x-0 z-[200] flex flex-col gap-2 items-center md:items-end pointer-events-none">
+        <div className="fixed bottom-24 left-4 right-4 md:bottom-6 md:right-6 md:left-auto md:transform-none z-[9999] flex flex-col gap-2.5 items-center md:items-end pointer-events-none w-[calc(100%-2rem)] md:w-auto">
             <AnimatePresence mode="popLayout">
                 {notifications.map((n) => (
-                    <div key={n.id} className="pointer-events-auto">
+                    <div key={n.id} className="w-full md:w-auto">
                         <ToastItem {...n} onRemove={removeNotification} />
                     </div>
                 ))}

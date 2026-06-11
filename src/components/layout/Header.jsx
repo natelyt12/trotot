@@ -21,7 +21,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
             onConfirm: async () => {
                 await signOut();
                 navigate("home");
-            }
+            },
         });
     };
     const searchDisplayText = getLocationDisplayText();
@@ -89,17 +89,129 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                         </button>
 
                         {/* Desktop Nav Links */}
-                        <div className="hidden lg:flex items-center gap-1">
-                            {navLinks.map((link) => (
-                                <button
-                                    key={link.page}
-                                    onClick={() => handleNavLinkClick(link)}
-                                    className={`border-none px-4 py-1.5 rounded-md cursor-pointer text-sm font-bold transition-colors ${currentPage === link.page ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                        <div className="hidden lg:flex items-center gap-3">
+                            {user ? (
+                                user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin" ? (
+                                    <>
+                                        <button
+                                            onClick={() => navigate("dashboard", { tab: "post_room", isCreating: true })}
+                                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5"
+                                        >
+                                            <AppIcon name="plus" size={14} strokeWidth={2.5} />
+                                            <span>Đăng tin phòng trọ</span>
+                                        </button>
+                                        <button
+                                            onClick={() => navigate("forum", { openCreateModal: true })}
+                                            className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer transition-all flex items-center gap-1.5"
+                                        >
+                                            <AppIcon name="messages" size={14} />
+                                            <span>Đăng tin diễn đàn</span>
+                                        </button>
+                                        <div className="h-4 w-px bg-stone-200 mx-1" />
+                                        <button
+                                            onClick={() => navigate("home")}
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                                currentPage === "home" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                            }`}
+                                        >
+                                            Tìm phòng
+                                        </button>
+                                        <button
+                                            onClick={() => navigate("forum")}
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                                currentPage === "forum" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                            }`}
+                                        >
+                                            Diễn đàn
+                                        </button>
+                                        <button
+                                            onClick={() => navigate("dashboard")}
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                                currentPage === "dashboard" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                            }`}
+                                        >
+                                            Quản lý
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => navigate("forum", { openCreateModal: true })}
+                                            className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5"
+                                        >
+                                            <AppIcon name="messages" size={14} />
+                                            <span>Đăng tin diễn đàn</span>
+                                        </button>
+                                        <div className="h-4 w-px bg-stone-200 mx-1" />
+                                        <button
+                                            onClick={() => navigate("home")}
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                                currentPage === "home" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                            }`}
+                                        >
+                                            Tìm phòng
+                                        </button>
+                                        <button
+                                            onClick={() => navigate("forum")}
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                                currentPage === "forum" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                            }`}
+                                        >
+                                            Diễn đàn
+                                        </button>
+                                        <button
+                                            onClick={() => navigate("profile", { tab: "favorites" })}
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                                currentPage === "favorites" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                            }`}
+                                        >
+                                            Tin đã lưu
+                                        </button>
+                                        <button
+                                            onClick={() => navigate("my-room")}
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                                currentPage === "my-room" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                            }`}
+                                        >
+                                            Quản lý phòng của tenant
+                                        </button>
+                                    </>
+                                )
+                            ) : (
+                                <>
+                                    <button
+                                        onClick={() => navigate("login")}
+                                        className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl border-none shadow-xs cursor-pointer transition-all flex items-center gap-1.5"
+                                    >
+                                        <AppIcon name="plus" size={14} strokeWidth={2.5} />
+                                        <span>Đăng tin phòng trọ</span>
+                                    </button>
+                                    <button
+                                        onClick={() => navigate("login")}
+                                        className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200/60 font-bold text-xs px-3.5 py-2 rounded-xl cursor-pointer transition-all flex items-center gap-1.5"
+                                    >
+                                        <AppIcon name="messages" size={14} />
+                                        <span>Đăng tin diễn đàn</span>
+                                    </button>
+                                    <div className="h-4 w-px bg-stone-200 mx-1" />
+                                    <button
+                                        onClick={() => navigate("home")}
+                                        className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            currentPage === "home" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                         }`}
-                                >
-                                    {link.label}
-                                </button>
-                            ))}
+                                    >
+                                        Tìm phòng
+                                    </button>
+                                    <button
+                                        onClick={() => navigate("forum")}
+                                        className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-bold transition-colors bg-transparent ${
+                                            currentPage === "forum" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                        }`}
+                                    >
+                                        Diễn đàn
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
 
@@ -128,15 +240,11 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
 
                         <div className="h-6 w-px bg-stone-100 hidden md:block" />
 
-                        {user && (
-                            <NotificationDropdown navigate={navigate} user={user} />
-                        )}
+                        {user && <NotificationDropdown navigate={navigate} user={user} />}
 
                         {user ? (
                             <div className="relative group flex items-center">
-                                <button
-                                    className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1.5 px-3 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors z-10"
-                                >
+                                <button className="flex items-center gap-2 md:gap-3 bg-transparent border-none py-1.5 px-3 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors z-10">
                                     <div className="text-right">
                                         <div className="text-sm font-bold text-stone-900 leading-tight truncate max-w-[120px]">
                                             {user.user_metadata?.full_name || "Người dùng"}
@@ -198,7 +306,7 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                                 <AppIcon name="settings" size={16} />
                                                 <span>Cài đặt tài khoản</span>
                                             </button>
-                                            {user && (user.user_metadata?.role === "tenant" || user.user_metadata?.role === "admin") && (
+                                            {user && user.user_metadata?.role === "tenant" && (
                                                 <button
                                                     onClick={() => navigate("my-room")}
                                                     className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
@@ -213,18 +321,10 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                                     className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
                                                 >
                                                     <AppIcon name="check-square" size={16} />
-                                                    <span>Quản lý tin đăng</span>
+                                                    <span>Quản lý</span>
                                                 </button>
                                             )}
-                                            {(user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
-                                                <button
-                                                    onClick={() => navigate("manage-guests")}
-                                                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-stone-700 hover:bg-stone-50 hover:text-stone-900 cursor-pointer border-none bg-transparent"
-                                                >
-                                                    <AppIcon name="users" size={16} />
-                                                    <span>Quản lý khách thuê</span>
-                                                </button>
-                                            )}
+
                                             {user && user.user_metadata?.role === "admin" && (
                                                 <button
                                                     onClick={() => navigate("admin")}
@@ -242,7 +342,16 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             onClick={handleLogout}
                                             className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-left text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer border-none bg-transparent"
                                         >
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth="2.5"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
                                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                                                 <polyline points="16 17 21 12 16 7" />
                                                 <line x1="21" y1="12" x2="9" y2="12" />
@@ -253,12 +362,20 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                 </div>
                             </div>
                         ) : (
-                            <button
-                                onClick={() => navigate("login")}
-                                className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold h-10 px-6 rounded-full cursor-pointer border-none transition-colors"
-                            >
-                                Đăng nhập
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => navigate("login")}
+                                    className="hidden md:flex items-center justify-center bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-bold h-10 px-5 rounded-full cursor-pointer border-none transition-colors"
+                                >
+                                    Đăng nhập
+                                </button>
+                                <button
+                                    onClick={() => navigate("register")}
+                                    className="bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold h-10 px-5 rounded-full cursor-pointer border-none transition-colors"
+                                >
+                                    Đăng ký
+                                </button>
+                            </div>
                         )}
 
                         {/* Hamburger Button (Mobile) */}
@@ -267,7 +384,16 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                             className="p-2 hover:bg-stone-100 rounded-full transition-colors cursor-pointer border-none bg-transparent md:hidden text-stone-700 flex items-center justify-center"
                             aria-label="Toggle menu"
                         >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <svg
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
                                 {mobileOpen ? (
                                     <>
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -380,21 +506,11 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                 }}
                                 className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
                             >
-                                Quản lý tin đăng
+                                Quản lý
                             </button>
                         )}
-                        {user && (user.user_metadata?.role === "landlord" || user.user_metadata?.role === "admin") && (
-                            <button
-                                onClick={() => {
-                                    navigate("manage-guests");
-                                    setMobileOpen(false);
-                                }}
-                                className="block w-full text-left bg-transparent border-none py-3 px-1 text-stone-600 text-sm font-bold cursor-pointer border-b border-stone-100 hover:text-amber-600 transition-colors duration-200"
-                            >
-                                Quản lý khách thuê
-                            </button>
-                        )}
-                        {user && (user.user_metadata?.role === "tenant" || user.user_metadata?.role === "admin") && (
+
+                        {user && user.user_metadata?.role === "tenant" && (
                             <button
                                 onClick={() => {
                                     navigate("my-room");

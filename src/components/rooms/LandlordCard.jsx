@@ -20,6 +20,8 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
         }
     }, [user?.id, room?.id, previewMode]);
 
+    const [copied, setCopied] = useState(false);
+
     const formatPhone = (phone) => {
         if (!phone || phone === "Chưa cập nhật" || phone === "Đang cập nhật") return phone;
         const cleaned = phone.replace(/\D/g, "");
@@ -41,12 +43,39 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                         <span className="text-[0.75rem] text-stone-500 font-medium uppercase tracking-wider">Mã tin: {room.listing_id}</span>
                         <button
                             onClick={() => {
-                                navigator.clipboard.writeText(room.listing_id);
+                                const code = room.listing_id || "";
+                                const handleCopySuccess = () => {
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 2000);
+                                };
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(code)
+                                        .then(handleCopySuccess)
+                                        .catch((err) => {
+                                            console.error("Lỗi sao chép: ", err);
+                                        });
+                                } else {
+                                    const textarea = document.createElement("textarea");
+                                    textarea.value = code;
+                                    document.body.appendChild(textarea);
+                                    textarea.select();
+                                    try {
+                                        document.execCommand("copy");
+                                        handleCopySuccess();
+                                    } catch (err) {
+                                        console.error("Lỗi sao chép dự phòng: ", err);
+                                    }
+                                    document.body.removeChild(textarea);
+                                }
                             }}
                             className="p-1.5 hover:bg-stone-200 rounded-md transition-colors text-stone-400 hover:text-amber-600 cursor-pointer border-none bg-transparent"
                             title="Sao chép mã tin"
                         >
-                            <AppIcon name="copy" size={14} />
+                            {copied ? (
+                                <AppIcon name="check" size={14} className="text-green-600" />
+                            ) : (
+                                <AppIcon name="copy" size={14} />
+                            )}
                         </button>
                     </div>
 
