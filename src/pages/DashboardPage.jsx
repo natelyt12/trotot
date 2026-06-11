@@ -343,19 +343,19 @@ function RenewPostModal({ room, onClose, onConfirm }) {
                                     key={opt.days}
                                     type="button"
                                     onClick={() => setSelectedDays(opt.days)}
-                                    className={`relative flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                                    className={`relative flex flex-col items-center justify-center p-4 rounded-xl border transition-all cursor-pointer ${
                                         selectedDays === opt.days
-                                            ? "border-amber-500 bg-amber-50/50 text-amber-900"
-                                            : "border-stone-200 hover:border-stone-300 bg-white text-stone-600"
+                                            ? "border-amber-500 bg-amber-50/60 text-amber-900 shadow-xs"
+                                            : "border-stone-200 hover:border-amber-300/50 hover:bg-amber-50/10 bg-white text-stone-600"
                                     }`}
                                 >
                                     {opt.popular && (
-                                        <span className="absolute -top-2.5 bg-amber-500 text-white text-[0.55rem] font-medium px-1.5 py-0.5 rounded-full border border-white shadow-xs">
+                                        <span className="absolute -top-2.5 bg-amber-500 text-white text-[0.6rem] font-medium px-2 py-0.5 rounded-full shadow-xs">
                                             Phổ biến
                                         </span>
                                     )}
-                                    <span className="text-sm font-bold tracking-tight">{opt.label}</span>
-                                    <span className="text-[0.65rem] text-stone-400 font-normal mt-1 uppercase">{opt.price}</span>
+                                    <span className="text-sm font-semibold tracking-tight">{opt.label}</span>
+                                    <span className="text-[0.65rem] text-stone-400 font-normal mt-0.5 uppercase">{opt.price}</span>
                                 </button>
                             ))}
                         </div>

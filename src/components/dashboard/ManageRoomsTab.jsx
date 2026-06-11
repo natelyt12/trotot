@@ -281,20 +281,19 @@ export default function ManageRoomsTab({
                                                 {isExpired && (
                                                     <button
                                                         onClick={() => handleRenewRoom(room)}
-                                                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-medium cursor-pointer transition-colors border-none shadow-sm shadow-amber-500/20"
+                                                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-50 border border-amber-200/60 text-amber-700 hover:bg-amber-100 rounded-lg text-xs font-medium cursor-pointer transition-colors"
                                                     >
-                                                        <AppIcon name="edit" size={12} />
+                                                        <AppIcon name="refresh" size={12} />
                                                         Gia hạn tin
                                                     </button>
-                                                )}
+                                                 )}
 
                                                 <button
                                                     onClick={() => setPreviewRoom({ ...mapSupabaseRoom(room), subTab })}
-                                                    className={`flex items-center justify-center gap-1.5 px-3 py-2 border border-stone-200 rounded-lg text-xs font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 cursor-pointer transition-colors ${!isExpired && "flex-1"}`}
+                                                    className="flex items-center justify-center gap-1.5 px-3 py-2 border border-stone-200 rounded-lg text-xs font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 cursor-pointer transition-colors"
                                                     title="Xem trước"
                                                 >
                                                     <AppIcon name="eye" size={14} />
-                                                    {!isExpired && <span>Xem trước</span>}
                                                 </button>
 
                                                 {subTab === "pending_verification" ? (
@@ -321,7 +320,7 @@ export default function ManageRoomsTab({
                                                         <AppIcon name="check" size={14} strokeWidth={3} />
                                                         Công khai
                                                     </button>
-                                                ) : (
+                                                ) : subTab === "expired" ? null : (
                                                     <button
                                                         onClick={() => {
                                                             setEditingRoom(room);

@@ -167,7 +167,7 @@ export default function LandlordOverviewTab({ user, rooms, setActiveTab, setSubT
                                 { day: "Hôm nay", views: 145, height: "98%", active: true },
                             ].map((item, idx) => (
                                 <div key={idx} className="flex-1 flex flex-col items-center gap-2 group/bar cursor-pointer">
-                                    <div className="relative w-full flex items-end justify-center">
+                                    <div className="relative w-full h-32 flex items-end justify-center">
                                         {/* Hover tooltip */}
                                         <div className="absolute bottom-full mb-1 opacity-0 group-hover/bar:opacity-100 transition-opacity bg-stone-800 text-white text-[10px] font-medium px-2 py-0.5 rounded shadow-md pointer-events-none whitespace-nowrap">
                                             {item.views} lượt xem
