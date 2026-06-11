@@ -135,7 +135,7 @@ export default function RequestsTab({ user }) {
                     className={`px-4 py-3 font-medium text-sm border-b-2 transition-colors cursor-pointer bg-transparent ${activeSubTab === 'transfers' ? 'border-amber-500 text-amber-600' : 'border-transparent text-stone-500 hover:text-stone-800'}`}
                     onClick={() => setActiveSubTab('transfers')}
                 >
-                    Yêu cầu sang nhượng ({transfers.filter(t => t.status === 'pending').length})
+                    Yêu cầu sang nhượng ({transfers.filter(t => t.status === 'pending' || t.status === 'pending_landlord').length})
                 </button>
             </div>
 
@@ -208,7 +208,7 @@ export default function RequestsTab({ user }) {
                                                 )}
                                             </div>
                                         </div>
-                                        {request.status === 'pending' && (
+                                        {(request.status === 'pending' || request.status === 'pending_landlord') && (
                                             <div className="flex gap-2 self-end md:self-center shrink-0">
                                                 <button onClick={() => handleRejectTransfer(request)} className="px-4 py-2 border-none rounded-lg text-sm font-medium bg-stone-100 text-stone-600 hover:bg-stone-200 cursor-pointer transition-colors">
                                                     Từ chối
