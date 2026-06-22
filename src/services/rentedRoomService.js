@@ -174,28 +174,20 @@ export const approveRoomTransferRPC = async (requestId, postId, roomId, oldTenan
 };
 
 /**
- * Approve roommate request (Client side logic for adding a roommate)
+ * Approve roommate request via RPC (bypasses RLS issues for Landlord updating Tenant's data)
  */
 export const approveRoommateRequest = async (requestId, postId, roomId, newTenantId) => {
     try {
-        // Update request status to approved
-        const { error: reqErr } = await supabase.from('room_requests').update({ status: 'approved', updated_at: new Date().toISOString() }).eq('id', requestId);
-        if (reqErr) throw reqErr;
-
-        // Add to rented_rooms
-        const { error: rentErr } = await supabase.from('rented_rooms').insert({
-            user_id: newTenantId,
-            room_id: roomId,
-            started_at: new Date().toISOString()
+        const { error } = await supabase.rpc('approve_roommate_request', {
+            p_request_id: requestId,
+            p_post_id: postId,
+            p_room_id: roomId,
+            p_new_tenant_id: newTenantId
         });
-        if (rentErr) throw rentErr;
-
-        // Optionally, close the post
-        await supabase.from('forum_posts').update({ status: 'completed', updated_at: new Date().toISOString() }).eq('id', postId);
-
+        if (error) throw error;
         return { error: null };
     } catch (err) {
-        console.error('Error executing approveRoommateRequest:', err);
+        console.error('Error executing approveRoommateRequest RPC:', err);
         return { error: err };
     }
 };

@@ -14,6 +14,7 @@ import AdminPage from "./pages/AdminPage.jsx";
 import PublicProfilePage from "./pages/PublicProfilePage.jsx";
 import MyRoomPage from "./pages/MyRoomPage.jsx";
 import ForumPage from "./pages/ForumPage.jsx";
+import ShippingPage from "./pages/ShippingPage.jsx";
 import { mapSupabaseRoom } from "./utils/roomMapper.js";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { useModal } from "./context/ModalContext.jsx";
@@ -164,7 +165,7 @@ export default function App() {
                     return;
                 }
 
-                if (["login", "register", "profile", "dashboard", "admin", "my-room", "forum"].includes(path)) {
+                if (["login", "register", "profile", "dashboard", "admin", "my-room", "forum", "shipping-service"].includes(path)) {
                     setCurrentPage(path);
                     setPageData(null);
                     return;
@@ -286,7 +287,7 @@ export default function App() {
                         <div
                             className={
                                 showLayout &&
-                                !["profile", "dashboard", "admin", "public-profile", "my-room", "forum", "room-detail"].includes(currentPage)
+                                !["profile", "dashboard", "admin", "public-profile", "my-room", "forum", "room-detail", "shipping-service"].includes(currentPage)
                                     ? "block"
                                     : "hidden"
                             }
@@ -333,9 +334,13 @@ export default function App() {
 
                         {/* My Room Layer */}
                         <div className={currentPage === "my-room" ? "block" : "hidden"}>
-                            <MyRoomPage user={user} navigate={navigate} />
+                            <MyRoomPage user={user} navigate={navigate} initialData={pageData} />
                         </div>
 
+                        {/* Shipping Service Layer */}
+                        <div className={currentPage === "shipping-service" ? "block" : "hidden"}>
+                            <ShippingPage user={user} navigate={navigate} />
+                        </div>
 
                         {/* Room Detail: Full page (only when accessing /rooms/slug directly) */}
                         {currentPage === "room-detail" && (

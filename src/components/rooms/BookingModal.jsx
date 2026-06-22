@@ -69,12 +69,12 @@ export default function BookingModal({ isOpen, onClose, room, user, onSuccess })
             if (error) throw error;
             
             addNotification('Đặt lịch thành công! Chủ phòng sẽ liên hệ sớm nhất.', 'success');
+            setLoading(false);
             handleClose();
             if (onSuccess) onSuccess();
         } catch (error) {
             console.error('Lỗi khi đặt lịch:', error);
             showModal({ title: 'Lỗi', message: 'Đã xảy ra lỗi khi đặt lịch. Vui lòng thử lại.', type: 'error' });
-        } finally {
             setLoading(false);
         }
     };

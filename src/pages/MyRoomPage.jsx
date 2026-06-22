@@ -24,8 +24,8 @@ import { getRoomRequestsForTenant, updateRoomRequestStatus } from "../services/f
 import { useModal } from "../context/ModalContext.jsx";
 import { useNotification } from "../context/NotificationContext.jsx";
 
-export default function MyRoomPage({ user, navigate }) {
-    const [activeTab, setActiveTab] = useState("current-room"); // 'current-room', 'contract', 'payments'
+export default function MyRoomPage({ user, navigate, initialData }) {
+    const [activeTab, setActiveTab] = useState(initialData?.tab || "current-room"); // 'current-room', 'contract', 'payments'
     const { showModal } = useModal();
     const { addNotification } = useNotification();
 
@@ -288,7 +288,7 @@ export default function MyRoomPage({ user, navigate }) {
                     </aside>
 
                     {/* Content panel */}
-                    <main className="flex-1 w-full bg-white border border-stone-200 rounded-xl shadow-sm p-6 md:p-8 min-w-0">
+                    <main className="flex-1 w-full min-w-0">
                             <motion.div key={activeTab} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                                 {/* TAB: Current Room */}
                                 {activeTab === "current-room" && (
@@ -507,7 +507,7 @@ export default function MyRoomPage({ user, navigate }) {
                                 {/* TAB: Payments */}
                                 {activeTab === "payments" && (
                                     <div className="space-y-6">
-                                        {mockPaymentData.map((payment, index) => (
+                                        {mockPaymentData.map((payment) => (
                                             <div key={payment.invoiceId} className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-4">
                                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-stone-100 pb-4 gap-3">
                                                     <div>

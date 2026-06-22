@@ -126,6 +126,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                     }
                     return;
                 }
+
                 addNotification(post.category === "roommate" ? "Đã gửi yêu cầu ở ghép! Vui lòng chờ phản hồi." : "Đã gửi yêu cầu sang nhượng! Vui lòng chờ người cho thuê phản hồi.", "success");
             },
         });

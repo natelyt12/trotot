@@ -55,14 +55,16 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
     const navLinks = [
         { label: "Tìm phòng", page: "home" },
         { label: "Diễn đàn", page: "forum" },
-        { label: "Tin đã lưu", page: "favorites" },
+        { label: "Dịch vụ chuyển trọ", page: "shipping-service" },
     ];
 
     const handleNavLinkClick = (link) => {
-        if (link.page === "favorites") {
+        if (link.page === "shipping-service") {
             if (!user) navigate("login");
-            else navigate("profile", { tab: "favorites" });
-        } else navigate(link.page);
+            else navigate("shipping-service");
+        } else {
+            navigate(link.page);
+        }
     };
 
     const roleLabel = (role) => {
@@ -129,6 +131,14 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             Diễn đàn
                                         </button>
                                         <button
+                                            onClick={() => navigate("shipping-service")}
+                                            className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
+                                                currentPage === "shipping-service" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                            }`}
+                                        >
+                                            Dịch vụ chuyển trọ
+                                        </button>
+                                        <button
                                             onClick={() => navigate("dashboard")}
                                             className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
                                                 currentPage === "dashboard" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
@@ -166,12 +176,12 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                             Diễn đàn
                                         </button>
                                         <button
-                                            onClick={() => navigate("profile", { tab: "favorites" })}
+                                            onClick={() => navigate("shipping-service")}
                                             className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
-                                                currentPage === "favorites" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                                currentPage === "shipping-service" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
                                             }`}
                                         >
-                                            Tin đã lưu
+                                            Dịch vụ chuyển trọ
                                         </button>
                                         <button
                                             onClick={() => navigate("my-room")}
@@ -219,6 +229,14 @@ export default function Header({ currentPage, navigate, user, onSearchClick }) {
                                         }`}
                                     >
                                         Diễn đàn
+                                    </button>
+                                    <button
+                                        onClick={() => navigate("shipping-service")}
+                                        className={`border-none px-3 py-1.5 rounded-lg cursor-pointer text-sm font-normal transition-colors bg-transparent ${
+                                            currentPage === "shipping-service" ? "text-amber-600" : "text-stone-600 hover:text-stone-900"
+                                        }`}
+                                    >
+                                        Dịch vụ chuyển trọ
                                     </button>
                                 </>
                             )}
