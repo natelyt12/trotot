@@ -7,8 +7,8 @@ export const INITIAL_KYC_REQUESTS = [
         phone: '0966554433',
         submitted_at: '2026-05-23',
         document_id: '001096012345',
-        doc_front: 'https://images.unsplash.com/photo-1554774853-aae0a22c8aa4?auto=format&fit=crop&w=400&q=80',
-        doc_house: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=400&q=80'
+        doc_front: '/mockData/cccd.jpg',
+        doc_house: '/mockData/cccd mặt sau.jpg'
     },
     {
         id: 'kyc-mock-2',
@@ -17,8 +17,8 @@ export const INITIAL_KYC_REQUESTS = [
         phone: '0904123987',
         submitted_at: '2026-05-22',
         document_id: '038192004567',
-        doc_front: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=400&q=80',
-        doc_house: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=400&q=80'
+        doc_front: '/mockData/cccd.jpg',
+        doc_house: '/mockData/cccd mặt sau.jpg'
     }
 ];
 

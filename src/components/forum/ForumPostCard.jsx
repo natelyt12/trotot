@@ -48,7 +48,7 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
               ? "bg-purple-50 text-purple-700 border-purple-200"
               : "bg-stone-50 text-stone-600 border-stone-200";
 
-    const category = post.category || "general";
+    const category = post.category || "roommate";
     const categoryLabel = category === "transfer" ? "Sang nhượng" : category === "roommate" ? "Tìm người ở cùng" : null;
     const categoryBadgeClass = category === "transfer" ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-sky-50 text-sky-700 border-sky-200";
 

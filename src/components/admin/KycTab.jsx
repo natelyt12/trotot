@@ -1,9 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import { TbUserCheck, TbMail, TbPhone, TbCalendar, TbX, TbCheck } from "react-icons/tb";
+import ImagePreviewModal from "../common/ImagePreviewModal";
 
 export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
+    const [previewState, setPreviewState] = useState({
+        isOpen: false,
+        images: [],
+        initialIndex: 0
+    });
+
+    const openPreview = (images, index) => {
+        setPreviewState({
+            isOpen: true,
+            images,
+            initialIndex: index
+        });
+    };
+
+    const closePreview = () => {
+        setPreviewState(prev => ({ ...prev, isOpen: false }));
+    };
+
     return (
         <div className="space-y-6">
+            <ImagePreviewModal
+                isOpen={previewState.isOpen}
+                onClose={closePreview}
+                images={previewState.images}
+                initialIndex={previewState.initialIndex}
+            />
             <div>
                 <h3 className="text-xl font-semibold text-stone-900 font-heading">Xác thực hồ sơ KYC</h3>
                 <p className="text-stone-500 text-xs mt-1">Duyệt yêu cầu nâng cấp vai trò từ Người thuê lên Bên cho thuê (Chủ nhà).</p>
@@ -61,7 +86,10 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                                                 e.currentTarget.src = "/images/placeholder.png";
                                             }}
                                         />
-                                        <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-[11px] font-medium">
+                                        <div 
+                                            className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-[11px] font-medium"
+                                            onClick={() => openPreview([req.doc_front, req.doc_house], 0)}
+                                        >
                                             Xem ảnh lớn
                                         </div>
                                     </div>
@@ -79,7 +107,10 @@ export default function KycTab({ kycRequests, onApproveKYC, onRejectKYC }) {
                                                 e.currentTarget.src = "/images/placeholder.png";
                                             }}
                                         />
-                                        <div className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-[11px] font-medium">
+                                        <div 
+                                            className="absolute inset-0 bg-stone-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-[11px] font-medium"
+                                            onClick={() => openPreview([req.doc_front, req.doc_house], 1)}
+                                        >
                                             Xem ảnh lớn
                                         </div>
                                     </div>
