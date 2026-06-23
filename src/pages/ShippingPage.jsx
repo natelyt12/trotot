@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     TbArrowLeft,
     TbCheck,
@@ -12,13 +12,25 @@ import {
     TbPackage,
     TbCar,
     TbListDetails,
-    TbTrash
+    TbTrash,
+    TbChevronLeft,
+    TbChevronRight
 } from "react-icons/tb";
 
 export default function ShippingPage({ navigate }) {
     const [activeTab, setActiveTab] = useState("providers"); // 'providers' | 'orders'
     const [orders, setOrders] = useState([]);
-    
+    const [currentBanner, setCurrentBanner] = useState(0);
+    const banners = ["/transfer/banner.png", "/transfer/banner2.png", "/transfer/banner3.png", "/transfer/banner4.png"];
+
+    useEffect(() => {
+        if (activeTab !== "providers") return;
+        const timer = setInterval(() => {
+            setCurrentBanner((prev) => (prev + 1) % banners.length);
+        }, 3000);
+        return () => clearInterval(timer);
+    }, [activeTab]);
+
     // Modals state
     const [bookingModalOpen, setBookingModalOpen] = useState(false);
     const [selectedProvider, setSelectedProvider] = useState(null);
@@ -79,12 +91,12 @@ export default function ShippingPage({ navigate }) {
         const { name, value } = e.target;
         const newForm = { ...bookingForm, [name]: value };
         setBookingForm(newForm);
-        
+
         // Mock estimate cost based on vehicle
         if (newForm.pickup && newForm.dropoff) {
             const base = vehicleTypes.find(v => v.id === newForm.vehicleType)?.priceBase || 150000;
             // Random distance multiplier for mockup
-            const randomDistance = Math.floor(Math.random() * 5) + 1; 
+            const randomDistance = Math.floor(Math.random() * 5) + 1;
             setEstimatedCost(base + (randomDistance * 15000));
         } else {
             setEstimatedCost(0);
@@ -96,7 +108,7 @@ export default function ShippingPage({ navigate }) {
             alert("Vui lòng nhập đầy đủ thông tin");
             return;
         }
-        
+
         const newOrder = {
             id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
             provider: selectedProvider,
@@ -105,7 +117,7 @@ export default function ShippingPage({ navigate }) {
             status: "pending", // pending, confirmed, completed, cancelled
             createdAt: new Date().toISOString(),
         };
-        
+
         setOrders([newOrder, ...orders]);
         setBookingModalOpen(false);
         setActiveTab("orders");
@@ -151,17 +163,17 @@ export default function ShippingPage({ navigate }) {
                         </div>
                         <span>Quay lại</span>
                     </button>
-                    
+
                     {/* Tabs */}
                     <div className="flex p-1 bg-white border border-stone-200 rounded-xl shadow-sm w-fit">
-                        <button 
+                        <button
                             onClick={() => setActiveTab("providers")}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer border-none ${activeTab === "providers" ? "bg-amber-50 text-amber-700" : "bg-transparent text-stone-500 hover:text-stone-700"}`}
                         >
                             <TbTruckDelivery size={18} />
                             <span>Đặt dịch vụ</span>
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab("orders")}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer border-none ${activeTab === "orders" ? "bg-amber-50 text-amber-700" : "bg-transparent text-stone-500 hover:text-stone-700"}`}
                         >
@@ -179,6 +191,43 @@ export default function ShippingPage({ navigate }) {
                 {/* TAB CONTENT: PROVIDERS */}
                 {activeTab === "providers" && (
                     <div className="bg-white border border-stone-200 rounded-2xl p-6 md:p-8 shadow-sm text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="mb-6 md:mb-8 rounded-xl overflow-hidden border border-stone-100 w-full relative group">
+                            <div className="relative w-full aspect-[16/9] md:aspect-[16/8]">
+                                {banners.map((src, idx) => (
+                                    <img
+                                        key={idx}
+                                        src={src}
+                                        alt={`Banner ${idx + 1}`}
+                                        className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-700 ${currentBanner === idx ? "opacity-100" : "opacity-0"}`}
+                                    />
+                                ))}
+                            </div>
+
+                            <button 
+                                onClick={() => setCurrentBanner(prev => (prev - 1 + banners.length) % banners.length)}
+                                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-all border-none cursor-pointer z-10"
+                            >
+                                <TbChevronLeft size={24} />
+                            </button>
+
+                            <button 
+                                onClick={() => setCurrentBanner(prev => (prev + 1) % banners.length)}
+                                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white opacity-0 group-hover:opacity-100 transition-all border-none cursor-pointer z-10"
+                            >
+                                <TbChevronRight size={24} />
+                            </button>
+
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                                {banners.map((_, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setCurrentBanner(idx)}
+                                        className={`h-2 rounded-full transition-all border-none p-0 cursor-pointer shadow-sm ${currentBanner === idx ? "bg-white w-5" : "bg-white/60 hover:bg-white/90 w-2"}`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500">
                             <TbTruckDelivery size={32} />
                         </div>
@@ -186,7 +235,7 @@ export default function ShippingPage({ navigate }) {
                         <p className="text-stone-500 text-sm mb-8 max-w-md mx-auto">
                             Danh sách các đơn vị cung cấp dịch vụ chuyển trọ uy tín, hỗ trợ bạn dọn nhà nhanh chóng và an toàn.
                         </p>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
                             {shippingProviders.map(provider => (
                                 <div key={provider.id} className="border border-stone-200 rounded-xl p-5 hover:border-amber-300 hover:shadow-md transition-all group flex flex-col items-center">
@@ -201,7 +250,7 @@ export default function ShippingPage({ navigate }) {
                                     <p className="text-xs text-stone-500 mb-6 line-clamp-3">
                                         {provider.desc}
                                     </p>
-                                    <button 
+                                    <button
                                         onClick={() => openBookingModal(provider)}
                                         className="w-full mt-auto py-2.5 bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white cursor-pointer border-none text-xs font-medium rounded-lg transition-all"
                                     >
@@ -223,7 +272,7 @@ export default function ShippingPage({ navigate }) {
                                 </div>
                                 <h3 className="font-medium text-stone-900 mb-1">Chưa có đơn vận chuyển nào</h3>
                                 <p className="text-stone-500 text-sm mb-6">Bạn chưa đặt dịch vụ vận chuyển nào. Hãy đặt xe để chuyển phòng dễ dàng hơn nhé!</p>
-                                <button 
+                                <button
                                     onClick={() => setActiveTab("providers")}
                                     className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer border-none"
                                 >
@@ -246,7 +295,7 @@ export default function ShippingPage({ navigate }) {
                                         </div>
                                         <div>{getStatusBadge(order.status)}</div>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                         <div className="space-y-3 relative">
                                             <div className="absolute left-[11px] top-4 bottom-4 w-0.5 bg-stone-200"></div>
@@ -269,7 +318,7 @@ export default function ShippingPage({ navigate }) {
                                                 </div>
                                             </div>
                                         </div>
-                                        
+
                                         <div className="bg-stone-50 rounded-xl p-4 flex flex-col justify-center">
                                             <div className="flex justify-between text-sm mb-2">
                                                 <span className="text-stone-500">Loại xe:</span>
@@ -291,7 +340,7 @@ export default function ShippingPage({ navigate }) {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     {/* MOCK ACTIONS FOR TESTING */}
                                     <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-4 flex flex-wrap gap-2 items-center justify-between">
                                         <div className="text-xs font-medium text-amber-800 flex items-center gap-1.5">
@@ -348,15 +397,15 @@ export default function ShippingPage({ navigate }) {
                                 <TbX size={24} />
                             </button>
                         </div>
-                        
+
                         <div className="p-5 overflow-y-auto max-h-[70vh]">
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-stone-700 mb-1.5">Địa chỉ nhận đồ (Nơi ở cũ)</label>
                                     <div className="relative">
                                         <TbMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             name="pickup"
                                             value={bookingForm.pickup}
                                             onChange={handleBookingChange}
@@ -365,13 +414,13 @@ export default function ShippingPage({ navigate }) {
                                         />
                                     </div>
                                 </div>
-                                
+
                                 <div>
                                     <label className="block text-sm font-medium text-stone-700 mb-1.5">Địa chỉ giao đồ (Nơi ở mới)</label>
                                     <div className="relative">
                                         <TbMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             name="dropoff"
                                             value={bookingForm.dropoff}
                                             onChange={handleBookingChange}
@@ -386,7 +435,7 @@ export default function ShippingPage({ navigate }) {
                                         <label className="block text-sm font-medium text-stone-700 mb-1.5">Loại xe</label>
                                         <div className="relative">
                                             <TbCar className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-                                            <select 
+                                            <select
                                                 name="vehicleType"
                                                 value={bookingForm.vehicleType}
                                                 onChange={handleBookingChange}
@@ -400,8 +449,8 @@ export default function ShippingPage({ navigate }) {
                                         <label className="block text-sm font-medium text-stone-700 mb-1.5">Thời gian chuyển</label>
                                         <div className="relative">
                                             <TbClock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-                                            <input 
-                                                type="datetime-local" 
+                                            <input
+                                                type="datetime-local"
                                                 name="time"
                                                 value={bookingForm.time}
                                                 onChange={handleBookingChange}
@@ -412,7 +461,7 @@ export default function ShippingPage({ navigate }) {
 
                                     <div className="col-span-2">
                                         <label className="block text-sm font-medium text-stone-700 mb-1.5">Ghi chú đồ đạc cần chuyển</label>
-                                        <textarea 
+                                        <textarea
                                             name="items"
                                             value={bookingForm.items}
                                             onChange={handleBookingChange}
@@ -432,13 +481,13 @@ export default function ShippingPage({ navigate }) {
                         </div>
 
                         <div className="p-5 border-t border-stone-100 flex gap-3">
-                            <button 
+                            <button
                                 onClick={() => setBookingModalOpen(false)}
                                 className="flex-1 py-3 rounded-xl font-medium text-sm bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors border-none cursor-pointer"
                             >
                                 Hủy
                             </button>
-                            <button 
+                            <button
                                 onClick={submitBooking}
                                 className="flex-[2] py-3 rounded-xl font-medium text-sm bg-amber-500 text-white hover:bg-amber-600 transition-colors border-none cursor-pointer shadow-md shadow-amber-500/20"
                             >
@@ -459,10 +508,10 @@ export default function ShippingPage({ navigate }) {
                         </div>
                         <h3 className="font-semibold text-stone-900 text-lg mb-1">Đánh giá dịch vụ</h3>
                         <p className="text-sm text-stone-500 mb-6">Bạn cảm thấy dịch vụ của {ratingOrder.provider.name} thế nào?</p>
-                        
+
                         <div className="flex justify-center gap-2 mb-6">
                             {[1, 2, 3, 4, 5].map(star => (
-                                <button 
+                                <button
                                     key={star}
                                     onClick={() => setRatingForm({ ...ratingForm, stars: star })}
                                     className="bg-transparent border-none p-0 cursor-pointer text-amber-400 hover:scale-110 transition-transform"
@@ -472,7 +521,7 @@ export default function ShippingPage({ navigate }) {
                             ))}
                         </div>
 
-                        <textarea 
+                        <textarea
                             placeholder="Chia sẻ trải nghiệm của bạn (không bắt buộc)..."
                             value={ratingForm.review}
                             onChange={(e) => setRatingForm({ ...ratingForm, review: e.target.value })}
@@ -480,13 +529,13 @@ export default function ShippingPage({ navigate }) {
                         ></textarea>
 
                         <div className="flex gap-3">
-                            <button 
+                            <button
                                 onClick={() => setRatingModalOpen(false)}
                                 className="flex-1 py-2.5 rounded-xl font-medium text-sm bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors border-none cursor-pointer"
                             >
                                 Bỏ qua
                             </button>
-                            <button 
+                            <button
                                 onClick={submitRating}
                                 className="flex-[2] py-2.5 rounded-xl font-medium text-sm bg-amber-500 text-white hover:bg-amber-600 transition-colors border-none cursor-pointer shadow-md shadow-amber-500/20"
                             >
