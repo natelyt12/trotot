@@ -198,12 +198,13 @@ export default function App() {
                                 setPageData(mappedRoom);
                             }
                         } else {
+                            console.error("Error fetching room or room is null:", error, room);
                             setCurrentPage("home");
                             setPageData(null);
                             window.history.pushState(null, "", "/");
                         }
                     } catch (err) {
-                        console.error("Error fetching room by slug:", err);
+                        console.error("Error fetching room by slug (catch block):", err);
                         setCurrentPage("home");
                         setPageData(null);
                         window.history.pushState(null, "", "/");
@@ -232,12 +233,13 @@ export default function App() {
                             setPageData(mappedRoom);
                         }
                     } else {
+                        console.error("Error fetching room (old format) or room is null:", error, room);
                         setCurrentPage("home");
                         setPageData(null);
                         window.history.pushState(null, "", "/");
                     }
                 } catch (err) {
-                    console.error("Error fetching room by slug:", err);
+                    console.error("Error fetching room by slug (old format catch block):", err);
                     setCurrentPage("home");
                     setPageData(null);
                     window.history.pushState(null, "", "/");
