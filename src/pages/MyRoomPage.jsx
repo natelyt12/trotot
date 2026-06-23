@@ -230,12 +230,15 @@ export default function MyRoomPage({ user, navigate, initialData }) {
 
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={fetchRentedRoomsData}
-                            disabled={loadingRented}
+                            onClick={() => {
+                                fetchRentedRoomsData();
+                                fetchTransferRequests();
+                            }}
+                            disabled={loadingRented || loadingRequests}
                             className="flex items-center gap-2 pl-1.5 pr-4 py-1.5 border border-stone-200 bg-white shadow-xs rounded-full text-xs font-medium text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all disabled:opacity-50 group cursor-pointer"
                         >
                             <div className="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center group-hover:bg-stone-100 transition-colors">
-                                <TbRefresh size={12} className={`group-hover:text-stone-600 transition-colors ${loadingRented ? "animate-spin" : ""}`} />
+                                <TbRefresh size={12} className={`group-hover:text-stone-600 transition-colors ${loadingRented || loadingRequests ? "animate-spin" : ""}`} />
                             </div>
                             <span className="group-hover:text-stone-600 transition-colors">Làm mới</span>
                         </button>

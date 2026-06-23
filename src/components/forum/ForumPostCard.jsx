@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { togglePostLike, deleteForumPost, updateForumPost, createRoomRequest } from "../../services/forumService.js";
+import { deleteFromCloudinary } from "../../utils/imageUtils.js";
 import { formatDate, formatRelativeTime } from "../../utils/formatters.js";
 import AppIcon from "../common/AppIcon.jsx";
 import RoomAttachCard from "./RoomAttachCard.jsx";
@@ -49,8 +50,9 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
               : "bg-stone-50 text-stone-600 border-stone-200";
 
     const category = post.category || "roommate";
-    const categoryLabel = category === "transfer" ? "Sang nhượng" : category === "roommate" ? "Tìm người ở cùng" : null;
-    const categoryBadgeClass = category === "transfer" ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-sky-50 text-sky-700 border-sky-200";
+    const isTransferCompleted = category === "transfer" && post.status === "completed";
+    const categoryLabel = isTransferCompleted ? "Đã chuyển nhượng" : category === "transfer" ? "Sang nhượng" : category === "roommate" ? "Tìm người ở cùng" : null;
+    const categoryBadgeClass = isTransferCompleted ? "bg-stone-100 text-stone-600 border-stone-300" : category === "transfer" ? "bg-purple-50 text-purple-700 border-purple-200" : "bg-sky-50 text-sky-700 border-sky-200";
 
     const handleLike = async () => {
         if (!user) {
@@ -81,6 +83,16 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
             confirmText: "Xóa",
             cancelText: "Hủy",
             onConfirm: async () => {
+                const images = post.images || [];
+                if (images.length > 0) {
+                    for (const img of images) {
+                        const url = img.url || img;
+                        if (url && url.includes("res.cloudinary.com")) {
+                            await deleteFromCloudinary(url);
+                        }
+                    }
+                }
+
                 const { error } = await deleteForumPost(post.id);
                 if (error) {
                     addNotification("Lỗi khi xóa bài đăng.", "error");
@@ -323,7 +335,18 @@ export default function ForumPostCard({ post, user, navigate, onEdit, onDelete, 
                     <span>Bình luận</span>
                 </button>
 
-                {(post.category === "transfer" || post.category === "roommate") && !isOwner && !isAdmin && post.status === "published" ? (
+                {isTransferCompleted && !isOwner && !isAdmin ? (
+                    <button
+                        disabled
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium text-stone-400 bg-stone-50 cursor-not-allowed border-none"
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                        <span>Đã chuyển nhượng</span>
+                    </button>
+                ) : ((post.category === "transfer" && post.status === "published") || (post.category === "roommate" && (post.status === "published" || post.status === "completed"))) && !isOwner && !isAdmin ? (
                     <button
                         onClick={handleRequestAction}
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border-none bg-transparent ${post.category === 'roommate' ? 'text-sky-600 hover:bg-sky-50' : 'text-purple-600 hover:bg-purple-50'}`}

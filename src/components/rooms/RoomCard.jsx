@@ -3,6 +3,8 @@ import { formatPriceShort, formatArea, formatAddressShort, truncate } from "../.
 import AppIcon from "../common/AppIcon.jsx";
 import { useFavorites } from "../../context/FavoritesContext.jsx";
 import { useModal } from "../../context/ModalContext";
+import { isRoomRentedGlobally } from "../../services/rentedRoomService.js";
+import { useState, useEffect } from "react";
 
 /* ============================================
    RoomCard Component
@@ -18,8 +20,25 @@ export default function RoomCard({ room, onClick, style }) {
     const isAvailable = metadata.status === "available" && !isExpired;
     const mediaCount = (media_contact.images?.length || 0) + (media_contact.video_urls?.length || 0);
     const hasVideo = media_contact.video_urls?.length > 0;
-
     const favorited = isFavorite(roomId);
+
+    const [isRented, setIsRented] = useState(false);
+
+    useEffect(() => {
+        let isMounted = true;
+        const checkRented = async () => {
+            try {
+                const { data: rented } = await isRoomRentedGlobally(roomId);
+                if (isMounted) {
+                    setIsRented(rented);
+                }
+            } catch (err) {
+                console.error("Error checking rented status for room:", roomId, err);
+            }
+        };
+        checkRented();
+        return () => { isMounted = false; };
+    }, [roomId]);
 
     const handleToggleFavorite = async (e) => {
         e.stopPropagation();
@@ -79,11 +98,11 @@ export default function RoomCard({ room, onClick, style }) {
                 <div className="absolute top-2 left-2 flex flex-col gap-1.5">
                     <span
                         className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full w-fit text-[0.7rem] font-medium border ${
-                            isAvailable ? "bg-green-50 text-green-700 border-green-200" : isExpired ? "bg-red-50 text-red-700 border-red-200" : "bg-stone-50 text-stone-700 border-stone-200"
+                            isRented ? "bg-stone-50 text-stone-600 border-stone-300" : isAvailable ? "bg-green-50 text-green-700 border-green-200" : isExpired ? "bg-red-50 text-red-700 border-red-200" : "bg-stone-50 text-stone-700 border-stone-200"
                         }`}
                     >
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isAvailable ? "bg-green-600" : isExpired ? "bg-red-600" : "bg-stone-600"}`} />
-                        {isAvailable ? "Còn phòng" : isExpired ? "Đã hết hạn" : metadata.status === "draft" ? "Bản nháp" : metadata.status}
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isRented ? "bg-stone-500" : isAvailable ? "bg-green-600" : isExpired ? "bg-red-600" : "bg-stone-600"}`} />
+                        {isRented ? "Đã cho thuê" : isAvailable ? "Còn phòng" : isExpired ? "Đã hết hạn" : metadata.status === "draft" ? "Bản nháp" : metadata.status}
                     </span>
 
                     {metadata.is_verified && (

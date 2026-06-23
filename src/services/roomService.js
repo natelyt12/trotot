@@ -160,52 +160,7 @@ export const updateRoom = async (roomId, payload) => {
     }
 };
 
-/**
- * Uploads a file to room_media Supabase storage bucket
- * @param {string} filePath 
- * @param {File|Blob} file 
- * @returns {Promise<{data: any, error: any}>}
- */
-export const uploadRoomMedia = async (filePath, file) => {
-    try {
-        const { data, error } = await supabase.storage
-            .from('room_media')
-            .upload(filePath, file, { upsert: true });
-        return { data, error };
-    } catch (err) {
-        console.error('Error uploading room media:', err);
-        return { data: null, error: err };
-    }
-};
 
-/**
- * Retrieves the public URL of a file in room_media storage bucket
- * @param {string} filePath 
- * @returns {string}
- */
-export const getRoomMediaPublicUrl = (filePath) => {
-    const { data } = supabase.storage
-        .from('room_media')
-        .getPublicUrl(filePath);
-    return data?.publicUrl || '';
-};
-
-/**
- * Removes media files from room_media storage bucket
- * @param {string[]} filePaths 
- * @returns {Promise<{data: any, error: any}>}
- */
-export const deleteRoomMedia = async (filePaths) => {
-    try {
-        const { data, error } = await supabase.storage
-            .from('room_media')
-            .remove(filePaths);
-        return { data, error };
-    } catch (err) {
-        console.error('Error deleting room media:', err);
-        return { data: null, error: err };
-    }
-};
 
 /**
  * Increments the views of a room using RPC or direct fallback

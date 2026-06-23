@@ -135,9 +135,21 @@ export default function RequestsTab({ user }) {
 
     return (
         <div className="h-full flex flex-col">
-            <h2 className="text-xl font-medium text-stone-900 mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
-                Yêu cầu từ khách thuê
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-medium text-stone-900" style={{ fontFamily: 'var(--font-heading)' }}>
+                    Yêu cầu từ khách thuê
+                </h2>
+                <button
+                    onClick={fetchData}
+                    disabled={loading}
+                    className="flex items-center gap-2 pl-1.5 pr-4 py-1.5 border border-stone-200 bg-white shadow-xs rounded-full text-xs font-medium text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all disabled:opacity-50 group cursor-pointer"
+                >
+                    <div className="w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center group-hover:bg-stone-100 transition-colors">
+                        <AppIcon name="refresh" size={12} className={`group-hover:text-stone-600 transition-colors ${loading ? "animate-spin" : ""}`} />
+                    </div>
+                    <span className="group-hover:text-stone-600 transition-colors">Làm mới</span>
+                </button>
+            </div>
 
             <div className="flex border-b border-stone-200 mb-6">
                 <button

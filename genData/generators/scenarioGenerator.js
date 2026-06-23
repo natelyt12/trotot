@@ -35,7 +35,7 @@ export const makeLargeScaleModerationScenario = (myUserId) => {
         const room = createMockRoom(myUserId, loc.city, loc.district, loc.ward);
         room.status = "available";
         room.is_verified = false;
-        room.title = `[CHỜ XÁC THỰC] Phòng tiện nghi giá tốt ở ${loc.district}`;
+        room.title = `Phòng tiện nghi giá tốt ở ${loc.district}`;
         rooms.push(room);
     }
 
@@ -45,7 +45,7 @@ export const makeLargeScaleModerationScenario = (myUserId) => {
         const room = createMockRoom(myUserId, loc.city, loc.district, loc.ward);
         room.status = "available";
         room.is_verified = true;
-        room.title = `[ĐÃ XÁC THỰC] Phòng trọ chính chủ tích xanh gần ${loc.ward}`;
+        room.title = `Phòng trọ chính chủ tích xanh gần ${loc.ward}`;
         rooms.push(room);
     }
 

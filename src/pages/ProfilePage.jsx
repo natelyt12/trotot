@@ -6,9 +6,6 @@ import {
     getUserProfile,
     updateUserProfile,
     updateUserAuth,
-    uploadAvatar,
-    getAvatarPublicUrl,
-    removeAvatar,
     deleteUserAccount,
 } from "../services/profileService.js";
 import { getRoomsByIds, getUserRooms, deleteCloudinaryImage } from "../services/roomService.js";
@@ -343,15 +340,7 @@ export default function ProfilePage({ user, navigate, initialData, currentPage }
                 const data = await response.json();
                 publicUrl = data.secure_url;
             } else {
-                const fileExt = compressedFile.name.split(".").pop();
-                const filePath = `${user.id}/${Date.now()}.${fileExt}`;
-
-                // 2. Upload file đã nén lên Supabase
-                const { error: uploadError } = await uploadAvatar(filePath, compressedFile);
-                if (uploadError) throw uploadError;
-
-                // 3. Lấy Public URL từ Supabase
-                publicUrl = getAvatarPublicUrl(filePath);
+                throw new Error("Tải ảnh thất bại: Vui lòng cấu hình Cloudinary (Supabase Storage đã bị vô hiệu hóa).");
             }
 
             // 4. Cập nhật Auth metadata
@@ -368,22 +357,11 @@ export default function ProfilePage({ user, navigate, initialData, currentPage }
             setFormData((prev) => ({ ...prev, avatar_url: publicUrl }));
             addNotification("Cập nhật ảnh đại diện thành công!", "success");
 
-            // 7. Xóa ảnh cũ trên storage nếu có để tránh rác dữ liệu
             if (oldAvatarUrl) {
                 if (oldAvatarUrl.includes("res.cloudinary.com")) {
                     await deleteFromCloudinary(oldAvatarUrl);
                 } else {
-                    const urlParts = oldAvatarUrl.split("/user_avatar/");
-                    if (urlParts.length > 1) {
-                        const oldPath = urlParts[1].split("?")[0];
-                        if (oldPath.startsWith(`${user.id}/`)) {
-                            const { error: removeError } = await removeAvatar(oldPath);
-
-                            if (removeError) {
-                                console.error("Lỗi khi xóa ảnh cũ từ storage:", removeError);
-                            }
-                        }
-                    }
+                    console.warn("Ảnh cũ không nằm trên Cloudinary, bỏ qua xóa ảnh (Supabase Storage đã bị vô hiệu hóa).");
                 }
             }
         } catch (err) {
@@ -443,13 +421,7 @@ export default function ProfilePage({ user, navigate, initialData, currentPage }
                             if (avatarUrl.includes("res.cloudinary.com")) {
                                 await deleteFromCloudinary(avatarUrl);
                             } else {
-                                const urlParts = avatarUrl.split("/user_avatar/");
-                                if (urlParts.length > 1) {
-                                    const path = urlParts[1].split("?")[0];
-                                    if (path.startsWith(`${user.id}/`)) {
-                                        await removeAvatar(path);
-                                    }
-                                }
+                                console.warn("Ảnh đại diện không nằm trên Cloudinary, bỏ qua xóa ảnh (Supabase Storage đã bị vô hiệu hóa).");
                             }
                         } catch (avatarErr) {
                             console.error("Lỗi khi xóa ảnh đại diện khi xóa tài khoản:", avatarErr);

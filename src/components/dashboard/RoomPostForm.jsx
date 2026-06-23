@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { createRoom, updateRoom, uploadRoomMedia, deleteRoomMedia, getRoomMediaPublicUrl } from "../../services/roomService";
+import { createRoom, updateRoom, deleteCloudinaryImage } from "../../services/roomService";
 import { useModal } from "../../context/ModalContext";
 import { useNotification } from "../../context/NotificationContext";
 import AppIcon from "../common/AppIcon";
@@ -8,6 +8,10 @@ import { PROVINCE } from "../../constants/province";
 import { UNIVERSITIES } from "../../constants/universities";
 import { motion, AnimatePresence } from "framer-motion";
 import { compressImage, deleteFromCloudinary } from "../../utils/imageUtils";
+
+// Helper for formatting inputs
+const formatCurrency = (val) => (val ? val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "");
+const parseCurrency = (val) => val.toString().replace(/\D/g, "");
 
 /**
  * RoomPostForm - Chức năng đăng tin mới (Single Form)
@@ -470,19 +474,7 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                         const data = await response.json();
                         publicUrl = data.secure_url;
                     } else {
-                        // Làm sạch tên file để tránh lỗi Invalid Key (tiếng Việt có dấu)
-                        const safeName = sanitizeFilename(fileToUpload.name);
-                        const fileName = `${Date.now()}_${i}_${safeName}`;
-                        const filePath = `${uploadFolder}/${fileName}`;
-
-                        const { data: _uploadData, error: uploadError } = await uploadRoomMedia(filePath, fileToUpload);
-
-                        if (uploadError) throw uploadError;
-
-                        // Lấy Public URL
-                        const supabaseUrl = getRoomMediaPublicUrl(filePath);
-
-                        publicUrl = supabaseUrl;
+                        throw new Error("Tải ảnh thất bại: Vui lòng cấu hình Cloudinary (Supabase Storage đã bị vô hiệu hóa).");
                     }
 
                     finalImages.push({
@@ -545,22 +537,8 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             if (oldImg.url.includes("res.cloudinary.com")) {
                                 await deleteFromCloudinary(oldImg.url);
                             } else {
-                                const parts = oldImg.url.split("/room_media/");
-                                if (parts.length > 1) {
-                                    const path = parts[1].split("?")[0];
-                                    if (path.startsWith(`${user.id}/`)) {
-                                        pathsToDelete.push(path);
-                                    }
-                                }
+                                console.warn(`Ảnh thừa ${oldImg.url} không nằm trên Cloudinary, bỏ qua xóa ảnh (Supabase Storage đã bị vô hiệu hóa).`);
                             }
-                        }
-                    }
-
-                    if (pathsToDelete.length > 0) {
-                        const { error: storageError } = await deleteRoomMedia(pathsToDelete);
-
-                        if (storageError) {
-                            console.error("Lỗi khi xóa ảnh thừa từ storage:", storageError);
                         }
                     }
                 }
@@ -784,14 +762,13 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 <div>
                                     <label className="block text-[0.7rem] font-medium text-stone-400 uppercase mb-1.5 tracking-tight">Giá thuê (đ) *</label>
                                     <input
-                                        type="number"
+                                        type="text"
+                                        inputMode="numeric"
                                         required
-                                        min="100000"
-                                        max="100000000"
-                                        placeholder="3500000"
+                                        placeholder="3.500.000"
                                         className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-amber-500 text-sm font-medium text-amber-600"
-                                        value={formData.price_monthly}
-                                        onChange={(e) => setFormData({ ...formData, price_monthly: e.target.value })}
+                                        value={formatCurrency(formData.price_monthly)}
+                                        onChange={(e) => setFormData({ ...formData, price_monthly: parseCurrency(e.target.value) })}
                                     />
                                 </div>
                                 <div>
@@ -998,13 +975,12 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                             <div>
                                 <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Tiền cọc * (Tối thiểu 100k)</label>
                                 <input
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
                                     required
-                                    min="100000"
-                                    max="500000000"
                                     className="w-full px-4 py-2.5 bg-white border border-stone-200 rounded-xl text-sm font-medium text-stone-700 focus:border-amber-500 outline-none transition-colors"
-                                    value={formData.monthly_costs.deposit_amount}
-                                    onChange={(e) => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, deposit_amount: e.target.value } })}
+                                    value={formatCurrency(formData.monthly_costs.deposit_amount)}
+                                    onChange={(e) => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, deposit_amount: parseCurrency(e.target.value) } })}
                                 />
                             </div>
 
@@ -1012,27 +988,25 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                 <div>
                                     <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Phí gửi xe *</label>
                                     <input
-                                        type="number"
+                                        type="text"
+                                        inputMode="numeric"
                                         required
-                                        min="0"
-                                        max="1000000"
                                         className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs"
-                                        value={formData.monthly_costs.parking_fee}
+                                        value={formatCurrency(formData.monthly_costs.parking_fee)}
                                         onChange={(e) =>
-                                            setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, parking_fee: e.target.value } })
+                                            setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, parking_fee: parseCurrency(e.target.value) } })
                                         }
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Internet *</label>
                                     <input
-                                        type="number"
+                                        type="text"
+                                        inputMode="numeric"
                                         required
-                                        min="0"
-                                        max="1000000"
                                         className="w-full px-3 py-2 bg-white border border-stone-200 rounded-xl text-xs"
-                                        value={formData.monthly_costs.internet}
-                                        onChange={(e) => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, internet: e.target.value } })}
+                                        value={formatCurrency(formData.monthly_costs.internet)}
+                                        onChange={(e) => setFormData({ ...formData, monthly_costs: { ...formData.monthly_costs, internet: parseCurrency(e.target.value) } })}
                                     />
                                 </div>
                             </div>
@@ -1041,18 +1015,17 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     <div className="flex-1">
                                         <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Tiền điện *</label>
                                         <input
-                                            type="number"
+                                            type="text"
+                                            inputMode="numeric"
                                             required
-                                            min="0"
-                                            max="1000000"
                                             className="w-full px-2 py-2 bg-white border border-stone-200 rounded-xl text-xs font-normal"
-                                            value={formData.monthly_costs.electricity.price}
+                                            value={formatCurrency(formData.monthly_costs.electricity.price)}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
                                                     monthly_costs: {
                                                         ...formData.monthly_costs,
-                                                        electricity: { ...formData.monthly_costs.electricity, price: e.target.value },
+                                                        electricity: { ...formData.monthly_costs.electricity, price: parseCurrency(e.target.value) },
                                                     },
                                                 })
                                             }
@@ -1079,18 +1052,17 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                     <div className="flex-1">
                                         <label className="block text-[0.6rem] font-medium text-stone-400 mb-1">Tiền nước *</label>
                                         <input
-                                            type="number"
+                                            type="text"
+                                            inputMode="numeric"
                                             required
-                                            min="0"
-                                            max="1000000"
                                             className="w-full px-2 py-2 bg-white border border-stone-200 rounded-xl text-xs font-normal"
-                                            value={formData.monthly_costs.water.price}
+                                            value={formatCurrency(formData.monthly_costs.water.price)}
                                             onChange={(e) =>
                                                 setFormData({
                                                     ...formData,
                                                     monthly_costs: {
                                                         ...formData.monthly_costs,
-                                                        water: { ...formData.monthly_costs.water, price: e.target.value },
+                                                        water: { ...formData.monthly_costs.water, price: parseCurrency(e.target.value) },
                                                     },
                                                 })
                                             }
@@ -1125,13 +1097,12 @@ export default function RoomPostForm({ user, onClear, onSuccess, roomToEdit }) {
                                                 onChange={(e) => updateExtraService(idx, "name", e.target.value)}
                                             />
                                             <input
-                                                type="number"
-                                                min="0"
-                                                max="10000000"
+                                                type="text"
+                                                inputMode="numeric"
                                                 placeholder="Giá"
                                                 className="w-28 px-2 py-1.5 bg-stone-50 border border-stone-200 rounded text-[0.7rem]"
-                                                value={service.price}
-                                                onChange={(e) => updateExtraService(idx, "price", e.target.value)}
+                                                value={formatCurrency(service.price)}
+                                                onChange={(e) => updateExtraService(idx, "price", parseCurrency(e.target.value))}
                                             />
                                             <button type="button" onClick={() => removeExtraService(idx)} className="text-red-400 p-1 hover:bg-red-50 rounded">
                                                 <AppIcon name="trash" size={12} />

@@ -53,52 +53,7 @@ export const updateUserAuth = async (authUpdates) => {
     }
 };
 
-/**
- * Uploads an avatar image file to Supabase storage
- * @param {string} filePath 
- * @param {File|Blob} file 
- * @returns {Promise<{data: any, error: any}>}
- */
-export const uploadAvatar = async (filePath, file) => {
-    try {
-        const { data, error } = await supabase.storage
-            .from('user_avatar')
-            .upload(filePath, file, { upsert: true });
-        return { data, error };
-    } catch (err) {
-        console.error('Error uploading avatar:', err);
-        return { data: null, error: err };
-    }
-};
 
-/**
- * Gets the public URL of an avatar image stored in Supabase storage
- * @param {string} filePath 
- * @returns {string}
- */
-export const getAvatarPublicUrl = (filePath) => {
-    const { data } = supabase.storage
-        .from('user_avatar')
-        .getPublicUrl(filePath);
-    return data?.publicUrl || '';
-};
-
-/**
- * Removes an avatar image file from Supabase storage
- * @param {string} filePath 
- * @returns {Promise<{data: any, error: any}>}
- */
-export const removeAvatar = async (filePath) => {
-    try {
-        const { data, error } = await supabase.storage
-            .from('user_avatar')
-            .remove([filePath]);
-        return { data, error };
-    } catch (err) {
-        console.error('Error removing avatar:', err);
-        return { data: null, error: err };
-    }
-};
 
 /**
  * Deletes the user account by calling RPC 'delete_user_account'

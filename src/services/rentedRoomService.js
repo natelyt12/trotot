@@ -50,6 +50,34 @@ export const checkRentedRoom = async (userId, roomId) => {
 };
 
 /**
+ * Check if a room is currently rented by ANY user
+ * @param {string} roomId
+ */
+export const isRoomRentedGlobally = async (roomId) => {
+    try {
+        const { data, error } = await supabase.rpc('check_room_rented_status', {
+            p_room_id: roomId
+        });
+
+        if (error) {
+            // Fallback for when RPC is not yet created
+            const { data: fbData, error: fbError } = await supabase
+                .from('rented_rooms')
+                .select('id')
+                .eq('room_id', roomId)
+                .limit(1);
+            if (fbError) throw fbError;
+            return { data: fbData && fbData.length > 0, error: null };
+        }
+        
+        return { data: !!data, error: null };
+    } catch (err) {
+        console.error('Error checking global rented room:', err);
+        return { data: false, error: err };
+    }
+};
+
+/**
  * Register that the current user is renting a room
  * @param {string} userId
  * @param {string} roomId

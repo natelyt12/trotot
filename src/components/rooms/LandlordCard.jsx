@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import AppIcon from "../common/AppIcon.jsx";
 import { formatPrice, formatArea, formatDeposit } from "../../utils/formatters.js";
 import BookingModal from "./BookingModal.jsx";
-import { checkRentedRoom } from "../../services/rentedRoomService.js";
+import { checkRentedRoom, isRoomRentedGlobally } from "../../services/rentedRoomService.js";
 
 export default function LandlordCard({ room, user, previewMode, showPhone, setShowPhone, showModal, navigate, isExpired }) {
     const computedExpired = isExpired !== undefined ? isExpired : room.metadata?.status === "expired" || room.status === "expired";
@@ -11,12 +11,21 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
 
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [isRenting, setIsRenting] = useState(false);
+    const [isRentedBySomeone, setIsRentedBySomeone] = useState(false);
 
     useEffect(() => {
-        if (user?.id && room?.id && !previewMode) {
-            checkRentedRoom(user.id, room.id).then(({ data }) => {
-                if (data) setIsRenting(true);
+        if (room?.id && !previewMode) {
+            // Check if ANYONE rents this room
+            isRoomRentedGlobally(room.id).then(({ data }) => {
+                if (data) setIsRentedBySomeone(true);
             });
+
+            // Check if CURRENT USER rents this room
+            if (user?.id) {
+                checkRentedRoom(user.id, room.id).then(({ data }) => {
+                    if (data) setIsRenting(true);
+                });
+            }
         }
     }, [user?.id, room?.id, previewMode]);
 
@@ -146,6 +155,49 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                                                           window.open(`https://zalo.me/${media_contact.contact?.phone}`, "_blank");
                                                       }
                                             }
+                                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white transition-colors duration-200 border-none font-medium ${previewMode ? "bg-stone-300 cursor-not-allowed" : "bg-[#0068ff] hover:bg-[#005ae0] cursor-pointer"}`}
+                                        >
+                                            <AppIcon name="messages" size={20} strokeWidth={2.5} />
+                                            <span>Nhắn tin qua Zalo</span>
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        ) : isRentedBySomeone ? (
+                            <div className="flex flex-col gap-2.5">
+                                <button
+                                    disabled={true}
+                                    className="flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-stone-400 bg-stone-100 border border-stone-200/60 cursor-not-allowed font-medium"
+                                >
+                                    <AppIcon name="calendar" size={20} strokeWidth={2.5} className="text-stone-400" />
+                                    <span>Đặt lịch</span>
+                                </button>
+                                <div className="flex gap-2 items-start text-stone-600 bg-stone-50 border border-stone-200/50 rounded-xl p-3 text-xs leading-relaxed">
+                                    <AppIcon name="alert" size={14} className="shrink-0 mt-0.5 text-stone-500" />
+                                    <span>Phòng này hiện đã có người thuê.</span>
+                                </div>
+                                {!showPhone ? (
+                                    <button
+                                        disabled={previewMode || user?.id === room?.user_id || user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "landlord"}
+                                        onClick={previewMode ? undefined : () => setShowPhone(true)}
+                                        className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-stone-600 border border-stone-200 bg-white transition-colors duration-200 font-medium ${previewMode || user?.id === room?.user_id || user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "landlord" ? "cursor-not-allowed opacity-70" : "hover:bg-stone-50 cursor-pointer"}`}
+                                    >
+                                        <AppIcon name="phone" size={20} strokeWidth={2.5} />
+                                        <span>Liên hệ chủ nhà</span>
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button
+                                            disabled={previewMode}
+                                            onClick={() => window.location.href = `tel:${media_contact.contact?.phone}`}
+                                            className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-medium ${previewMode ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
+                                        >
+                                            <AppIcon name="phone" size={20} strokeWidth={2.5} />
+                                            <span>{formatPhone(media_contact.contact?.phone)}</span>
+                                        </button>
+                                        <button
+                                            disabled={previewMode}
+                                            onClick={previewMode ? undefined : () => window.open(`https://zalo.me/${media_contact.contact?.phone}`, "_blank")}
                                             className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white transition-colors duration-200 border-none font-medium ${previewMode ? "bg-stone-300 cursor-not-allowed" : "bg-[#0068ff] hover:bg-[#005ae0] cursor-pointer"}`}
                                         >
                                             <AppIcon name="messages" size={20} strokeWidth={2.5} />

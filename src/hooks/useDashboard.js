@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useModal } from "../context/ModalContext";
 import { useNotification } from "../context/NotificationContext.jsx";
-import { getUserRooms, publishRoom, verifyRoomMock, deleteRoom, deleteRoomMedia, createRoom, updateRoom } from "../services/roomService.js";
+import { getUserRooms, publishRoom, verifyRoomMock, deleteRoom, createRoom, updateRoom } from "../services/roomService.js";
 import { moveRoomToDraft } from "../utils/roomUtils.js";
 import { deleteFromCloudinary } from "../utils/imageUtils.js";
 import { validateRoomData } from "../utils/validation.js";
@@ -163,27 +163,9 @@ export const useDashboard = (user, initialData, routerPage) => {
 
                         const images = room.media_contact?.images;
                         if (images && images.length > 0) {
-                            const pathsToDelete = [];
                             for (const img of images) {
-                                if (img.url) {
-                                    if (img.url.includes("res.cloudinary.com")) {
-                                        await deleteFromCloudinary(img.url);
-                                    } else {
-                                        const parts = img.url.split("/room_media/");
-                                        if (parts.length > 1) {
-                                            const path = parts[1].split("?")[0];
-                                            if (path.startsWith(`${user.id}/`)) {
-                                                pathsToDelete.push(path);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (pathsToDelete.length > 0) {
-                                const { error: storageError } = await deleteRoomMedia(pathsToDelete);
-                                if (storageError) {
-                                    console.error("Lỗi khi xóa ảnh từ storage:", storageError);
+                                if (img.url && img.url.includes("res.cloudinary.com")) {
+                                    await deleteFromCloudinary(img.url);
                                 }
                             }
                         }

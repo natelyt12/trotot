@@ -28,8 +28,8 @@ export const getForumPosts = async ({ page = 0, limit = 10, userId = null, autho
         if (status) {
             query = query.eq('status', status);
         } else if (!authorId || authorId !== userId) {
-            // Public feed: only published posts
-            query = query.eq('status', 'published');
+            // Public feed: published and completed posts
+            query = query.in('status', ['published', 'completed']);
         }
         if (search) {
             query = query.ilike('content', `%${search}%`);

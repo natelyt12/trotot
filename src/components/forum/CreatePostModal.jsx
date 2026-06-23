@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createForumPost, updateForumPost } from "../../services/forumService.js";
 import { getRentedRooms } from "../../services/rentedRoomService.js";
-import { uploadRoomMedia, getRoomMediaPublicUrl } from "../../services/roomService.js";
+
 import AppIcon from "../common/AppIcon.jsx";
 import { useModal } from "../../context/ModalContext.jsx";
 import { useNotification } from "../../context/NotificationContext.jsx";
@@ -102,20 +102,7 @@ export default function CreatePostModal({ isOpen, onClose, user, onSuccess, edit
                         const data = await res.json();
                         return { url: data.secure_url, public_id: data.public_id, isNew: true };
                     } else {
-                        // Fallback to Supabase Storage (just like RoomPostForm.jsx):
-                        const sanitizeFilename = (filename) => {
-                            const str = filename.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                            return str.replace(/[^a-zA-Z0-9.]/g, "_").replace(/_+/g, "_");
-                        };
-                        const safeName = sanitizeFilename(compressedFile.name);
-                        const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${safeName}`;
-                        const filePath = `forum_posts/${fileName}`;
-
-                        const { data: _uploadData, error: uploadError } = await uploadRoomMedia(filePath, compressedFile);
-                        if (uploadError) throw uploadError;
-
-                        const supabaseUrl = getRoomMediaPublicUrl(filePath);
-                        return { url: supabaseUrl, public_id: null, isNew: true };
+                        throw new Error("Tải ảnh thất bại: Vui lòng cấu hình Cloudinary (Supabase Storage đã bị vô hiệu hóa).");
                     }
                 }),
             );

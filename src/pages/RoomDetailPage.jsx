@@ -6,6 +6,7 @@ import { UNIVERSITIES } from "../constants/universities";
 import { formatPrice, formatArea, formatDate, formatElectricity, formatWater, formatDeposit } from "../utils/formatters.js";
 import AppIcon from "../components/common/AppIcon.jsx";
 import { useFavorites } from "../context/FavoritesContext.jsx";
+import { isRoomRentedGlobally } from "../services/rentedRoomService.js";
 import CommentSection from "../components/rooms/CommentSection.jsx";
 import LandlordCard from "../components/rooms/LandlordCard.jsx";
 import ImagePreviewModal from "../components/common/ImagePreviewModal.jsx";
@@ -68,6 +69,7 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
     // Fetch full details if only partial info is passed
     const [fullRoom, setFullRoom] = useState(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
+    const [isRented, setIsRented] = useState(false);
 
     useEffect(() => {
         if (!resolvedRoom?.id) return;
@@ -97,6 +99,28 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
             isMounted = false;
         };
     }, [resolvedRoom]);
+
+    // Separate useEffect for fetching rented status so it runs even if room is fully loaded
+    useEffect(() => {
+        if (!resolvedRoom?.id) return;
+        
+        let isMounted = true;
+        const checkRentedStatus = async () => {
+            try {
+                const { data: rented } = await isRoomRentedGlobally(resolvedRoom.id);
+                if (isMounted) {
+                    setIsRented(rented);
+                }
+            } catch (err) {
+                console.error("Error fetching rented status:", err);
+            }
+        };
+        
+        checkRentedStatus();
+        return () => {
+            isMounted = false;
+        };
+    }, [resolvedRoom?.id]);
 
     const activeRoom = fullRoom || resolvedRoom;
 
@@ -272,34 +296,40 @@ export default function RoomDetailPage({ room, navigate, user, onClose, previewM
                                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[0.75rem] font-medium border ${
                                                 showAsPublished
                                                     ? "bg-blue-50 text-blue-700 border-blue-200"
-                                                    : isAvailable
-                                                      ? "bg-green-50 text-green-700 border-green-200"
-                                                      : isExpired
-                                                        ? "bg-red-50 text-red-700 border-red-200"
-                                                        : metadata.status === "pending"
-                                                          ? "bg-amber-50 text-amber-700 border-amber-200"
-                                                          : "bg-stone-50 text-stone-700 border-stone-200"
+                                                    : isRented
+                                                      ? "bg-stone-50 text-stone-600 border-stone-300"
+                                                      : isAvailable
+                                                        ? "bg-green-50 text-green-700 border-green-200"
+                                                        : isExpired
+                                                          ? "bg-red-50 text-red-700 border-red-200"
+                                                          : metadata.status === "pending"
+                                                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                                                            : "bg-stone-50 text-stone-700 border-stone-200"
                                             }`}
                                         >
                                             <span
                                                 className={`w-2 h-2 rounded-full shrink-0 ${
                                                     showAsPublished
                                                         ? "bg-blue-600"
-                                                        : isAvailable
-                                                          ? "bg-green-600"
-                                                          : isExpired
-                                                            ? "bg-red-600"
-                                                            : metadata.status === "pending"
-                                                              ? "bg-amber-600"
-                                                              : "bg-stone-600"
+                                                        : isRented
+                                                          ? "bg-stone-500"
+                                                          : isAvailable
+                                                            ? "bg-green-600"
+                                                            : isExpired
+                                                              ? "bg-red-600"
+                                                              : metadata.status === "pending"
+                                                                ? "bg-amber-600"
+                                                                : "bg-stone-600"
                                                 }`}
                                             />
                                             {showAsPublished
                                                 ? "Đã công khai"
-                                                : isAvailable
-                                                  ? "Còn phòng"
-                                                  : isExpired
-                                                    ? "Đã hết hạn"
+                                                : isRented
+                                                  ? "Đã cho thuê"
+                                                  : isAvailable
+                                                    ? "Còn phòng"
+                                                    : isExpired
+                                                      ? "Đã hết hạn"
                                                     : metadata.status === "pending"
                                                       ? "Chờ duyệt"
                                                       : metadata.status === "draft"
