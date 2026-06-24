@@ -127,7 +127,7 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
             console.error("Error submitting comment:", err);
             showModal({
                 title: "Lỗi",
-                message: "Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại sau.",
+                message: err.message || "Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại sau.",
                 type: "error",
             });
         } finally {
@@ -195,6 +195,11 @@ export default function CommentSection({ room, user, navigate, isGridMode = fals
             localStorage.setItem(QUOTA_KEY, JSON.stringify(quota));
         } catch (err) {
             console.error("Error submitting reply:", err);
+            showModal({
+                title: "Lỗi",
+                message: err.message || "Có lỗi xảy ra khi gửi phản hồi. Vui lòng thử lại sau.",
+                type: "error",
+            });
         } finally {
             setSubmitting(false);
         }

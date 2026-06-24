@@ -12,20 +12,31 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [isRenting, setIsRenting] = useState(false);
     const [isRentedBySomeone, setIsRentedBySomeone] = useState(false);
+    const [loadingRentedStatus, setLoadingRentedStatus] = useState(true);
 
     useEffect(() => {
         if (room?.id && !previewMode) {
+            setLoadingRentedStatus(true);
+            
+            const promises = [];
+            
             // Check if ANYONE rents this room
-            isRoomRentedGlobally(room.id).then(({ data }) => {
+            promises.push(isRoomRentedGlobally(room.id).then(({ data }) => {
                 if (data) setIsRentedBySomeone(true);
-            });
+            }));
 
             // Check if CURRENT USER rents this room
             if (user?.id) {
-                checkRentedRoom(user.id, room.id).then(({ data }) => {
+                promises.push(checkRentedRoom(user.id, room.id).then(({ data }) => {
                     if (data) setIsRenting(true);
-                });
+                }));
             }
+            
+            Promise.all(promises).finally(() => {
+                setLoadingRentedStatus(false);
+            });
+        } else {
+            setLoadingRentedStatus(false);
         }
     }, [user?.id, room?.id, previewMode]);
 
@@ -208,9 +219,9 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                             </div>
                         ) : !showPhone ? (
                             <button
-                                disabled={previewMode || user?.id === room?.user_id || user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "landlord"}
+                                disabled={previewMode || loadingRentedStatus || user?.id === room?.user_id || user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "landlord"}
                                 onClick={
-                                    previewMode
+                                    previewMode || loadingRentedStatus
                                         ? undefined
                                         : () => {
                                               if (!user) {
@@ -227,10 +238,10 @@ export default function LandlordCard({ room, user, previewMode, showPhone, setSh
                                               setIsBookingModalOpen(true);
                                           }
                                 }
-                                className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-medium ${previewMode || user?.id === room?.user_id || user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "landlord" ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
+                                className={`flex items-center justify-center gap-2.5 w-full py-3 rounded-full! text-white border-none transition-colors duration-200 font-medium ${previewMode || loadingRentedStatus || user?.id === room?.user_id || user?.user_metadata?.role === "admin" || user?.user_metadata?.role === "landlord" ? "bg-stone-300 cursor-not-allowed" : "cursor-pointer bg-amber-500 hover:bg-amber-600"}`}
                             >
                                 <AppIcon name="calendar" size={20} strokeWidth={2.5} />
-                                <span>Đặt lịch</span>
+                                <span>{loadingRentedStatus ? "Đang kiểm tra..." : "Đặt lịch"}</span>
                             </button>
                         ) : (
                             <>

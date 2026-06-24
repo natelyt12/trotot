@@ -69,6 +69,16 @@ export const createComment = async ({ roomId, userId, content, parentId = null }
             .insert([insertPayload])
             .select('*, profiles!user_id(full_name, avatar_url)')
             .single();
+            
+        if (error && error.code === '23503' && error.message.includes('profiles')) {
+            console.error('Data Integrity Error: User has no profile record.', error);
+            return { 
+                data: null, 
+                error: { 
+                    message: "Tài khoản của bạn bị lỗi dữ liệu (chưa có hồ sơ). Vui lòng sử dụng tài khoản khác hoặc liên hệ Admin." 
+                } 
+            };
+        }
 
         return { data, error };
     } catch (err) {
