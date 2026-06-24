@@ -32,8 +32,6 @@ export default function ShippingPage({ navigate }) {
     }, [activeTab]);
 
     // Modals state
-    const [bookingModalOpen, setBookingModalOpen] = useState(false);
-    const [selectedProvider, setSelectedProvider] = useState(null);
     const [ratingModalOpen, setRatingModalOpen] = useState(false);
     const [ratingOrder, setRatingOrder] = useState(null);
 
@@ -54,21 +52,24 @@ export default function ShippingPage({ navigate }) {
             name: "Xanh SM",
             logo: "/transfer/xanhsm.png",
             tag: "Xe điện bảo vệ môi trường",
-            desc: "Dịch vụ vận chuyển bằng xe điện 100%, êm ái, sạch sẽ, không mùi xăng dầu. Đặc biệt thân thiện môi trường."
+            desc: "Dịch vụ vận chuyển bằng xe điện 100%, êm ái, sạch sẽ, không mùi xăng dầu. Đặc biệt thân thiện môi trường.",
+            multiplier: 1.2
         },
         {
             id: "ghn",
             name: "Giao Hàng Nhanh",
             logo: "/transfer/ghn.webp",
             tag: "Phủ sóng toàn quốc",
-            desc: "Đơn vị vận chuyển lâu năm với mạng lưới rộng khắp, hệ thống tracking hiện đại giúp theo dõi đơn hàng chính xác."
+            desc: "Đơn vị vận chuyển lâu năm với mạng lưới rộng khắp, hệ thống tracking hiện đại giúp theo dõi đơn hàng chính xác.",
+            multiplier: 1.0
         },
         {
             id: "spx",
             name: "SPX Express",
             logo: "/transfer/spx.png",
             tag: "Giá cước cạnh tranh",
-            desc: "Dịch vụ vận chuyển của Shopee với chi phí cực rẻ, nhiều ưu đãi và hỗ trợ lấy hàng tận nơi nhanh chóng."
+            desc: "Dịch vụ vận chuyển của Shopee với chi phí cực rẻ, nhiều ưu đãi và hỗ trợ lấy hàng tận nơi nhanh chóng.",
+            multiplier: 0.9
         }
     ];
 
@@ -80,13 +81,6 @@ export default function ShippingPage({ navigate }) {
     ];
 
     // MOCK FUNCTIONS
-    const openBookingModal = (provider) => {
-        setSelectedProvider(provider);
-        setBookingForm({ pickup: "", dropoff: "", vehicleType: "xe-tai-500kg", time: "", items: "" });
-        setEstimatedCost(0);
-        setBookingModalOpen(true);
-    };
-
     const handleBookingChange = (e) => {
         const { name, value } = e.target;
         const newForm = { ...bookingForm, [name]: value };
@@ -95,31 +89,30 @@ export default function ShippingPage({ navigate }) {
         // Mock estimate cost based on vehicle
         if (newForm.pickup && newForm.dropoff) {
             const base = vehicleTypes.find(v => v.id === newForm.vehicleType)?.priceBase || 150000;
-            // Random distance multiplier for mockup
-            const randomDistance = Math.floor(Math.random() * 5) + 1;
-            setEstimatedCost(base + (randomDistance * 15000));
+            // Constant distance multiplier for mockup so it doesn't change wildly on every keystroke
+            const distanceMultiplier = 2; 
+            setEstimatedCost(base + (distanceMultiplier * 15000));
         } else {
             setEstimatedCost(0);
         }
     };
 
-    const submitBooking = () => {
+    const submitBooking = (provider, cost) => {
         if (!bookingForm.pickup || !bookingForm.dropoff || !bookingForm.time) {
-            alert("Vui lòng nhập đầy đủ thông tin");
+            alert("Vui lòng nhập đầy đủ điểm đi, điểm đến và thời gian trước khi đặt xe");
             return;
         }
 
         const newOrder = {
             id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-            provider: selectedProvider,
+            provider: provider,
             details: bookingForm,
-            cost: estimatedCost,
+            cost: cost,
             status: "pending", // pending, confirmed, completed, cancelled
             createdAt: new Date().toISOString(),
         };
 
         setOrders([newOrder, ...orders]);
-        setBookingModalOpen(false);
         setActiveTab("orders");
     };
 
@@ -228,36 +221,141 @@ export default function ShippingPage({ navigate }) {
                             </div>
                         </div>
 
-                        <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 text-amber-500">
-                            <TbTruckDelivery size={32} />
-                        </div>
-                        <h3 className="font-medium text-stone-900 text-lg mb-2">Dịch vụ vận chuyển</h3>
-                        <p className="text-stone-500 text-sm mb-8 max-w-md mx-auto">
-                            Danh sách các đơn vị cung cấp dịch vụ chuyển trọ uy tín, hỗ trợ bạn dọn nhà nhanh chóng và an toàn.
-                        </p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
-                            {shippingProviders.map(provider => (
-                                <div key={provider.id} className="border border-stone-200 rounded-xl p-5 hover:border-amber-300 hover:shadow-md transition-all group flex flex-col items-center">
-                                    <div className="w-16 h-16 rounded-2xl bg-stone-50 border border-stone-100 overflow-hidden flex items-center justify-center p-2 mb-4">
-                                        <img src={provider.logo} alt={provider.name} className="w-full h-full object-contain" />
-                                    </div>
-                                    <h4 className="font-semibold text-stone-900 group-hover:text-amber-600 transition-colors mb-1.5">{provider.name}</h4>
-                                    <div className="text-[10px] text-stone-500 font-medium flex items-center justify-center gap-1 mb-4 bg-stone-50 px-2.5 py-1 rounded-full uppercase tracking-wide">
-                                        <TbCheck className="text-emerald-500" size={14} />
-                                        {provider.tag}
-                                    </div>
-                                    <p className="text-xs text-stone-500 mb-6 line-clamp-3">
-                                        {provider.desc}
-                                    </p>
-                                    <button
-                                        onClick={() => openBookingModal(provider)}
-                                        className="w-full mt-auto py-2.5 bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white cursor-pointer border-none text-xs font-medium rounded-lg transition-all"
-                                    >
-                                        Liên hệ đặt xe
-                                    </button>
+                        {/* FORM SECTION */}
+                        <div className="mb-8 text-left bg-stone-50 p-5 md:p-6 rounded-2xl border border-stone-100">
+                            <h3 className="font-medium text-stone-900 text-base md:text-lg mb-5 flex items-center gap-2">
+                                <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
+                                    <TbMapPin size={18} />
                                 </div>
-                            ))}
+                                Thông tin vận chuyển
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label className="block text-sm font-medium text-stone-700 mb-1.5">Điểm đi (Nơi ở cũ) <span className="text-red-500">*</span></label>
+                                    <div className="relative">
+                                        <TbMapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                                        <input
+                                            type="text"
+                                            name="pickup"
+                                            value={bookingForm.pickup}
+                                            onChange={handleBookingChange}
+                                            placeholder="Nhập địa chỉ đầy đủ..."
+                                            className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-stone-700 mb-1.5">Điểm đến (Nơi ở mới) <span className="text-red-500">*</span></label>
+                                    <div className="relative">
+                                        <TbMapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                                        <input
+                                            type="text"
+                                            name="dropoff"
+                                            value={bookingForm.dropoff}
+                                            onChange={handleBookingChange}
+                                            placeholder="Nhập địa chỉ đầy đủ..."
+                                            className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-stone-700 mb-1.5">Loại xe <span className="text-red-500">*</span></label>
+                                    <div className="relative">
+                                        <TbCar className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                                        <select
+                                            name="vehicleType"
+                                            value={bookingForm.vehicleType}
+                                            onChange={handleBookingChange}
+                                            className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all appearance-none shadow-sm cursor-pointer"
+                                        >
+                                            {vehicleTypes.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-stone-700 mb-1.5">Thời gian chuyển <span className="text-red-500">*</span></label>
+                                    <div className="relative">
+                                        <TbClock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                                        <input
+                                            type="datetime-local"
+                                            name="time"
+                                            value={bookingForm.time}
+                                            onChange={handleBookingChange}
+                                            className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="col-span-1 md:col-span-2">
+                                    <label className="block text-sm font-medium text-stone-700 mb-1.5">Ghi chú đồ đạc cần chuyển</label>
+                                    <textarea
+                                        name="items"
+                                        value={bookingForm.items}
+                                        onChange={handleBookingChange}
+                                        placeholder="Ví dụ: 1 tủ lạnh, 2 vali quần áo, 1 bàn làm việc..."
+                                        className="w-full p-3.5 bg-white border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all min-h-[100px] resize-none shadow-sm"
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* PROVIDERS LIST */}
+                        <div className="text-left">
+                            <h3 className="font-medium text-stone-900 text-base md:text-lg mb-5 flex items-center gap-2">
+                                <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
+                                    <TbTruckDelivery size={18} />
+                                </div>
+                                Chọn đơn vị vận chuyển
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-center">
+                                {shippingProviders.map(provider => (
+                                    <div key={provider.id} className="border border-stone-200 rounded-2xl p-6 hover:border-amber-300 hover:shadow-lg transition-all duration-300 group flex flex-col items-center bg-white relative overflow-hidden">
+                                        {provider.id === "xanhsm" && (
+                                            <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
+                                                Khuyên dùng
+                                            </div>
+                                        )}
+                                        <div className="w-16 h-16 rounded-2xl bg-stone-50 border border-stone-100 overflow-hidden flex items-center justify-center p-2 mb-4">
+                                            <img src={provider.logo} alt={provider.name} className="w-full h-full object-contain" />
+                                        </div>
+                                        <h4 className="font-semibold text-stone-900 group-hover:text-amber-600 transition-colors mb-1.5">{provider.name}</h4>
+                                        <div className="text-[10px] text-stone-500 font-medium flex items-center justify-center gap-1 mb-4 bg-stone-50 px-2.5 py-1 rounded-full uppercase tracking-wide">
+                                            <TbCheck className="text-emerald-500" size={14} />
+                                            {provider.tag}
+                                        </div>
+                                        <p className="text-xs text-stone-500 mb-6 line-clamp-3">
+                                            {provider.desc}
+                                        </p>
+                                        
+                                        {estimatedCost > 0 ? (
+                                            <div className="mt-auto w-full pt-4 border-t border-stone-100">
+                                                <div className="text-xs text-stone-500 mb-1">Cước phí dự kiến</div>
+                                                <div className="font-bold text-amber-600 text-xl mb-4">
+                                                    {(estimatedCost * provider.multiplier).toLocaleString('vi-VN')} đ
+                                                </div>
+                                                <button
+                                                    onClick={() => submitBooking(provider, estimatedCost * provider.multiplier)}
+                                                    className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white cursor-pointer border-none text-sm font-medium rounded-xl transition-all shadow-md shadow-amber-500/20 active:scale-[0.98]"
+                                                >
+                                                    Đặt xe {provider.name}
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="mt-auto w-full pt-4 border-t border-stone-100">
+                                                <div className="text-[11px] text-stone-400 mb-4 bg-stone-50 py-2 px-3 rounded-lg border border-stone-100 inline-block">Vui lòng nhập điểm đi và đến để xem giá</div>
+                                                <button
+                                                    disabled
+                                                    className="w-full py-3 bg-stone-100 text-stone-400 cursor-not-allowed border-none text-sm font-medium rounded-xl transition-all"
+                                                >
+                                                    Chưa thể đặt xe
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -383,120 +481,7 @@ export default function ShippingPage({ navigate }) {
                 )}
             </div>
 
-            {/* MODAL ĐẶT DỊCH VỤ */}
-            {bookingModalOpen && selectedProvider && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                    <div className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onClick={() => setBookingModalOpen(false)}></div>
-                    <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center justify-between p-5 border-b border-stone-100">
-                            <div className="flex items-center gap-3">
-                                <img src={selectedProvider.logo} alt={selectedProvider.name} className="w-8 h-8 object-contain" />
-                                <h3 className="font-semibold text-stone-900">Đặt xe {selectedProvider.name}</h3>
-                            </div>
-                            <button onClick={() => setBookingModalOpen(false)} className="text-stone-400 hover:text-stone-600 bg-transparent border-none cursor-pointer">
-                                <TbX size={24} />
-                            </button>
-                        </div>
 
-                        <div className="p-5 overflow-y-auto max-h-[70vh]">
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-700 mb-1.5">Địa chỉ nhận đồ (Nơi ở cũ)</label>
-                                    <div className="relative">
-                                        <TbMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-                                        <input
-                                            type="text"
-                                            name="pickup"
-                                            value={bookingForm.pickup}
-                                            onChange={handleBookingChange}
-                                            placeholder="Nhập địa chỉ đầy đủ..."
-                                            className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-700 mb-1.5">Địa chỉ giao đồ (Nơi ở mới)</label>
-                                    <div className="relative">
-                                        <TbMapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
-                                        <input
-                                            type="text"
-                                            name="dropoff"
-                                            value={bookingForm.dropoff}
-                                            onChange={handleBookingChange}
-                                            placeholder="Nhập địa chỉ đầy đủ..."
-                                            className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-stone-700 mb-1.5">Loại xe</label>
-                                        <div className="relative">
-                                            <TbCar className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-                                            <select
-                                                name="vehicleType"
-                                                value={bookingForm.vehicleType}
-                                                onChange={handleBookingChange}
-                                                className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all appearance-none"
-                                            >
-                                                {vehicleTypes.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-stone-700 mb-1.5">Thời gian chuyển</label>
-                                        <div className="relative">
-                                            <TbClock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
-                                            <input
-                                                type="datetime-local"
-                                                name="time"
-                                                value={bookingForm.time}
-                                                onChange={handleBookingChange}
-                                                className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-span-2">
-                                        <label className="block text-sm font-medium text-stone-700 mb-1.5">Ghi chú đồ đạc cần chuyển</label>
-                                        <textarea
-                                            name="items"
-                                            value={bookingForm.items}
-                                            onChange={handleBookingChange}
-                                            placeholder="Ví dụ: 1 tủ lạnh, 2 vali quần áo, 1 bàn làm việc..."
-                                            className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:bg-white focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition-all min-h-[80px] resize-none"
-                                        ></textarea>
-                                    </div>
-                                </div>
-
-                                {estimatedCost > 0 && (
-                                    <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center justify-between">
-                                        <span className="text-sm font-medium text-amber-800">Cước phí dự kiến:</span>
-                                        <span className="text-lg font-bold text-amber-600">{estimatedCost.toLocaleString('vi-VN')} đ</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="p-5 border-t border-stone-100 flex gap-3">
-                            <button
-                                onClick={() => setBookingModalOpen(false)}
-                                className="flex-1 py-3 rounded-xl font-medium text-sm bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors border-none cursor-pointer"
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                onClick={submitBooking}
-                                className="flex-[2] py-3 rounded-xl font-medium text-sm bg-amber-500 text-white hover:bg-amber-600 transition-colors border-none cursor-pointer shadow-md shadow-amber-500/20"
-                            >
-                                Xác nhận đặt xe
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* MODAL ĐÁNH GIÁ */}
             {ratingModalOpen && ratingOrder && (
